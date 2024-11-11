@@ -1,4 +1,4 @@
-package com.soroush.eskandarie.musicplayer.ui.theme
+package com.soroush.eskandarie.musicplayer.presentation.ui.theme
 
 import android.app.Activity
 import android.os.Build
