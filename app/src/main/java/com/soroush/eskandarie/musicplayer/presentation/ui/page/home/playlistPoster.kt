@@ -21,19 +21,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
@@ -61,7 +57,7 @@ fun PlaylistPoster(
         if (frontImageSize != Size.Zero && Math.abs(prevBoxSize.width - mainBoxSize.width) > 100) {
             // finding out the minimum padding necessary to fit the all three image in
             val M =
-                (Math.sin(Dimens.Rotation.PlaylistPosterBackRotation * Math.PI / 180) * Dimens.FillMaxSize.PlaylistPosterBackAspecctRatio + 2f / 3)
+                (Math.sin(Dimens.Rotation.PlaylistPosterBackRotation * Math.PI / 180) * Dimens.Size.PlaylistPosterBackWeight + 2f / 3)
             val minSide = Math
                 .min(mainBoxSize.width, mainBoxSize.height)
             padding = ((minSide / 4) * (1 - M) / M).dp
@@ -77,7 +73,7 @@ fun PlaylistPoster(
     ) {
         Box(
             modifier = Modifier
-                .weight(1 - Dimens.FillMaxSize.PlaylistPosterTextPercent)
+                .weight(1 - Dimens.Size.PlaylistPosterTextWeight)
                 .aspectRatio(1f)
                 .padding(mainBoxPadding, 0.dp)
                 .onGloballyPositioned { coordinates ->
@@ -92,7 +88,7 @@ fun PlaylistPoster(
         ) {
             BackPosters(
                 shape = imageShape,
-                fillSize = Dimens.FillMaxSize.PlaylistPosterBackAspecctRatio,
+                fillSize = Dimens.Size.PlaylistPosterBackWeight,
                 frontImageSize = frontImageSize,
                 direction = Direction.Right,
                 uri = uriBack2,
@@ -101,7 +97,7 @@ fun PlaylistPoster(
             )
             BackPosters(
                 shape = imageShape,
-                fillSize = Dimens.FillMaxSize.PlaylistPosterBackAspecctRatio,
+                fillSize = Dimens.Size.PlaylistPosterBackWeight,
                 frontImageSize = frontImageSize,
                 direction = Direction.Left,
                 uri = uriBack1,
@@ -133,7 +129,7 @@ fun PlaylistPoster(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(Dimens.FillMaxSize.PlaylistPosterTextPercent),
+                .weight(Dimens.Size.PlaylistPosterTextWeight),
             contentAlignment = Alignment.TopCenter
         ) {
             Text(

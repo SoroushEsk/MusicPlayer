@@ -2,6 +2,7 @@ package com.soroush.eskandarie.musicplayer
 
 import android.net.Uri
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -31,7 +34,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdownItem
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.PlaylistItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.PlaylistPoster
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Light
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.MusicPlayerTheme
 
 class MainActivity : ComponentActivity() {
@@ -39,33 +45,58 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
         setContent {
+            val context = LocalContext.current
             MusicPlayerTheme {
-                Column (modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(10.dp)
-                    .aspectRatio(1f),
-                    verticalArrangement = Arrangement.SpaceBetween
-                ){
-                    repeat(2){
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ){
-                            repeat(2) {
-                                PlaylistPoster(
-                                    extraPadding = 4.dp,
-                                    title = "Favorite",
-                                    modifier = Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(Color.Gray.copy(alpha = 0.25f)),
-                                    imageShape = RoundedCornerShape(10.dp),
-                                    uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/${R.drawable.ed}"),
-                                    uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/${R.drawable.mahasti}"),
-                                    uriBack2 = Uri.parse("android.resource://${LocalContext.current.packageName}/${R.drawable.sandi}")
-                                )
-                            }
-                        }
+                Surface( modifier = Modifier
+                    .fillMaxSize()
+                    .background(Light.Background)) {
+                    Column (modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp)
+                    ){
+                        PlaylistItem(
+                            title = "Playlist 1",
+                            posterUri = Uri.parse("sht"),
+                            onIcon1Click = {},
+                            onIcon2Click = {},
+                            dropdownList = listOf(PlaylistDropdownItem(1, "rename", {}), PlaylistDropdownItem(2, "delete", {})),
+                            playlistId = 1,
+                            onClick = {}
+                        )
+                        Spacer(modifier = Modifier.fillMaxWidth().height(10.dp))
+                        PlaylistItem(
+                            title = "Playlist 2",
+                            posterUri = Uri.parse("sht"),
+                            onIcon1Click = {},
+                            onIcon2Click = {},
+                            dropdownList = listOf(PlaylistDropdownItem(1, "rename", {}), PlaylistDropdownItem(2, "delete", {})),
+                            playlistId = 1,
+                            onClick = {}
+                        )
+                        Spacer(modifier = Modifier.fillMaxWidth().height(10.dp))
+                        PlaylistItem(
+                            title = "Playlist 3",
+                            posterUri = Uri.parse("sht"),
+                            onIcon1Click = {},
+                            onIcon2Click = {},
+                            dropdownList = listOf(PlaylistDropdownItem(1, "rename", {}), PlaylistDropdownItem(2, "delete", {})),
+                            playlistId = 1,
+                            onClick = {}
+                        )
+                        Spacer(modifier = Modifier.fillMaxWidth().height(10.dp))
+                        PlaylistItem(
+                            title = "Playlist 4",
+                            posterUri = Uri.parse("sht"),
+                            onIcon1Click = {},
+                            onIcon2Click = {},
+                            dropdownList = listOf(PlaylistDropdownItem(1, "rename", {}), PlaylistDropdownItem(2, "delete", {})),
+                            playlistId = 1,
+                            onClick = {}
+                        )
                     }
                 }
-            }
+                }
+
         }
     }
 }
