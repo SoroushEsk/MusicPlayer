@@ -1,14 +1,12 @@
-package com.soroush.eskandarie.musicplayer.presentation.ui.page.home
+package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,13 +14,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -71,6 +66,12 @@ fun PlaylistItem(
     var isExpanded by remember {
         mutableStateOf(false)
     }
+    val backgroundColr by remember{
+        mutableStateOf(
+            if ( themeColor is Light ) Color.White.copy(alpha = 091f)
+            else themeColor.DarkSurface
+        )
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -81,7 +82,7 @@ fun PlaylistItem(
         AsyncImage(
             modifier = Modifier
                 .clip(posterShape)
-                .padding(Dimens.Padding.PlaylistItemIconPadding),
+                .padding(Dimens.Padding.PlaylistItemPosterPadding),
             model = posterUri,
             contentDescription = "Playlist: ${title} Poster",
             error = painterResource(id = errorImage)
@@ -93,6 +94,7 @@ fun PlaylistItem(
         )
         Text(
             text = title,
+            color = themeColor.Text,
             style = textStyle
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -132,33 +134,38 @@ fun PlaylistItem(
 
                 )
             }
-
-            DropdownMenu(
-                expanded = isExpanded,
-                onDismissRequest = { isExpanded = false },
-                modifier = Modifier
-                    .background(themeColor.DarkSurface)
-                    .padding(Dimens.Padding.PlayListItemDropdown)
+            MaterialTheme(
+                shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.CornerRadius.PlaylistPosterCornerRadius))
             ) {
-                dropdownList.forEachIndexed { index, value ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = value.name,
-                                color = themeColor.Text
-                            )
-                        },
-                        onClick = {
-                            value.onClick(playlistId)
-                            isExpanded = false
-                        }
+                DropdownMenu(
+                    expanded = isExpanded,
+                    onDismissRequest = { isExpanded = false },
+                    modifier = Modifier
+                        .background(backgroundColr)
+                        .padding(
+                            Dimens.Padding.PlayListItemDropdown,
+                            Dimens.Padding.PlayListItemDropdown / 2
+                        ),
+                    properties = PopupProperties(
+                        focusable = true,
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = true
                     )
-                    if (index != dropdownList.size - 1) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(Dimens.Spacing.PlaylistItemDropdownSpace)
-                                .background(themeColor.Text)
+                ) {
+                    dropdownList.forEachIndexed { index, value ->
+                        DropdownMenuItem(
+                            modifier = Modifier.background(Color.Transparent),
+                            text = {
+                                Text(
+                                    text = value.name,
+                                    color = themeColor.Text,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            },
+                            onClick = {
+                                value.onClick(playlistId)
+                                isExpanded = false
+                            }
                         )
                     }
                 }

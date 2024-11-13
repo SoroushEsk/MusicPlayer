@@ -30,7 +30,7 @@ object Light : ThemeColor {
     override val LightShadow = Color(0xFFFFFFFF)
     override val DarkShadow  = Color(0xFFD1D9E6)
     override val Text        = Color(0xFF333333)
-    override val DarkSurface = Color(0x8DE6E6E6)
+    override val DarkSurface = Color(0x3BC5C5C5)
     override val Icon        = Color(0xFF25344D)
 
 }
@@ -42,6 +42,6 @@ object Dark : ThemeColor {
     override val LightShadow = Color(0xFF323232)
     override val DarkShadow  = Color(0xFF0A0A0A)
     override val Text        = Color(0xE6E0E0E0)
-    override val DarkSurface = Color(0xFF040404)
-    override val Icon        = Color(0xFF6B9BE8)
+    override val DarkSurface = Color(0xFF111111)
+    override val Icon        = Color(0xFF4984E2)
 }

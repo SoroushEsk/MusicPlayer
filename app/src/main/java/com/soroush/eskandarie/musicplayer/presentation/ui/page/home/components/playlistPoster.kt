@@ -1,4 +1,4 @@
-package com.soroush.eskandarie.musicplayer.presentation.ui.page.home
+package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
 import android.net.Uri
 import androidx.compose.foundation.layout.Box

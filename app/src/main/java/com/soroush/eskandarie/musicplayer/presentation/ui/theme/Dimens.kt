@@ -12,6 +12,7 @@ object Dimens {
         val PlaylistPosterDefaultPadding: Dp = 0.dp
         val PlayListItemIconSize     : Dp = 16.dp
         val PlayListItemDropdown     : Dp = 4.dp
+        val PlaylistItemPosterPadding: Dp = 8.dp
         val PlaylistItemIconPadding  : Dp = 2.dp
     }
     object Spacing{

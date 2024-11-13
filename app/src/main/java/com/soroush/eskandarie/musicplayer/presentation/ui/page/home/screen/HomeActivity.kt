@@ -1,4 +1,4 @@
-package com.soroush.eskandarie.musicplayer.presentation.ui.page.home
+package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
