@@ -1,6 +1,5 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.theme
 
-import android.graphics.drawable.Icon
 import androidx.compose.ui.graphics.Color
 
 val Purple80 = Color(0xFFD0BCFF)
@@ -21,8 +20,9 @@ interface ThemeColor{
     val Text            : Color
     val DarkSurface     : Color
     val Icon            : Color
+    val FocusedField    : Color
 }
-object Light : ThemeColor {
+object LightTheme : ThemeColor {
     override val Background  = Color(0xFFE0E0E0)
     override val Surface     = Color(0xFFFAFAFA)
     override val Primary     = Color(0xFF4285F4)
@@ -32,9 +32,9 @@ object Light : ThemeColor {
     override val Text        = Color(0xFF333333)
     override val DarkSurface = Color(0x3BC5C5C5)
     override val Icon        = Color(0xFF25344D)
-
+    override val FocusedField= Color(0xFF284A81)
 }
-object Dark : ThemeColor {
+object DarkTheme : ThemeColor {
     override val Background  = Color(0xFF191919)
     override val Surface     = Color(0xFF1E1E1E)
     override val Primary     = Color(0xFF4285F4)
@@ -44,4 +44,5 @@ object Dark : ThemeColor {
     override val Text        = Color(0xE6E0E0E0)
     override val DarkSurface = Color(0xFF111111)
     override val Icon        = Color(0xFF4984E2)
+    override val FocusedField= Color(0xFF689DF7)
 }

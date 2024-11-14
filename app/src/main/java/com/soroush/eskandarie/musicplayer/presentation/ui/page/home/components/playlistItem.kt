@@ -38,9 +38,9 @@ import androidx.compose.ui.window.PopupProperties
 import coil.compose.AsyncImage
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdownItem
-import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dark
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
-import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Light
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ThemeColor
 
 
@@ -53,7 +53,7 @@ fun PlaylistItem(
     icon1: Int = R.drawable.play_button,
     icon2: Int = R.drawable.shuffle,
     errorImage: Int = R.drawable.empty_album,
-    themeColor: ThemeColor = if (isSystemInDarkTheme()) Dark else Light,
+    themeColor: ThemeColor = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     playlistId: Int,
     title: String,
     posterUri: Uri,
@@ -68,7 +68,7 @@ fun PlaylistItem(
     }
     val backgroundColr by remember{
         mutableStateOf(
-            if ( themeColor is Light ) Color.White.copy(alpha = 091f)
+            if ( themeColor is LightTheme ) Color.White.copy(alpha = 0.91f)
             else themeColor.DarkSurface
         )
     }

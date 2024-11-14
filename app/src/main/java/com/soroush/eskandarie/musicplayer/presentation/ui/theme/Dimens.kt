@@ -7,6 +7,7 @@ object Dimens {
     object CornerRadius{
         val PlaylistItemPosterRaduis: Dp = 12.dp
         val PlaylistPosterCornerRadius = 28.dp
+        val AppTextFieldCornerRadius: Dp = 12.dp
     }
     object Padding{
         val PlaylistPosterDefaultPadding: Dp = 0.dp
