@@ -16,6 +16,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -25,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
@@ -39,25 +41,25 @@ fun SearchField(
     shape: RoundedCornerShape = RoundedCornerShape(Dimens.CornerRadius.AppTextFieldCornerRadius),
     themeColors: ThemeColor = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     modifier: Modifier = Modifier,
+    setState: (HomeAction) -> Unit,
+    getState: @Composable ()-> State<String>,
     onChange: (String) -> Unit
-
 ) {
-    var searchText by remember {
-        mutableStateOf("")
-    }
+    val searchText by getState()
+
     Box(
         modifier = Modifier
             .clip(shape)
             .border(
                 1.dp,
                 themeColors.Text,
-                shape = shape)
+                shape = shape
+            )
     ) {
         TextField(
             value = searchText,
             onValueChange = { newText ->
-                searchText = newText
-                onChange(searchText)
+                setState(HomeAction.SetSearchText(newText))
             },
             singleLine = true,
             modifier = modifier
@@ -70,10 +72,6 @@ fun SearchField(
             },
             prefix = {
                 Icon(
-                    modifier = Modifier
-                        .clickable {
-                            onChange(searchText)
-                        },
                     imageVector = Icons.Filled.Search,
                     contentDescription = "Search Field Icon"
                 )
