@@ -18,14 +18,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
         val intent = Intent(this, HomeActivity::class.java)
-        CoroutineScope(this.lifecycle.coroutineScope.coroutineContext).launch { delay(20000)
+        CoroutineScope(this.lifecycle.coroutineScope.coroutineContext).launch { delay(1000)
             startActivity(intent)
         }
         setContent {
             val context = LocalContext.current
             MusicPlayerTheme {
-
-                MusicPlayerScreen()
             }
         }
     }

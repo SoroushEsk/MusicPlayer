@@ -1,11 +1,9 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.common
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -17,16 +15,13 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.soroush.eskandarie.musicplayer.presentation.action.HomeAction
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
@@ -41,11 +36,11 @@ fun SearchField(
     shape: RoundedCornerShape = RoundedCornerShape(Dimens.CornerRadius.AppTextFieldCornerRadius),
     themeColors: ThemeColor = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     modifier: Modifier = Modifier,
-    setState: (HomeAction) -> Unit,
-    getState: @Composable ()-> State<String>,
+    setState: (HomeSetAction) -> Unit,
+    getState: State<String>,
     onChange: (String) -> Unit
 ) {
-    val searchText by getState()
+    val searchText by getState
 
     Box(
         modifier = Modifier
@@ -59,7 +54,7 @@ fun SearchField(
         TextField(
             value = searchText,
             onValueChange = { newText ->
-                setState(HomeAction.SetSearchText(newText))
+                setState(HomeSetAction.SetSearchText(newText))
             },
             singleLine = true,
             modifier = modifier

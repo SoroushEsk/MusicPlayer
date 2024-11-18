@@ -1,8 +1,10 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    id("com.google.devtools.ksp") version "1.9.0-1.0.13"
+    id("com.google.dagger.hilt.android") version "2.50"
+    kotlin("kapt")
 }
-
 android {
     namespace = "com.soroush.eskandarie.musicplayer"
     compileSdk = 35
@@ -49,6 +51,11 @@ android {
         }
     }
 }
+kotlin {
+    sourceSets.main {
+        kotlin.srcDir("build/generated/ksp/main/kotlin")
+    }
+}
 
 dependencies {
 
@@ -63,6 +70,16 @@ dependencies {
 
     // Coil
     implementation(libs.coil.compose)
+
+    // ViewModel
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // KSP & Dagger/ Hilt
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.window)
+    ksp(libs.hilt.compiler)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.hilt.navigation.compose)
     implementation(libs.material)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.constraintlayout)

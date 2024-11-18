@@ -5,19 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePlaylist
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.map
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -28,17 +24,23 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+            ) {
                 SearchField(
-                    setState = viewmodel::getAction,
-                    getState = {
-                        viewmodel.searchBox.map { searchEvent ->
-                            searchEvent.searchText
-                        }.collectAsState(initial = "")
-                    }
+                    setState = viewmodel::getHomeSetAction,
+                    getState =
+                        viewmodel.getHomeState(HomeGetStateAction.GetSearchTextState)
+
                 ) {
 
                 }
+
+                HomePlaylist(
+                    modifier = Modifier
+                )
             }
         }
     }
