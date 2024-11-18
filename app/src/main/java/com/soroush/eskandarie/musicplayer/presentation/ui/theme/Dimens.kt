@@ -10,7 +10,7 @@ object Dimens {
         val AppTextFieldCornerRadius: Dp = 12.dp
     }
     object Padding{
-        val PlaylistPosterDefaultPadding: Dp = 0.dp
+        val TopPlaylistItemDefaultPadding: Dp = 0.dp
         val PlayListItemIconSize     : Dp = 16.dp
         val PlayListItemDropdown     : Dp = 4.dp
         val PlaylistItemPosterPadding: Dp = 8.dp
@@ -20,11 +20,11 @@ object Dimens {
         val PlaylistItemDropdownSpace:  Dp = 2.dp
     }
     object Rotation {
-        val PlaylistPosterBackRotation = 5f
+        val TopPlaylistItemBackRotation = 4f
     }
     object Size{
-        val PlaylistPosterTextWeight:   Float = 0.15f
-        val PlaylistPosterBackWeight:   Float = 0.85f
+        val TopPlaylistItemTextWeight:   Float = 0.15f
+        val TopPlaylistItemBackWeight:   Float = 0.85f
         val PlaylistItemHeight:         Dp = 60.dp
         val PlaylistSpaceBetween:       Dp = 10.dp
         val PlayListItemIconSize:       Dp = 20.dp

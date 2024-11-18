@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 //        enableEdgeToEdge()
         val intent = Intent(this, HomeActivity::class.java)
-        CoroutineScope(this.lifecycle.coroutineScope.coroutineContext).launch { delay(1000)
+        CoroutineScope(this.lifecycle.coroutineScope.coroutineContext).launch { delay(10)
             startActivity(intent)
         }
         setContent {

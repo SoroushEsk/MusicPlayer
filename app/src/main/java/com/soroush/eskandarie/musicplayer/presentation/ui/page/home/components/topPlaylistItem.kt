@@ -47,7 +47,7 @@ fun TopPlaylistItem(
     uriBack2: Uri,
     modifier: Modifier = Modifier,
     themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
-    extraPadding: Dp = Dimens.Padding.PlaylistPosterDefaultPadding,
+    extraPadding: Dp = Dimens.Padding.TopPlaylistItemDefaultPadding,
     imageShape: Shape = RoundedCornerShape(Dimens.CornerRadius.TopPlaylistItemCornerRadius),
     errorResource: Int = R.drawable.empty_album,
     textColor: TextStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -62,7 +62,7 @@ fun TopPlaylistItem(
         if (frontImageSize != Size.Zero && Math.abs(prevBoxSize.width - mainBoxSize.width) > 100) {
             // finding out the minimum padding necessary to fit the all three image in
             val M =
-                (Math.sin(Dimens.Rotation.PlaylistPosterBackRotation * Math.PI / 180) * Dimens.Size.PlaylistPosterBackWeight + 2f / 3)
+                (Math.sin(Dimens.Rotation.TopPlaylistItemBackRotation * Math.PI / 180) * Dimens.Size.TopPlaylistItemBackWeight + 2f / 3)
             val minSide = Math
                 .min(mainBoxSize.width, mainBoxSize.height)
             padding = ((minSide / 4) * (1 - M) / M).dp
@@ -78,7 +78,7 @@ fun TopPlaylistItem(
     ) {
         Box(
             modifier = Modifier
-                .weight(1 - Dimens.Size.PlaylistPosterTextWeight)
+                .weight(1 - Dimens.Size.TopPlaylistItemTextWeight)
                 .aspectRatio(1f)
                 .padding(mainBoxPadding, 0.dp)
                 .onGloballyPositioned { coordinates ->
@@ -93,7 +93,7 @@ fun TopPlaylistItem(
         ) {
             BackPosters(
                 shape = imageShape,
-                fillSize = Dimens.Size.PlaylistPosterBackWeight,
+                fillSize = Dimens.Size.TopPlaylistItemBackWeight,
                 frontImageSize = frontImageSize,
                 direction = Direction.Right,
                 uri = uriBack2,
@@ -102,7 +102,7 @@ fun TopPlaylistItem(
             )
             BackPosters(
                 shape = imageShape,
-                fillSize = Dimens.Size.PlaylistPosterBackWeight,
+                fillSize = Dimens.Size.TopPlaylistItemBackWeight,
                 frontImageSize = frontImageSize,
                 direction = Direction.Left,
                 uri = uriBack1,
@@ -134,7 +134,7 @@ fun TopPlaylistItem(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(Dimens.Size.PlaylistPosterTextWeight),
+                .weight(Dimens.Size.TopPlaylistItemTextWeight),
             contentAlignment = Alignment.TopCenter
         ) {
             Text(
@@ -165,7 +165,7 @@ private fun BackPosters(
         modifier = Modifier
             .fillMaxSize(fillSize)
             .aspectRatio(1f)
-            .rotate(sign * Dimens.Rotation.PlaylistPosterBackRotation)
+            .rotate(sign * Dimens.Rotation.TopPlaylistItemBackRotation)
             .offset {
                 IntOffset(
                     sign * (frontImageSize.width / 3).toInt(),
