@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
+import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -22,14 +23,16 @@ class HomeViewModel @Inject constructor(
 
 ): ViewModel() {
     //region Viewmodel States
-    private val _searchBox = MutableStateFlow(
-        SearchFieldState(
-            searchText = "",
-            isSearch = false
+    private val _homeState = MutableStateFlow(
+        HomeViewModelState(
+            SearchFieldState(
+                searchText = "",
+                isSearch = false
+            )
         )
     )
-    private val searchBox : StateFlow<SearchFieldState>
-        get() = _searchBox
+     val homeState : StateFlow<HomeViewModelState>
+        get() = _homeState
     //endregion
     //region Viewmodel Action Channels
     private val setActionChannel = Channel<HomeSetAction> ( Channel.UNLIMITED )
@@ -37,10 +40,6 @@ class HomeViewModel @Inject constructor(
     //region Main Methods
     init{
         handleSetActions()
-    }
-    @Composable
-    fun getHomeState(action: HomeGetStateAction) = when(action){
-        is HomeGetStateAction.GetSearchTextState -> getSearchTextState()
     }
     fun getHomeSetAction(action: HomeSetAction){
         viewModelScope.launch {
@@ -58,13 +57,8 @@ class HomeViewModel @Inject constructor(
         }
     }
     private suspend fun setSearchText(searchText: String){
-        _searchBox.value = _searchBox.value.copy(searchText = searchText)
+        _homeState.value.searchFieldState = _homeState.value.searchFieldState.copy(searchText = searchText)
     }
-    @Composable
-    private fun getSearchTextState() =
-        searchBox.map { searchEvent ->
-            searchEvent.searchText
-        }.collectAsState(initial = "")
     //endregion
     //region Override Methods
     override fun onCleared() {

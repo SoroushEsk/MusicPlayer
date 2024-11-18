@@ -6,7 +6,7 @@ import androidx.compose.ui.unit.dp
 object Dimens {
     object CornerRadius{
         val PlaylistItemPosterRaduis: Dp = 12.dp
-        val PlaylistPosterCornerRadius = 28.dp
+        val TopPlaylistItemCornerRadius = 16.dp
         val AppTextFieldCornerRadius: Dp = 12.dp
     }
     object Padding{

@@ -8,12 +8,14 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePlaylist
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.map
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
@@ -31,9 +33,9 @@ class HomeActivity : ComponentActivity() {
             ) {
                 SearchField(
                     setState = viewmodel::getHomeSetAction,
-                    getState =
-                        viewmodel.getHomeState(HomeGetStateAction.GetSearchTextState)
-
+                    getState = viewmodel.homeState.map {homeState ->
+                            homeState.searchFieldState.searchText
+                        }.collectAsState(initial = "")
                 ) {
 
                 }

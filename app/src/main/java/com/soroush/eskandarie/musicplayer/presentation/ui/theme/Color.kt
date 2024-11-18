@@ -10,7 +10,7 @@ val Purple40 = Color(0xFF6650a4)
 val PurpleGrey40 = Color(0xFF625b71)
 val Pink40 = Color(0xFF7D5260)
 
-interface ThemeColor{
+interface ColorTheme{
     val Background      : Color
     val Surface         : Color
     val Primary         : Color
@@ -22,7 +22,7 @@ interface ThemeColor{
     val Icon            : Color
     val FocusedField    : Color
 }
-object LightTheme : ThemeColor {
+object LightTheme : ColorTheme {
     override val Background  = Color(0xFFE0E0E0)
     override val Surface     = Color(0xFFFAFAFA)
     override val Primary     = Color(0xFF4285F4)
@@ -34,7 +34,7 @@ object LightTheme : ThemeColor {
     override val Icon        = Color(0xFF25344D)
     override val FocusedField= Color(0xFF284A81)
 }
-object DarkTheme : ThemeColor {
+object DarkTheme : ColorTheme {
     override val Background  = Color(0xFF191919)
     override val Surface     = Color(0xFF1E1E1E)
     override val Primary     = Color(0xFF4285F4)

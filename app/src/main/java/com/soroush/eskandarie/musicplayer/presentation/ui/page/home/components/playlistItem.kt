@@ -41,7 +41,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdown
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
-import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ThemeColor
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,7 +53,7 @@ fun PlaylistItem(
     icon1: Int = R.drawable.play_button,
     icon2: Int = R.drawable.shuffle,
     errorImage: Int = R.drawable.empty_album,
-    themeColor: ThemeColor = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
+    themeColor: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     playlistId: Int,
     title: String,
     posterUri: Uri,
@@ -135,7 +135,7 @@ fun PlaylistItem(
                 )
             }
             MaterialTheme(
-                shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.CornerRadius.PlaylistPosterCornerRadius))
+                shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.CornerRadius.TopPlaylistItemCornerRadius))
             ) {
                 DropdownMenu(
                     expanded = isExpanded,

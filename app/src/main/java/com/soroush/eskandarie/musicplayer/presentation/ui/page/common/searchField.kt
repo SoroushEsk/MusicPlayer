@@ -25,7 +25,7 @@ import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
-import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ThemeColor
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,7 +34,7 @@ fun SearchField(
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     placeHolder: String = "Search",
     shape: RoundedCornerShape = RoundedCornerShape(Dimens.CornerRadius.AppTextFieldCornerRadius),
-    themeColors: ThemeColor = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
+    themeColors: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     modifier: Modifier = Modifier,
     setState: (HomeSetAction) -> Unit,
     getState: State<String>,

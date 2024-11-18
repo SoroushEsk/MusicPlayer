@@ -1,6 +1,7 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
 import android.net.Uri
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,18 +33,22 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import androidx.compose.runtime.LaunchedEffect as LaunchedEffect1
 
 @Composable
-fun PlaylistPoster(
+fun TopPlaylistItem(
     title: String,
     uriFront: Uri,
     uriBack1: Uri,
     uriBack2: Uri,
     modifier: Modifier = Modifier,
+    themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
     extraPadding: Dp = Dimens.Padding.PlaylistPosterDefaultPadding,
-    imageShape: Shape = RoundedCornerShape(Dimens.CornerRadius.PlaylistPosterCornerRadius),
+    imageShape: Shape = RoundedCornerShape(Dimens.CornerRadius.TopPlaylistItemCornerRadius),
     errorResource: Int = R.drawable.empty_album,
     textColor: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         fontWeight = FontWeight.Medium
@@ -135,7 +140,8 @@ fun PlaylistPoster(
             Text(
                 text = title,
                 modifier = Modifier,
-                style = textColor
+                style = textColor,
+                color = themeColor.Text
             )
         }
         Spacer(modifier = Modifier.weight(0.05f))
