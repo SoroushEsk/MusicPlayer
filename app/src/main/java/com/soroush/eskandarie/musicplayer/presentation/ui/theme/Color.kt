@@ -30,7 +30,7 @@ object LightTheme : ColorTheme {
     override val LightShadow = Color(0xFFFFFFFF)
     override val DarkShadow  = Color(0xFFD1D9E6)
     override val Text        = Color(0xFF333333)
-    override val DarkSurface = Color(0x3BC5C5C5)
+    override val DarkSurface = Color(0x1EC5C5C5)
     override val Icon        = Color(0xFF25344D)
     override val FocusedField= Color(0xFF284A81)
 }

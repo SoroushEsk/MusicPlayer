@@ -1,5 +1,6 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -10,6 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.domain.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePlaylist
@@ -41,7 +45,8 @@ class HomeActivity : ComponentActivity() {
                 }
 
                 HomePlaylist(
-                    modifier = Modifier
+                    modifier = Modifier,
+                    playlists = getPlaylist()
                 )
             }
         }
@@ -50,5 +55,39 @@ class HomeActivity : ComponentActivity() {
 
     //region Init Methods
 
+    //endregion
+    //region Normal Methods
+    private fun getPlaylist() : List<Playlist> = listOf(
+        Playlist(
+            0,
+            "Favorite",
+            Uri.parse("android.resource://${this.packageName}/" + R.drawable.favorite_playlist)
+        ),
+        Playlist(
+            1,
+            "Playlist 1",
+            Uri.parse("android.resource://${this.packageName}/" + R.drawable.shaj)
+        ),
+        Playlist(
+            2,
+            "Playlist 2",
+            Uri.parse("android.resource://${this.packageName}/" + R.drawable.ghader)
+        ),
+        Playlist(
+            3,
+            "Playlist 3",
+            Uri.parse("android.resource://${this.packageName}/" + R.drawable.simint)
+        ),
+        Playlist(
+            4,
+            "Playlist 4",
+            Uri.parse("android.resource://${this.packageName}/" + R.drawable.sharhram)
+        ),
+        Playlist(
+            5,
+            "Playlist 5",
+            Uri.parse("android.resource://${this.packageName}/" + R.drawable.empty_album)
+        )
+    )
     //endregion
 }

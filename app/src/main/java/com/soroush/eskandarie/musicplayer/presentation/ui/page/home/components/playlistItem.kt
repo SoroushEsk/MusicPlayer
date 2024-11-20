@@ -71,21 +71,22 @@ fun PlaylistItem(
     val backgroundColr by remember{
         mutableStateOf(
             if ( themeColor is LightTheme ) Color.White.copy(alpha = 0.91f)
-            else themeColor.DarkSurface
+            else Color.Black.copy(alpha = 0.91f)
         )
     }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(themeColor.DarkSurface)
-            .height(Dimens.Size.PlaylistItemHeight),
+            .height(Dimens.Size.PlaylistItemHeight)
+            .clip(posterShape),
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
             modifier = Modifier
-                .clip(posterShape)
                 .aspectRatio(1f)
-                .padding(Dimens.Padding.PlaylistItemPosterPadding),
+                .padding(Dimens.Padding.PlaylistItemPosterPadding)
+                .clip(posterShape),
             model = posterUri,
             contentScale = ContentScale.Crop,
             contentDescription = "Playlist: ${title} Poster",
