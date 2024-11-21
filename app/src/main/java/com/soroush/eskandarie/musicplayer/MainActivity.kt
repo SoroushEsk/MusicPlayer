@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.coroutineScope
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen.HomeActivity
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.MusicPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.ProfileHeader
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.MusicPlayerTheme
 import kotlinx.coroutines.CoroutineScope
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
+        startActivity(intent)
 
         setContent {
             val context = LocalContext.current
