@@ -1,11 +1,8 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
 import android.net.Uri
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,18 +17,15 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import coil.size.Dimension
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdownItem
@@ -39,7 +33,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
-import com.soroush.eskandarie.musicplayer.util.Constants
+import com.soroush.eskandarie.musicplayer.util.Constaints
 
 @Composable
 fun HomePlaylist(
@@ -49,11 +43,10 @@ fun HomePlaylist(
 
 
 ) {
-    var scrollState = rememberScrollState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(Dimens.Padding.HomePagePadding),
+            .padding(Dimens.Padding.HomePagePadding, 0.dp),
         horizontalAlignment = Alignment.Start
     ) {
         item{
@@ -73,7 +66,7 @@ fun HomePlaylist(
             Text(
                 modifier = Modifier,
                 fontWeight = FontWeight.Bold,
-                text = Constants.HomePageValues.PlaylistSectionTitle,
+                text = Constaints.HomePageValues.PlaylistSectionTitle,
                 color = themeColor.Text,
                 style = MaterialTheme
                     .typography

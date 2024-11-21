@@ -79,6 +79,11 @@ dependencies {
     implementation(libs.androidx.window)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.android.compiler)
+
+    // Constraint layout
+    implementation(libs.constraintlayout.compose)
+
+
     implementation(libs.hilt.navigation.compose)
     implementation(libs.material)
     implementation(libs.androidx.appcompat)

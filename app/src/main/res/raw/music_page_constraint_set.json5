@@ -1,0 +1,74 @@
+{
+  ConstraintSets: {
+    start: {
+      profile_pic: {
+        width: 40,
+        height: 40,
+        start: ['parent', 'start'],
+        top: ['parent', 'top'],
+        custom: {
+          background: '#08FF04'
+        }
+      },
+      username: {
+        start: ['profile_pic', 'end'],
+        top: ['profile_pic', 'top'],
+        bottom: ['profile_pic', 'bottom'],
+        custom: {
+          background: '#08FF04'
+        }
+      },
+      box: {
+        width: 'parent',
+        height: 80,
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        bottom: ['parent', 'bottom']
+      }
+    },
+    end: {
+      profile_pic: {
+        width: 150,
+        height: 150,
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top'],
+        custom: {
+          background: '#FFFFFF'
+        }
+      },
+      username: {
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['profile_pic', 'bottom'],
+        custom: {
+          background: '#FFFFFF'
+        }
+      },
+      box: {
+        width: 'parent',
+        height: 'parent',
+        start: ['parent', 'start'],
+        end: ['parent', 'end'],
+        top: ['parent', 'top'],
+        bottom: ['parent', 'bottom']
+      }
+    }
+  },
+  Transitions: {
+    default: {
+      from: 'start',
+      to: 'end',
+      pathMotionArc: 'startHorizontal',
+      KeyFrames: {
+        KeyAttributes: [
+          {
+            target: ['username'],
+            frames: [0, 50, 100],
+            translationX: [0, 80, 0]
+          }
+        ]
+      }
+    }
+  }
+}

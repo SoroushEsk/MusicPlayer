@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 
 object Dimens {
     object CornerRadius{
-        val PlaylistItemPosterRaduis        : Dp    = 12.dp
+        val PlaylistItemPosterRadius        : Dp    = 12.dp
         val TopPlaylistItemCornerRadius     : Dp    = 16.dp
         val AppTextFieldCornerRadius        : Dp    = 12.dp
     }
@@ -28,8 +28,9 @@ object Dimens {
     object Size{
         val TopPlaylistItemTextWeight       : Float = 0.15f
         val TopPlaylistItemBackWeight       : Float = 0.85f
-        val PlaylistItemHeight              : Dp    = 72.dp
+        val GeneralItemHeight               : Dp    = 72.dp
         val PlaylistSpaceBetween            : Dp    = 10.dp
         val PlayListItemIconSize            : Dp    = 20.dp
+        val MinMusicBarHeight               : Dp    = 80.dp
     }
 }
