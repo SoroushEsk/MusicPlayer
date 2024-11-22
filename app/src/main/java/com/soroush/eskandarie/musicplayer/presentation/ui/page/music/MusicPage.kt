@@ -1,16 +1,18 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.music
 
+import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,19 +23,17 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,7 +45,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -54,164 +53,164 @@ import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.constraintlayout.compose.ExperimentalMotionApi
 import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
+import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
-import com.soroush.eskandarie.musicplayer.util.Constaints
-import okio.ByteString.Companion.readByteString
-import kotlin.time.times
-
-//@OptIn(ExperimentalMotionApi::class)
-//@Composable
-//fun MusicPage(
-//    modifier: Modifier = Modifier,
-//    scrollState: ScrollState
-//) {
-//    val context = LocalContext.current
-//
-//    val motionProgress = scrollState.value.toFloat() / scrollState.maxValue.toFloat().coerceAtLeast(1f)
-//    val motionSceneContent = remember {
-//        context.resources.openRawResource(R.raw.music_page_constraint_set).bufferedReader().use { it.readText()
-//        }
-//    }
-//    val motionScene = MotionScene(content = motionSceneContent)
-//    MotionLayout(
-//        modifier = Modifier
-//            .layoutId(Constaints.HomePageValues.MusicPageMotionLayoutId),
-//        motionScene = motionScene,
-//        progress = motionProgress
-//    ) {
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .background(Color.DarkGray)
-//                .layoutId(Constaints.MusicBarValues.MotionLayoutBoxId)
-//    )
-//    }
-//}
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
+import com.soroush.eskandarie.musicplayer.util.Constants
 
 @OptIn(ExperimentalMotionApi::class)
 @Composable
-fun ProfileHeader(
-    modifier: Modifier
+fun MusicPage(
+    modifier: Modifier = Modifier,
+    colorTheme: ColorTheme = if( isSystemInDarkTheme()) DarkTheme else LightTheme,
+    posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.General)
 ) {
 
     val configuration = LocalConfiguration.current
+    val resources = LocalContext.current.resources
+
+    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.mahasti)
+    val palette = Palette.from(bitmap).generate()
+//    val dominantSwatch = palette.dominantSwatch
+//    val vibrantSwatch = palette.vibrantSwatch
+//    val mutedSwatch = palette.mutedSwatch
+//
+//    val dominantColor = dominantSwatch?.rgb ?: 0
+//    val vibrantColor = vibrantSwatch?.rgb ?: 0
+//    val mutedColor = mutedSwatch?.rgb ?: 0
+//
+//    Log.e("Dominant Color"," $dominantColor")
+//    Log.e("Vibrant Color"," $vibrantColor")
+//    Log.e("Muted Color", " $mutedColor")
+//
+
+
+    val dominantColor = Color(palette.getDominantColor(0)).copy(alpha = 0.8f)
+    val vibrantColor = Color(palette.getVibrantColor(0)).copy(alpha = 0.6f)
+    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.4f)
+
+    val radialGradientBrush = Brush.linearGradient(
+        colors = listOf( dominantColor, vibrantColor, mutedColor ),
+        start = Offset(0f, 0f),
+        end = Offset(configuration.screenWidthDp.toFloat()* LocalDensity.current.density, 0f)
+    )
+    var progress by remember { mutableStateOf(0f) }
+
+    var preFingerY by remember{mutableStateOf(0f)}
+    var isScroll by remember { mutableStateOf(false) }
     var fingerY by remember { mutableStateOf(0f) }
     var isTouching by remember { mutableStateOf(false) }
     val maxScrollRange =  configuration.screenHeightDp * LocalDensity.current.density
-    var progress by remember { mutableStateOf(0.7f) }
     var offsetY by remember { mutableStateOf(0f) }
 
-    LaunchedEffect(
-        key1 = fingerY
-    ) {
-        progress = Math.abs(fingerY - maxScrollRange) / maxScrollRange
-        Log.e("Scroll Progress", "Progress: ${fingerY}")
-    }
+    val animatedProgress by animateFloatAsState(
+        targetValue = if (isTouching) {
+            Math.abs(fingerY - maxScrollRange) / maxScrollRange
+        } else {
+            if (progress > 0.5f) {
+                if (isScroll) 0.99f else 1f
+            } else 0f
+        },
+        animationSpec = tween(durationMillis = if ( isTouching ) 0 else 700)
+    )
+
+    progress = animatedProgress
+
+    Log.e("ProfileHeader", "Error loading motion scene :$progress ")
 
     val context = LocalContext.current
     val scene = remember {
         try {
             context.resources.openRawResource(R.raw.music_page_constraint_set).readBytes().decodeToString()
         } catch (e: Exception) {
-            Log.e("ProfileHeader", "Error loading motion scene", e)
-            "" // Provide a fallback empty string
+            ""
         }
     }
-
-    MotionLayout(
-        motionScene = MotionScene(content = scene),
-        progress = progress,
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight()
-    ) {
-        val profilePictureProperties = motionProperties(id = "profile_pic")
-        val usernameProperties = motionProperties(id = "username")
-
-        Column(
-            modifier = Modifier
+//    if ( progress < 1f)
+        MotionLayout(
+            motionScene = MotionScene(content = scene),
+            progress = progress,
+            modifier = modifier
+                .fillMaxHeight()
                 .fillMaxWidth()
-                .background(Color.DarkGray)
-                .layoutId("box")
-                .onGloballyPositioned { coordinates ->
-                    offsetY = coordinates.positionInWindow().y
-                }
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val position = event.changes.first().position
-                            isTouching = event.changes.any { it.pressed }
-                            if (isTouching) {
-                                fingerY = position.y + offsetY
-                            }
-                        }
-                    }
-                }
-        ){
-            if( progress < 1f){
-                Image(
-                    painter = painterResource(id = R.drawable.ed),
-                    contentDescription = "profile_pic",
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .border(
-                            width = 2.dp,
-                            color = profilePictureProperties.value.color("background"),
-                            shape = CircleShape
-                        )
-                        .layoutId("profile_pic")
-                )
-                Text(
-                    text = "Slim Shady",
-                    fontSize = 24.sp,
-                    color = usernameProperties.value.color("background"),
-                    modifier = Modifier.layoutId("username")
-                )
-            } else MusicPage()
-        }
+        ) {
+            Row (
+                modifier = modifier
+                    .layoutId(Constants.MusicBarValues.MotionLayoutContainerId)
+                    .clip(posterShape)
+                    .background(colorTheme.Background)
+                    .background(radialGradientBrush)
+            ){
 
-    }
+            }
+            Image(
+                painter = painterResource(id = R.drawable.mahasti),
+                contentDescription = Constants.MusicPageValues.MusicPosterDescription,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .layoutId(Constants.MusicBarValues.MotionLayoutPosterId)
+                    .padding(Dimens.Padding.MusicBarMusicPoster)
+                    .aspectRatio(1f)
+                    .clip(posterShape)
+            )
+
+
+
+        }
+//    else
+//        MusicPageFullScreen(colorTheme = colorTheme, modifier = Modifier. pointerInput(Unit) {
+//            awaitPointerEventScope {
+//                while (true) {
+//                    val event = awaitPointerEvent()
+//                    val position = event.changes.first().position
+//                    fingerY = position.y
+//                    }
+//                }
+//            }
+//        ){}
+
 }
 
 @Composable
-fun MusicPage(modifier: Modifier = Modifier) {
+fun MusicPageFullScreen(
+    modifier: Modifier = Modifier,
+    colorTheme: ColorTheme,
+    onDownIconClick: () -> Unit
+) {
     var isRotatePoster by remember { mutableStateOf(true) }
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(DarkTheme.Background)
-        ,
-        verticalArrangement = Arrangement.SpaceBetween
+            .background(colorTheme.Background)
+            .navigationBarsPadding()
+            .statusBarsPadding()
     ) {
+
         SongDetail(
             modifier = modifier,
             songName = "Harighe Sabs" ,
-            songArtist = "Ebi"//,
-//            downIcon = R.drawable.down_arrow ,
-//            optionsIcon = R.drawable.options_list
+            songArtist = "Ebi",
+            onDownIconClick = onDownIconClick
         )
-        Spacer(
-            modifier = Modifier.height(4.dp)
-        )
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f))
         SongLyricSlider()
         SongPoster(
             modifier = modifier,
@@ -220,6 +219,9 @@ fun MusicPage(modifier: Modifier = Modifier) {
             needleImage = R.drawable.needle,
             isAnimation = isRotatePoster
         )
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f))
         IconRowAboveProgressBar(modifier = modifier, R.drawable.filled_heart, R.drawable.playlist)
         ProgressBar(
             modifier = modifier,
@@ -228,12 +230,20 @@ fun MusicPage(modifier: Modifier = Modifier) {
             totalDuration = "03:13",
             songPercent = 0.73f
         )
+
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f))
         IconBelowProgressBar(
             modifier = modifier
         )
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .weight(3f))
         Spacer(modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.25f))
+            .height(Dimens.Spacing.MusicPageSpaceBetween)
+                )
     }
 }
 
@@ -258,7 +268,7 @@ fun IconBelowProgressBar(
         Spacer(modifier = Modifier
             .width(28.dp)
             .fillMaxHeight())
-        PLayControlShaow(
+        PLayControlShadow(
             modifier = modifier
                 .rotate(90f)
                 .weight(1.3f),
@@ -270,7 +280,7 @@ fun IconBelowProgressBar(
         Spacer(modifier = Modifier
             .width(24.dp)
             .fillMaxHeight())
-        PLayControlShaow(
+        PLayControlShadow(
             modifier = modifier
                 .weight(1.75f),
             iconPainter = R.drawable.pause,
@@ -281,7 +291,7 @@ fun IconBelowProgressBar(
         Spacer(modifier = Modifier
             .width(24.dp)
             .fillMaxHeight())
-        PLayControlShaow(
+        PLayControlShadow(
             modifier = modifier
                 .weight(1.3f),
             iconPainter = R.drawable.fast_forward,
@@ -300,7 +310,7 @@ fun IconBelowProgressBar(
     }
 }
 @Composable
-fun PLayControlShaow(
+fun PLayControlShadow(
     modifier: Modifier,
     iconPainter : Int,
     shape : Shape = RoundedCornerShape(16.dp),
@@ -401,8 +411,8 @@ fun IconRowAboveProgressBar(
     Row (
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight(0.13f)
-            .padding(16.dp, 0.dp),
+            .height(Dimens.Size.MusicPageAboveProgressBarHeight)
+            .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ){
         IconShadowed(modifier = modifier,
@@ -549,6 +559,7 @@ fun SongLyricSlider(
 fun SongDetail(
     modifier: Modifier,
     songName: String,
+    onDownIconClick: () -> Unit,
     songArtist: String
 ) {
     Row(
@@ -561,7 +572,10 @@ fun SongDetail(
     ) {
         IconShadowed(
             modifier = modifier
-                .weight(1.5f),
+                .weight(1.5f)
+                .clickable {
+                    onDownIconClick()
+                },
             iconPainter = R.drawable.down_arrow
         )
         SongTitle(

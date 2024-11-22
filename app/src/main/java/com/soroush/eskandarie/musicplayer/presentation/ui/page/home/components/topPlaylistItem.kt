@@ -127,7 +127,7 @@ fun TopPlaylistItem(
                     modifier = Modifier
                         .fillMaxSize(),
                     error = painterResource(errorResource),
-                    contentScale = ContentScale.Fit
+                    contentScale = ContentScale.Crop
                 )
             }
         }
@@ -180,7 +180,7 @@ private fun BackPosters(
             contentDescription = description,
             modifier = Modifier.fillMaxSize(),
             error = painterResource(erroResource),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Crop
         )
     }
 }

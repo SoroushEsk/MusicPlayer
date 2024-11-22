@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,7 +32,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
-import com.soroush.eskandarie.musicplayer.util.Constaints
+import com.soroush.eskandarie.musicplayer.util.Constants
 
 @Composable
 fun HomePlaylist(
@@ -66,7 +65,7 @@ fun HomePlaylist(
             Text(
                 modifier = Modifier,
                 fontWeight = FontWeight.Bold,
-                text = Constaints.HomePageValues.PlaylistSectionTitle,
+                text = Constants.HomePageValues.PlaylistSectionTitle,
                 color = themeColor.Text,
                 style = MaterialTheme
                     .typography

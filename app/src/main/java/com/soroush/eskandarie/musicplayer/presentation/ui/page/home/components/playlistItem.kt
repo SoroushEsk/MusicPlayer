@@ -51,7 +51,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 fun PlaylistItem(
     modifier: Modifier = Modifier,
     textStyle: TextStyle = MaterialTheme.typography.titleMedium,
-    posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.PlaylistItemPosterRadius),
+    posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.General),
     icon1: Int = R.drawable.play_button,
     icon2: Int = R.drawable.shuffle,
     errorImage: Int = R.drawable.empty_album,

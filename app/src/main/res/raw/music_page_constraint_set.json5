@@ -1,53 +1,27 @@
 {
   ConstraintSets: {
     start: {
-      profile_pic: {
-        width: 40,
-        height: 40,
-        start: ['parent', 'start'],
-        top: ['parent', 'top'],
-        custom: {
-          background: '#08FF04'
-        }
-      },
-      username: {
-        start: ['profile_pic', 'end'],
-        top: ['profile_pic', 'top'],
-        bottom: ['profile_pic', 'bottom'],
-        custom: {
-          background: '#08FF04'
-        }
-      },
-      box: {
+      motion_container: {
         width: 'parent',
         height: 80,
-        start: ['parent', 'start'],
-        end: ['parent', 'end'],
-        bottom: ['parent', 'bottom']
+        bottom: ['parent', 'bottom', 0],
+        start: ['parent', 'start', 0],
+        end: ['parent', 'end', 0]
+      },
+      motion_music_poster: {
+        height: 80,
+        start: ['motion_container', 'start'],
+        top: ['motion_container', 'top'],
+        bottom: ['motion_container', 'bottom', 0]
       }
     },
     end: {
-      profile_pic: {
-        width: 150,
-        height: 150,
-        start: ['parent', 'start'],
-        end: ['parent', 'end'],
-        top: ['parent', 'top'],
-        custom: {
-          background: '#FFFFFF'
-        }
+      poster_image: {
+        center: 'parent',
       },
-      username: {
-        start: ['parent', 'start'],
-        end: ['parent', 'end'],
-        top: ['profile_pic', 'bottom'],
-        custom: {
-          background: '#FFFFFF'
-        }
+      disc_image: {
       },
       box: {
-        width: 'parent',
-        height: 'parent',
         start: ['parent', 'start'],
         end: ['parent', 'end'],
         top: ['parent', 'top'],

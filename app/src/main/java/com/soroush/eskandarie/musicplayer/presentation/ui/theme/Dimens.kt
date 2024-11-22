@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 
 object Dimens {
     object CornerRadius{
-        val PlaylistItemPosterRadius        : Dp    = 12.dp
+        val General                         : Dp    = 12.dp
         val TopPlaylistItemCornerRadius     : Dp    = 16.dp
         val AppTextFieldCornerRadius        : Dp    = 12.dp
     }
@@ -17,10 +17,13 @@ object Dimens {
         val PlaylistItemIconPadding         : Dp    =  2.dp
         val HomePagePadding                 : Dp    =  8.dp
         val HomePageTopPlaylistItemPadding  : Dp    = 10.dp
+        val MusicBarMusicPoster             : Dp    =  8.dp
     }
     object Spacing{
         val HomePageSpaceBetween            : Dp    =  8.dp
         val PlaylistItemDropdownSpace       : Dp    =  2.dp
+
+        val MusicPageSpaceBetween           : Dp    =  12.dp
     }
     object Rotation {
         val TopPlaylistItemBackRotation     : Float = 4f
@@ -32,5 +35,8 @@ object Dimens {
         val PlaylistSpaceBetween            : Dp    = 10.dp
         val PlayListItemIconSize            : Dp    = 20.dp
         val MinMusicBarHeight               : Dp    = 80.dp
+
+        val MusicPageAboveProgressBarHeight : Dp    = 80.dp
+
     }
 }

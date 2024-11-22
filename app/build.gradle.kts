@@ -83,6 +83,11 @@ dependencies {
     // Constraint layout
     implementation(libs.constraintlayout.compose)
 
+    // Color thief
+    implementation(libs.androidx.palette.ktx)
+
+
+
 
     implementation(libs.hilt.navigation.compose)
     implementation(libs.material)
