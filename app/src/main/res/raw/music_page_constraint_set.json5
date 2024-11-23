@@ -3,14 +3,60 @@
     start: {
       motion_container: {
         width: 'parent',
-        height: 80,
+        height: 68,
         bottom: ['parent', 'bottom', 0],
         start: ['parent', 'start', 0],
         end: ['parent', 'end', 0]
       },
       motion_music_poster: {
-        height: 80,
-        start: ['motion_container', 'start'],
+        height: 60,
+        start: ['motion_container', 'start', 0],
+        top: ['motion_container', 'top'],
+        bottom: ['motion_container', 'bottom', 0]
+      },
+      motion_music_title: {
+        height: 'wrap',
+        end: ['motion_text_container', 'end', 0],
+        start: ['motion_text_container', 'start', 0],
+        top: ['motion_music_poster', 'top'],
+        bottom: ['motion_music_poster', 'bottom', 14]
+      },
+      motion_music_artist: {
+        height: 'wrap',
+        end: ['motion_text_container', 'end', 0],
+        start: ['motion_text_container', 'start', 0],
+        top: ['motion_music_title', 'bottom'],
+        bottom: ['motion_music_poster', 'bottom', 14]
+      },
+      motion_text_container: {
+        height: 'wrap',
+        width: 0,
+        end: ['motion_back_icon', 'start', 4],
+        start: ['motion_music_poster', 'end', 4],
+        top: ['motion_container', 'top'],
+        bottom: ['motion_container', 'bottom', 0]
+      },
+      motion_back_icon: {
+        height: 32,
+        end: ['motion_play_icon', 'start', 4],
+        top: ['motion_container', 'top'],
+        bottom: ['motion_container', 'bottom', 0]
+      },
+      motion_play_icon: {
+        height: 40,
+        end: ['motion_forward_icon', 'start', 4],
+        top: ['motion_container', 'top'],
+        bottom: ['motion_container', 'bottom', 0]
+      },
+      motion_forward_icon: {
+        height: 32,
+        end: ['motion_playlist_icon', 'start', 0],
+        top: ['motion_container', 'top'],
+        bottom: ['motion_container', 'bottom', 0]
+      },
+      motion_playlist_icon: {
+        height: 28,
+        end: ['parent', 'end', 0],
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       }

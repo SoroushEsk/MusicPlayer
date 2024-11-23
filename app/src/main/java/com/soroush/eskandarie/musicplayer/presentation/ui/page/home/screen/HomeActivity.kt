@@ -9,13 +9,15 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.Playlist
-import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePlaylist
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.MusicPage
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -45,13 +47,15 @@ class HomeActivity : ComponentActivity() {
 //
 //                    }
 
-                    HomePlaylist(
+                    HomePage(
                         modifier = Modifier
-                            .align(Alignment.TopCenter),
+                            .align(Alignment.TopCenter)
+                            .padding(horizontal = (Dimens.Padding.HomeActivity)),
                         playlists = getPlaylist()
                     )
 
                     MusicPage(
+                        modifier = Modifier
                     )
 
 //                MusicPage(scrollState = scrollState)

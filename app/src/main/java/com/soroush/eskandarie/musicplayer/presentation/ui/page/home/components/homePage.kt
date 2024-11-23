@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -35,7 +36,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.util.Constants
 
 @Composable
-fun HomePlaylist(
+fun HomePage(
     modifier: Modifier = Modifier,
     themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
     playlists: List<Playlist>
@@ -43,9 +44,8 @@ fun HomePlaylist(
 
 ) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Dimens.Padding.HomePagePadding, 0.dp),
+        modifier = modifier
+            .fillMaxSize(),
         horizontalAlignment = Alignment.Start
     ) {
         item{
