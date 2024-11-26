@@ -5,8 +5,10 @@ import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -41,6 +43,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
@@ -54,10 +57,12 @@ import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -81,45 +86,34 @@ import com.soroush.eskandarie.musicplayer.util.Constants
 @Composable
 fun MusicPage(
     modifier: Modifier = Modifier,
-    colorTheme: ColorTheme = if( isSystemInDarkTheme()) DarkTheme else LightTheme,
+    colorTheme: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.General)
 ) {
 
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
+    val context = LocalContext.current
 
     val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
     val palette = Palette.from(bitmap).generate()
-//    val dominantSwatch = palette.dominantSwatch
-//    val vibrantSwatch = palette.vibrantSwatch
-//    val mutedSwatch = palette.mutedSwatch
-//
-//    val dominantColor = dominantSwatch?.rgb ?: 0
-//    val vibrantColor = vibrantSwatch?.rgb ?: 0
-//    val mutedColor = mutedSwatch?.rgb ?: 0
-//
-//    Log.e("Dominant Color"," $dominantColor")
-//    Log.e("Vibrant Color"," $vibrantColor")
-//    Log.e("Muted Color", " $mutedColor")
-//
 
 
     val dominantColor = Color(palette.getDominantColor(0)).copy(alpha = 0.75f)
     val vibrantColor = Color(palette.getVibrantColor(0)).copy(alpha = 0.5f)
     val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.4f)
-    
+
     val radialGradientBrush = Brush.linearGradient(
-        colors = listOf( dominantColor, vibrantColor , mutedColor),
+        colors = listOf(dominantColor, vibrantColor, mutedColor),
         start = Offset(0f, 0f),
-        end = Offset(configuration.screenWidthDp.toFloat()* LocalDensity.current.density, 0f)
+        end = Offset(configuration.screenWidthDp.toFloat() * LocalDensity.current.density, 0f)
     )
     var progress by remember { mutableStateOf(0f) }
 
-    var preFingerY by remember{mutableStateOf(0f)}
+    var preFingerY by remember { mutableStateOf(0f) }
     var isScroll by remember { mutableStateOf(false) }
     var fingerY by remember { mutableStateOf(0f) }
     var isTouching by remember { mutableStateOf(false) }
-    val maxScrollRange =  configuration.screenHeightDp * LocalDensity.current.density
+    val maxScrollRange = configuration.screenHeightDp * LocalDensity.current.density
     var offsetY by remember { mutableStateOf(0f) }
 
     val animatedProgress by animateFloatAsState(
@@ -130,115 +124,149 @@ fun MusicPage(
                 if (isScroll) 0.99f else 1f
             } else 0f
         },
-        animationSpec = tween(durationMillis = if ( isTouching ) 0 else 700)
+        animationSpec = tween(durationMillis = if (isTouching) 0 else 700)
     )
-
     progress = animatedProgress
 
-    Log.e("ProfileHeader", "Error loading motion scene :$progress ")
+    var textWidth by remember { mutableStateOf(0f) }
+    val infiniteTransition = rememberInfiniteTransition()
+    val offsetX = infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = -textWidth,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = 8000,
+                easing = LinearEasing
+            ), repeatMode = RepeatMode.Restart
+        ), label = ""
+    )
 
-    val context = LocalContext.current
+    // TODO(" create rotate functionalty" )
     val scene = remember {
         try {
-            context.resources.openRawResource(R.raw.music_page_constraint_set).readBytes().decodeToString()
+            context.resources.openRawResource(R.raw.music_page_constraint_set).readBytes()
+                .decodeToString()
         } catch (e: Exception) {
             ""
         }
     }
 //    if ( progress < 1f)
-        MotionLayout(
-            motionScene = MotionScene(content = scene),
-            progress = progress,
-            modifier = modifier
-                .fillMaxHeight()
-                .fillMaxWidth()
-        ) {
-            Row (
-                modifier = modifier
-                    .layoutId(Constants.MusicBarValues.MotionLayoutContainerId)
-                    .clip(posterShape)
-                    .background(colorTheme.Background)
-                    .background(radialGradientBrush)
-            ){
-
-            }
-            Image(
-                painter = painterResource(id = R.drawable.shaj),
-                contentDescription = Constants.MusicPageValues.MusicPosterDescription,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .layoutId(Constants.MusicBarValues.MotionLayoutPosterId)
-                    .padding(Dimens.Padding.MusicBarMusicPoster)
-                    .aspectRatio(1f)
-                    .clip(posterShape)
+    MotionLayout(
+        motionScene = MotionScene(content = scene),
+        progress = progress,
+        modifier = modifier
+            .fillMaxHeight()
+            .fillMaxWidth()
+            .then(
+                if ( progress < 1f ) Modifier.navigationBarsPadding()
+                else Modifier.statusBarsPadding()
             )
+    ) {
+        Column(
+            modifier = modifier
+                .layoutId(Constants.MusicBarValues.MotionLayoutContainerId)
+                .clip(RoundedCornerShape(
+                    topStart = if (progress < 1f ) Dimens.CornerRadius.General else  0.dp,
+                    topEnd =  if ( progress < 1f ) Dimens.CornerRadius.General else  0.dp
+                ))
+                .background(colorTheme.Background)
+                .background(radialGradientBrush)
+                .onGloballyPositioned { coordinates ->
+                    offsetY = coordinates.positionInWindow().y
+                    Log.e("5465", "$offsetY")
+                }
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val position = event.changes.first().position
+                            isTouching = event.changes.any { it.pressed }
+                            if (isTouching) {
+                                fingerY = position.y + offsetY
+                            }
+                        }
+                    }
+                }
+        ) {
 
+        }
+        Image(
+            painter = painterResource(id = R.drawable.shaj),
+            contentDescription = Constants.MusicPageValues.MusicPosterDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .layoutId(Constants.MusicBarValues.MotionLayoutPosterId)
+                .padding(Dimens.Padding.MusicBarMusicPoster)
+                .aspectRatio(1f)
+                .clip(posterShape)
+        )
+
+
+        Column(
+            modifier = Modifier
+                .layoutId(Constants.MusicBarValues.MotionLayoutTextContainer),
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
-                text = "Tasnife Saze Khamoosh",
-                modifier = modifier.layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
+                text = "Tasnife Saze Khamoosh I have many more to say",
+                modifier = modifier
+                    .layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
                 color = colorTheme.Text,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold)
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+                onTextLayout = { textLayoutResult ->
+                    textWidth = textLayoutResult.size.width.toFloat()
+                }
             )
             Text(
                 text = "Mohammadreza Shajarian",
-                modifier = modifier.layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
+                modifier = modifier
+                    .layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
                 color = colorTheme.Text.copy(alpha = 0.55f),
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1
             )
-            Box(
-                modifier = Modifier
-                    .layoutId(Constants.MusicBarValues.MotionLayoutTextContainer)
-            )
-            PLayControlShadow(
-                modifier = modifier.rotate(90f),
-                tint = colorTheme.Background,
-                iconPainter = R.drawable.fast_forward,
-                shape = CircleShape,
-                backgroundColor = colorTheme.Icon,
-                padding = 6.dp,
-                layoutId = Constants.MusicBarValues.MotionLayoutBackIconId
-            )
-            PLayControlShadow(
-                modifier = modifier,
-                tint = colorTheme.Background,
-                iconPainter = R.drawable.pause,
-                shape = CircleShape,
-                backgroundColor = colorTheme.Icon,
-                padding = 10.dp,
-                layoutId = Constants.MusicBarValues.MotionLayoutPlayIconId
-            )
-            PLayControlShadow(
-                modifier = modifier,
-                tint = colorTheme.Background,
-                iconPainter = R.drawable.fast_forward,
-                shape = CircleShape,
-                backgroundColor = colorTheme.Icon,
-                padding = 6.dp,
-                layoutId = Constants.MusicBarValues.MotionLayoutForwardIconId
-            )
-
-            Image(
-                painter = painterResource(id = R.drawable.playlist),
-                contentDescription = Constants.MusicPageValues.MusicPosterDescription,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .layoutId(Constants.MusicBarValues.MotionLayoutPlaylistIconId)
-                    .padding(6.dp)
-                    .aspectRatio(1f)
-            )
-
         }
-//    else
-//        MusicPageFullScreen(colorTheme = colorTheme, modifier = Modifier. pointerInput(Unit) {
-//            awaitPointerEventScope {
-//                while (true) {
-//                    val event = awaitPointerEvent()
-//                    val position = event.changes.first().position
-//                    fingerY = position.y
-//                    }
-//                }
-//            }
-//        ){}
+        PLayControlShadow(
+            modifier = modifier.rotate(90f),
+            tint = colorTheme.Background,
+            iconPainter = R.drawable.fast_forward,
+            shape = CircleShape,
+            backgroundColor = colorTheme.Icon,
+            padding = 5.dp,
+            layoutId = Constants.MusicBarValues.MotionLayoutBackIconId
+        )
+        PLayControlShadow(
+            modifier = modifier,
+            tint = colorTheme.Background,
+            iconPainter = R.drawable.pause,
+            shape = CircleShape,
+            backgroundColor = colorTheme.Icon,
+            padding = 10.dp,
+            layoutId = Constants.MusicBarValues.MotionLayoutPlayIconId
+        )
+        PLayControlShadow(
+            modifier = modifier,
+            tint = colorTheme.Background,
+            iconPainter = R.drawable.fast_forward,
+            shape = CircleShape,
+            backgroundColor = colorTheme.Icon,
+            padding = 5.dp,
+            layoutId = Constants.MusicBarValues.MotionLayoutForwardIconId
+        )
+
+        Image(
+            painter = painterResource(id = R.drawable.playlist),
+            contentDescription = Constants.MusicPageValues.MusicPosterDescription,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .layoutId(Constants.MusicBarValues.MotionLayoutPlaylistIconId)
+                .padding(6.dp)
+                .aspectRatio(1f)
+        )
+
+    }
+
 
 }
 
@@ -259,13 +287,15 @@ fun MusicPageFullScreen(
 
         SongDetail(
             modifier = modifier,
-            songName = "Harighe Sabs" ,
+            songName = "Harighe Sabs",
             songArtist = "Ebi",
             onDownIconClick = onDownIconClick
         )
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f))
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
         SongLyricSlider()
         SongPoster(
             modifier = modifier,
@@ -274,9 +304,11 @@ fun MusicPageFullScreen(
             needleImage = R.drawable.needle,
             isAnimation = isRotatePoster
         )
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f))
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
         IconRowAboveProgressBar(modifier = modifier, R.drawable.filled_heart, R.drawable.playlist)
         ProgressBar(
             modifier = modifier,
@@ -286,19 +318,24 @@ fun MusicPageFullScreen(
             songPercent = 0.73f
         )
 
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f))
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
         IconBelowProgressBar(
             modifier = modifier
         )
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .weight(3f))
-        Spacer(modifier = modifier
-            .fillMaxWidth()
-            .height(Dimens.Spacing.MusicPageSpaceBetween)
-                )
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(3f)
+        )
+        Spacer(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(Dimens.Spacing.MusicPageSpaceBetween)
+        )
     }
 }
 
@@ -314,15 +351,17 @@ fun IconBelowProgressBar(
             .padding(16.dp, 20.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
-    ){
+    ) {
         IconShadowed(
             modifier = modifier
                 .weight(1f),
             iconPainter = R.drawable.shuffle,
         )
-        Spacer(modifier = Modifier
-            .width(28.dp)
-            .fillMaxHeight())
+        Spacer(
+            modifier = Modifier
+                .width(28.dp)
+                .fillMaxHeight()
+        )
         PLayControlShadow(
             modifier = modifier
                 .rotate(90f)
@@ -332,9 +371,11 @@ fun IconBelowProgressBar(
             backgroundColor = colorTheme.Icon,
             padding = 18.dp
         )
-        Spacer(modifier = Modifier
-            .width(24.dp)
-            .fillMaxHeight())
+        Spacer(
+            modifier = Modifier
+                .width(24.dp)
+                .fillMaxHeight()
+        )
         PLayControlShadow(
             modifier = modifier
                 .weight(1.75f),
@@ -343,9 +384,11 @@ fun IconBelowProgressBar(
             shape = CircleShape,
             padding = 26.dp
         )
-        Spacer(modifier = Modifier
-            .width(24.dp)
-            .fillMaxHeight())
+        Spacer(
+            modifier = Modifier
+                .width(24.dp)
+                .fillMaxHeight()
+        )
         PLayControlShadow(
             modifier = modifier
                 .weight(1.3f),
@@ -354,9 +397,11 @@ fun IconBelowProgressBar(
             backgroundColor = colorTheme.Icon,
             padding = 18.dp
         )
-        Spacer(modifier = Modifier
-            .width(28.dp)
-            .fillMaxHeight())
+        Spacer(
+            modifier = Modifier
+                .width(28.dp)
+                .fillMaxHeight()
+        )
         IconShadowed(
             modifier = modifier
                 .weight(1f),
@@ -364,18 +409,19 @@ fun IconBelowProgressBar(
         )
     }
 }
+
 @Composable
 fun PLayControlShadow(
     modifier: Modifier,
-    iconPainter : Int,
-    shape : Shape = RoundedCornerShape(16.dp),
+    iconPainter: Int,
+    shape: Shape = RoundedCornerShape(16.dp),
     colorTheme: ColorTheme = DarkTheme,
-    aspectRatio : Float = 1f,
+    aspectRatio: Float = 1f,
     backgroundColor: Color = Color.Transparent,
-    tint : Color = colorTheme.DarkSurface,
+    tint: Color = colorTheme.DarkSurface,
     padding: Dp = 10.dp,
     layoutId: String = ""
-){
+) {
     Box(
         modifier = modifier
             .layoutId(layoutId)
@@ -397,7 +443,7 @@ fun PLayControlShadow(
             )
             .background(backgroundColor),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Icon(
             painter = painterResource(id = iconPainter),
             contentDescription = null,
@@ -408,6 +454,7 @@ fun PLayControlShadow(
         )
     }
 }
+
 @Composable
 fun ProgressBar(
     modifier: Modifier = Modifier,
@@ -423,16 +470,18 @@ fun ProgressBar(
             .fillMaxHeight(0.13f)
             .padding(16.dp, 0.dp),
         verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         Text(text = currentPosition, color = colorTheme.Text)
-        Canvas(modifier = modifier
-            .weight(1f)
-            .fillMaxHeight()
-            .padding(12.dp, 0.dp)){
+        Canvas(
+            modifier = modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .padding(12.dp, 0.dp)
+        ) {
             drawLine(
                 color = colorTheme.DarkShadow,
                 start = Offset(0f, center.y),
-                end   = Offset(size.width, center.y),
+                end = Offset(size.width, center.y),
                 strokeWidth = 8.dp.toPx(),
                 cap = StrokeCap.Round
             )
@@ -443,7 +492,7 @@ fun ProgressBar(
                     end = Offset(size.width * songPercent, center.y)
                 ),
                 start = Offset(0f, center.y),
-                end   = Offset(size.width * songPercent, center.y),
+                end = Offset(size.width * songPercent, center.y),
                 strokeWidth = 8.dp.toPx(),
                 cap = StrokeCap.Round
             )
@@ -459,36 +508,40 @@ fun ProgressBar(
         Text(text = totalDuration, color = colorTheme.Text)
     }
 }
+
 @Composable
 fun IconRowAboveProgressBar(
     modifier: Modifier = Modifier,
     heartImage: Int,
     playlistImage: Int
 ) {
-    Row (
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .height(Dimens.Size.MusicPageAboveProgressBarHeight)
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween
-    ){
-        IconShadowed(modifier = modifier,
+    ) {
+        IconShadowed(
+            modifier = modifier,
             iconPainter = playlistImage
         )
-        IconShadowed(modifier = modifier,
+        IconShadowed(
+            modifier = modifier,
             iconPainter = heartImage
         )
     }
 }
+
 @Composable
 fun SongPoster(
-    modifier        : Modifier,
-    poster          : Int,
-    discImage       : Int,
-    needleImage     : Int,
-    rotationLength  : Int = 20000,
-    isAnimation     : Boolean
-){
+    modifier: Modifier,
+    poster: Int,
+    discImage: Int,
+    needleImage: Int,
+    rotationLength: Int = 20000,
+    isAnimation: Boolean
+) {
     var currentRotation by remember { mutableStateOf(0f) }
     val rotation = remember { Animatable(currentRotation) }
 
@@ -514,10 +567,9 @@ fun SongPoster(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight(0.5f)
-            .aspectRatio(1f)
-        ,
+            .aspectRatio(1f),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Box(
             modifier = modifier
                 .fillMaxSize(0.8f)
@@ -525,7 +577,7 @@ fun SongPoster(
                     rotationZ = rotation.value
                 },
             contentAlignment = Alignment.Center
-        ){
+        ) {
             Image(
                 painter = painterResource(id = poster),
                 contentDescription = null,
@@ -607,11 +659,13 @@ fun SongPoster(
         }
     }
 }
+
 @Composable
 fun SongLyricSlider(
 ) {
 
 }
+
 @Composable
 fun SongDetail(
     modifier: Modifier,
@@ -647,18 +701,19 @@ fun SongDetail(
         )
     }
 }
+
 @Composable
 fun IconShadowed(
     modifier: Modifier,
-    iconPainter : Int,
-    shape : Shape = RoundedCornerShape(16.dp),
+    iconPainter: Int,
+    shape: Shape = RoundedCornerShape(16.dp),
     colorTheme: ColorTheme = DarkTheme,
-    aspectRatio : Float = 1f,
+    aspectRatio: Float = 1f,
     backgroundColor: Color = Color.Transparent,
-    tint : Color = colorTheme.DarkSurface,
+    tint: Color = colorTheme.DarkSurface,
     padding: Dp = 10.dp,
     layoutId: String = "" //********************
-){
+) {
     Box(
         modifier = modifier
             .layoutId(layoutId)
@@ -680,7 +735,7 @@ fun IconShadowed(
             )
             .background(backgroundColor),
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Icon(
             painter = painterResource(id = iconPainter),
             contentDescription = null,
@@ -697,19 +752,27 @@ fun IconShadowed(
         )
     }
 }
+
 @Composable
-fun SongTitle(modifier: Modifier = Modifier,
-              name    : String,
-              artist  : String
+fun SongTitle(
+    modifier: Modifier = Modifier,
+    name: String,
+    artist: String
 ) {
-    Column(modifier = modifier,
+    Column(
+        modifier = modifier,
         verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally){
-        Text(text = name,
-            color = DarkTheme.Text)
-        Spacer(modifier =  Modifier.height(4.dp))
-        Text(text = artist,
-            color = DarkTheme.Text)
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = name,
+            color = DarkTheme.Text
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = artist,
+            color = DarkTheme.Text
+        )
     }
 
 }

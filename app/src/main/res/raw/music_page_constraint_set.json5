@@ -3,7 +3,7 @@
     start: {
       motion_container: {
         width: 'parent',
-        height: 68,
+        height: 64,
         bottom: ['parent', 'bottom', 0],
         start: ['parent', 'start', 0],
         end: ['parent', 'end', 0]
@@ -19,59 +19,56 @@
         end: ['motion_text_container', 'end', 0],
         start: ['motion_text_container', 'start', 0],
         top: ['motion_music_poster', 'top'],
-        bottom: ['motion_music_poster', 'bottom', 14]
+        bottom: ['motion_music_poster', 'bottom', 16]
       },
       motion_music_artist: {
         height: 'wrap',
         end: ['motion_text_container', 'end', 0],
         start: ['motion_text_container', 'start', 0],
         top: ['motion_music_title', 'bottom'],
-        bottom: ['motion_music_poster', 'bottom', 14]
+        bottom: ['motion_music_poster', 'bottom', 12]
       },
       motion_text_container: {
-        height: 'wrap',
-        width: 0,
+        width: 'spread',
+        height: 64,
         end: ['motion_back_icon', 'start', 4],
         start: ['motion_music_poster', 'end', 4],
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       },
       motion_back_icon: {
-        height: 32,
-        end: ['motion_play_icon', 'start', 4],
+        height: 26,
+        end: ['motion_play_icon', 'start', 5],
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       },
       motion_play_icon: {
-        height: 40,
-        end: ['motion_forward_icon', 'start', 4],
+        height: 36,
+        end: ['motion_forward_icon', 'start', 5],
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       },
       motion_forward_icon: {
-        height: 32,
-        end: ['motion_playlist_icon', 'start', 0],
+        height: 26,
+        end: ['motion_playlist_icon', 'start', 6],
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       },
       motion_playlist_icon: {
-        height: 28,
-        end: ['parent', 'end', 0],
+        height: 32,
+        end: ['parent', 'end', 4],
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       }
     },
     end: {
-      poster_image: {
-        center: 'parent',
-      },
-      disc_image: {
-      },
-      box: {
-        start: ['parent', 'start'],
-        end: ['parent', 'end'],
-        top: ['parent', 'top'],
-        bottom: ['parent', 'bottom']
+      motion_container: {
+        width: 'parent',
+        height: 'parent',
+        bottom: ['parent', 'bottom', 0],
+        start: ['parent', 'start', 0],
+        end: ['parent', 'end', 0],
+        top: ['parent', 'top', 0],
       }
     }
   },
@@ -79,11 +76,11 @@
     default: {
       from: 'start',
       to: 'end',
-      pathMotionArc: 'startHorizontal',
+      pathMotionArc: 'startVertical',
       KeyFrames: {
         KeyAttributes: [
           {
-            target: ['username'],
+            target: ['motion_container'],
             frames: [0, 50, 100],
             translationX: [0, 80, 0]
           }
