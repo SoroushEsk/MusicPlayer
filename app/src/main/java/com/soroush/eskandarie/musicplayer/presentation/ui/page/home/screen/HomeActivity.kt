@@ -34,6 +34,7 @@ class HomeActivity : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .navigationBarsPadding()
             ) {
 
 //                    SearchField(
@@ -48,7 +49,6 @@ class HomeActivity : ComponentActivity() {
                     HomePage(
                         modifier = Modifier
                             .statusBarsPadding()
-                            .navigationBarsPadding()
                             .align(Alignment.TopCenter)
                             .padding(horizontal = (Dimens.Padding.HomeActivity)),
                         playlists = getPlaylist()

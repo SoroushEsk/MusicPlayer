@@ -1,6 +1,6 @@
 package com.soroush.eskandarie.musicplayer.util
 
-import androidx.constraintlayout.motion.widget.MotionLayout
+import android.widget.ProgressBar
 
 object Constants {
     object HomePageValues{
@@ -21,6 +21,9 @@ object Constants {
     }
     object MusicPageValues{
         const val MusicPosterDescription    : String = "Music Poster"
+        const val PlayProgressBarContainerId: String = "play_progress_bar_container"
+        const val ProgressBarTotalDurationId: String = "progress_bar_total_duration"
+        const val ProgressBar               : String = "progress_bar"
     }
 
 

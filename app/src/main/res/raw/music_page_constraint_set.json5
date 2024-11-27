@@ -59,6 +59,14 @@
         end: ['parent', 'end', 4],
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
+      },
+      play_progress_bar_container: {
+        height: 0,
+        width: 0,
+        start: ['parent', 'start', 0],
+        end: ['motion_music_poster', 'start', 0],
+        top: ['motion_music_poster', 'bottom', 20],
+        bottom: ['motion_play_icon', 'top', 20]
       }
     },
     end: {
@@ -69,6 +77,62 @@
         start: ['parent', 'start', 0],
         end: ['parent', 'end', 0],
         top: ['parent', 'top', 0],
+      },
+      motion_music_poster: {
+        height: 150,
+        start: ['motion_container', 'start', 0],
+        top: ['motion_text_container', 'bottom',150],
+        end: ['motion_container', 'end', 0]
+
+      },
+      motion_music_title: {
+        height: 'wrap',
+        end: ['motion_text_container', 'end', 0],
+        start: ['motion_text_container', 'start', 0]
+      },
+      motion_music_artist: {
+        height: 'wrap',
+        end: ['motion_text_container', 'end', 0],
+        start: ['motion_text_container', 'start', 0]
+      },
+      motion_text_container: {
+        width: 300,
+        height: 64,
+        end: ['parent', 'end', 4],
+        start: ['parent', 'start', 4],
+        top: ['motion_container', 'top', 30]
+      },
+      motion_back_icon: {
+        height: 26,
+        start: ['parent', 'start', 0],
+        end: ['motion_play_icon', 'start', 5],
+        bottom: ['motion_container', 'bottom', 0],
+        top: ['motion_music_poster', 'bottom', 0]
+      },
+      motion_play_icon: {
+        height: 36,
+        start: ['parent', 'start', 0],
+        end: ['parent', 'end', 0],
+        bottom: ['motion_container', 'bottom', 0],
+        top: ['motion_music_poster', 'bottom', 0]
+      },
+      motion_forward_icon: {
+        height: 26,
+        start: ['motion_play_icon', 'end', 0],
+        end: ['parent', 'end', 6],
+        bottom: ['motion_container', 'bottom', 0],
+        top: ['motion_music_poster', 'bottom', 0]
+      },
+      motion_playlist_icon: {
+        height: 32,
+        start: ['motion_forward_icon', 'end', 0],
+        top: ['motion_music_poster', 'bottom', 0],
+        end: ['parent', 'end', 4],
+        bottom: ['motion_container', 'bottom', 0]
+      },
+      play_progress_bar_container: {
+        top: ['motion_music_poster', 'bottom', 0],
+        bottom: ['motion_play_icon', 'top', 0]
       }
     }
   },
@@ -80,7 +144,6 @@
       KeyFrames: {
         KeyAttributes: [
           {
-            target: ['motion_container'],
             frames: [0, 50, 100],
             translationX: [0, 80, 0]
           }

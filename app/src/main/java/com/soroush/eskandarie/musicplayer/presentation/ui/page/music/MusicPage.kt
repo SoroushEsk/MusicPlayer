@@ -1,7 +1,6 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.music
 
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -43,7 +42,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
@@ -59,7 +57,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
@@ -93,28 +90,44 @@ fun MusicPage(
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
     val context = LocalContext.current
+    var progress by remember { mutableStateOf(0f) }
 
     val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
     val palette = Palette.from(bitmap).generate()
 
+    var posterCoordinates by remember {
+        mutableStateOf(Offset(0f, 0f))
+    }
+    var mainContainerCoordinates by remember {
+        mutableStateOf(Offset(0f, 0f))
+    }
 
-    val dominantColor = Color(palette.getDominantColor(0)).copy(alpha = 0.75f)
-    val vibrantColor = Color(palette.getVibrantColor(0)).copy(alpha = 0.5f)
-    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.4f)
-
-    val radialGradientBrush = Brush.linearGradient(
-        colors = listOf(dominantColor, vibrantColor, mutedColor),
-        start = Offset(0f, 0f),
-        end = Offset(configuration.screenWidthDp.toFloat() * LocalDensity.current.density, 0f)
+    val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = 0.90f)
+    val dominantColor2 = Color(palette.getDominantColor(0)).copy(alpha = 0.70f)
+    val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = 0.50f)
+    val vibrantColor2 = Color(palette.getVibrantColor(0)).copy(alpha = 0.30f)
+    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.10f)
+    val listOfColors =
+        listOf(dominantColor1, dominantColor2, vibrantColor1, vibrantColor2, mutedColor)
+    val radialGradientBrush = Brush.radialGradient(
+        colors = listOfColors,
+        center = Offset(posterCoordinates.x, posterCoordinates.y - mainContainerCoordinates.y),
+        radius = Math.sqrt(
+            Math.pow(
+                (LocalDensity.current.density * configuration.screenHeightDp - posterCoordinates.y).toDouble(),
+                2.0
+            ) + Math.pow(
+                (LocalDensity.current.density * configuration.screenWidthDp - posterCoordinates.x).toDouble(),
+                2.0
+            )
+        ).toFloat()
     )
-    var progress by remember { mutableStateOf(0f) }
 
     var preFingerY by remember { mutableStateOf(0f) }
     var isScroll by remember { mutableStateOf(false) }
     var fingerY by remember { mutableStateOf(0f) }
     var isTouching by remember { mutableStateOf(false) }
     val maxScrollRange = configuration.screenHeightDp * LocalDensity.current.density
-    var offsetY by remember { mutableStateOf(0f) }
 
     val animatedProgress by animateFloatAsState(
         targetValue = if (isTouching) {
@@ -158,22 +171,24 @@ fun MusicPage(
             .fillMaxHeight()
             .fillMaxWidth()
             .then(
-                if ( progress < 1f ) Modifier.navigationBarsPadding()
+                if (progress < 1f) Modifier.navigationBarsPadding()
                 else Modifier.statusBarsPadding()
             )
     ) {
         Column(
             modifier = modifier
                 .layoutId(Constants.MusicBarValues.MotionLayoutContainerId)
-                .clip(RoundedCornerShape(
-                    topStart = if (progress < 1f ) Dimens.CornerRadius.General else  0.dp,
-                    topEnd =  if ( progress < 1f ) Dimens.CornerRadius.General else  0.dp
-                ))
+                .clip(
+                    RoundedCornerShape(
+                        topStart = if (progress < 1f) Dimens.CornerRadius.General else 0.dp,
+                        topEnd = if (progress < 1f) Dimens.CornerRadius.General else 0.dp
+                    )
+                )
                 .background(colorTheme.Background)
                 .background(radialGradientBrush)
                 .onGloballyPositioned { coordinates ->
-                    offsetY = coordinates.positionInWindow().y
-                    Log.e("5465", "$offsetY")
+                    mainContainerCoordinates =
+                        Offset(coordinates.positionInWindow().x, coordinates.positionInWindow().y)
                 }
                 .pointerInput(Unit) {
                     awaitPointerEventScope {
@@ -182,7 +197,7 @@ fun MusicPage(
                             val position = event.changes.first().position
                             isTouching = event.changes.any { it.pressed }
                             if (isTouching) {
-                                fingerY = position.y + offsetY
+                                fingerY = position.y + mainContainerCoordinates.y
                             }
                         }
                     }
@@ -199,6 +214,14 @@ fun MusicPage(
                 .padding(Dimens.Padding.MusicBarMusicPoster)
                 .aspectRatio(1f)
                 .clip(posterShape)
+                .onGloballyPositioned { coordinates ->
+                    val width = coordinates.size.width.toFloat()
+                    val height = coordinates.size.height.toFloat()
+                    val offsetX = coordinates.positionInWindow().x.toFloat()
+                    val offsetY = coordinates.positionInWindow().y.toFloat()
+
+                    posterCoordinates = Offset(offsetX + width / 2, offsetY + height / 2)
+                }
         )
 
 
@@ -255,14 +278,25 @@ fun MusicPage(
             layoutId = Constants.MusicBarValues.MotionLayoutForwardIconId
         )
 
-        Image(
+        Icon(
             painter = painterResource(id = R.drawable.playlist),
             contentDescription = Constants.MusicPageValues.MusicPosterDescription,
-            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .layoutId(Constants.MusicBarValues.MotionLayoutPlaylistIconId)
-                .padding(6.dp)
-                .aspectRatio(1f)
+                .padding(7.dp)
+                .aspectRatio(1f),
+            tint = colorTheme.Text.copy(alpha = 0.6f)
+
+        )
+        ProgressBar(
+            modifier = Modifier
+                .layoutId(Constants.MusicPageValues.PlayProgressBarContainerId)
+                .fillMaxWidth()
+                .fillMaxHeight(0.13f),
+            colorTheme = DarkTheme,
+            currentPosition = "01:31",
+            totalDuration = "03:13",
+            songPercent = 0.73f
         )
 
     }
@@ -466,44 +500,47 @@ fun ProgressBar(
 
     Row(
         modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.13f)
             .padding(16.dp, 0.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = currentPosition, color = colorTheme.Text)
+        Text(
+            text = currentPosition,
+            color = colorTheme.Text,
+            modifier = Modifier.align(Alignment.CenterVertically)
+        )
         Canvas(
-            modifier = modifier
+            modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
                 .padding(12.dp, 0.dp)
         ) {
-            drawLine(
-                color = colorTheme.DarkShadow,
-                start = Offset(0f, center.y),
-                end = Offset(size.width, center.y),
-                strokeWidth = 8.dp.toPx(),
-                cap = StrokeCap.Round
-            )
-            drawLine(
-                brush = Brush.linearGradient(
-                    colors = listOf(colorTheme.Primary, colorTheme.Secondary),
-                    start = Offset(center.x, center.y),
-                    end = Offset(size.width * songPercent, center.y)
-                ),
-                start = Offset(0f, center.y),
-                end = Offset(size.width * songPercent, center.y),
-                strokeWidth = 8.dp.toPx(),
-                cap = StrokeCap.Round
-            )
-            drawPoints(
-                points = listOf(Offset(size.width * songPercent, center.y)),
-                pointMode = PointMode.Points,
-                color = colorTheme.Secondary,
-                strokeWidth = (8 * 1.8f).dp.toPx(),
-                cap = StrokeCap.Round
-            )
-
+            if (size.width > 0 && size.height > 0) {
+                drawLine(
+                    color = colorTheme.DarkShadow,
+                    start = Offset(0f, center.y),
+                    end = Offset(size.width, center.y),
+                    strokeWidth = 8.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+                drawLine(
+                    brush = Brush.linearGradient(
+                        colors = listOf(colorTheme.Primary, colorTheme.Secondary),
+                        start = Offset(center.x, center.y),
+                        end = Offset(size.width * songPercent, center.y)
+                    ),
+                    start = Offset(0f, center.y),
+                    end = Offset(size.width * songPercent, center.y),
+                    strokeWidth = 8.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+                drawPoints(
+                    points = listOf(Offset(size.width * songPercent, center.y)),
+                    pointMode = PointMode.Points,
+                    color = colorTheme.Secondary,
+                    strokeWidth = (8 * 1.8f).dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
         }
         Text(text = totalDuration, color = colorTheme.Text)
     }
