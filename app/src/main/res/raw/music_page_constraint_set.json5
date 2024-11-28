@@ -14,20 +14,6 @@
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       },
-      motion_music_title: {
-        height: 'wrap',
-        end: ['motion_text_container', 'end', 0],
-        start: ['motion_text_container', 'start', 0],
-        top: ['motion_music_poster', 'top'],
-        bottom: ['motion_music_poster', 'bottom', 16]
-      },
-      motion_music_artist: {
-        height: 'wrap',
-        end: ['motion_text_container', 'end', 0],
-        start: ['motion_text_container', 'start', 0],
-        top: ['motion_music_title', 'bottom'],
-        bottom: ['motion_music_poster', 'bottom', 12]
-      },
       motion_text_container: {
         width: 'spread',
         height: 64,
@@ -60,11 +46,16 @@
         top: ['motion_container', 'top'],
         bottom: ['motion_container', 'bottom', 0]
       },
+      above_progress_bar_container: {
+        height: 0,
+        top: ['motion_music_poster', 'bottom', 20],
+        bottom: ['motion_play_icon', 'top', 20]
+      },
       play_progress_bar_container: {
         height: 0,
         width: 0,
-        start: ['parent', 'start', 0],
-        end: ['motion_music_poster', 'start', 0],
+        start: ['motion_music_poster', 'start', 0],
+        end: ['motion_music_poster', 'end', 0],
         top: ['motion_music_poster', 'bottom', 20],
         bottom: ['motion_play_icon', 'top', 20]
       }
@@ -84,19 +75,9 @@
         top: ['motion_text_container', 'bottom',150],
         end: ['motion_container', 'end', 0]
 
-      },
-      motion_music_title: {
-        height: 'wrap',
-        end: ['motion_text_container', 'end', 0],
-        start: ['motion_text_container', 'start', 0]
-      },
-      motion_music_artist: {
-        height: 'wrap',
-        end: ['motion_text_container', 'end', 0],
-        start: ['motion_text_container', 'start', 0]
-      },
+      } ,
       motion_text_container: {
-        width: 300,
+        width: 250,
         height: 64,
         end: ['parent', 'end', 4],
         start: ['parent', 'start', 4],
@@ -107,31 +88,34 @@
         start: ['parent', 'start', 0],
         end: ['motion_play_icon', 'start', 5],
         bottom: ['motion_container', 'bottom', 0],
-        top: ['motion_music_poster', 'bottom', 0]
+        top: ['play_progress_bar_container', 'bottom', 0]
       },
       motion_play_icon: {
         height: 36,
         start: ['parent', 'start', 0],
         end: ['parent', 'end', 0],
         bottom: ['motion_container', 'bottom', 0],
-        top: ['motion_music_poster', 'bottom', 0]
+        top: ['play_progress_bar_container', 'bottom', 0]
       },
       motion_forward_icon: {
         height: 26,
         start: ['motion_play_icon', 'end', 0],
         end: ['parent', 'end', 6],
         bottom: ['motion_container', 'bottom', 0],
-        top: ['motion_music_poster', 'bottom', 0]
+        top: ['play_progress_bar_container', 'bottom', 0]
       },
       motion_playlist_icon: {
         height: 32,
-        start: ['motion_forward_icon', 'end', 0],
-        top: ['motion_music_poster', 'bottom', 0],
-        end: ['parent', 'end', 4],
-        bottom: ['motion_container', 'bottom', 0]
+        start: ['parent', 'end', 50],
+        top: ['parent', 'bottom', 50],
       },
-      play_progress_bar_container: {
+      above_progress_bar_container: {
+        height: 80,
         top: ['motion_music_poster', 'bottom', 0],
+        bottom: ['play_progress_bar_container', 'top', 0]
+      },
+     play_progress_bar_container: {
+        top: ['above_progress_bar_container', 'bottom', 0],
         bottom: ['motion_play_icon', 'top', 0]
       }
     }
@@ -142,10 +126,13 @@
       to: 'end',
       pathMotionArc: 'startVertical',
       KeyFrames: {
+        KeyPositions: [{
+          target: ['above_progress_bar_container'],
+          percentHeight: [25],
+        }],
         KeyAttributes: [
           {
-            frames: [0, 50, 100],
-            translationX: [0, 80, 0]
+            frames: [0, 25, 50, 75, 100]
           }
         ]
       }

@@ -20,10 +20,11 @@ object Constants {
 
     }
     object MusicPageValues{
-        const val MusicPosterDescription    : String = "Music Poster"
-        const val PlayProgressBarContainerId: String = "play_progress_bar_container"
-        const val ProgressBarTotalDurationId: String = "progress_bar_total_duration"
-        const val ProgressBar               : String = "progress_bar"
+        const val MusicPosterDescription        : String = "Music Poster"
+        const val PlayProgressBarContainerId    : String = "play_progress_bar_container"
+        const val ProgressBarTotalDurationId    : String = "progress_bar_total_duration"
+        const val ProgressBar                   : String = "progress_bar"
+        const val AboveProgressBarContainerId   : String = "above_progress_bar_container"
     }
 
 

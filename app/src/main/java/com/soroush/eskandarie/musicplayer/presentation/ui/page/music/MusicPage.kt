@@ -1,6 +1,7 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.music
 
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -228,7 +229,8 @@ fun MusicPage(
         Column(
             modifier = Modifier
                 .layoutId(Constants.MusicBarValues.MotionLayoutTextContainer),
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = if(progress == 0f) Alignment.Start else Alignment.CenterHorizontally
         ) {
             Text(
                 text = "Tasnife Saze Khamoosh I have many more to say",
@@ -288,6 +290,8 @@ fun MusicPage(
             tint = colorTheme.Text.copy(alpha = 0.6f)
 
         )
+
+        IconRowAboveProgressBar(modifier = Modifier, R.drawable.filled_heart, R.drawable.playlist)
         ProgressBar(
             modifier = Modifier
                 .layoutId(Constants.MusicPageValues.PlayProgressBarContainerId)
@@ -344,13 +348,13 @@ fun MusicPageFullScreen(
                 .weight(1f)
         )
         IconRowAboveProgressBar(modifier = modifier, R.drawable.filled_heart, R.drawable.playlist)
-        ProgressBar(
-            modifier = modifier,
-            colorTheme = DarkTheme,
-            currentPosition = "01:31",
-            totalDuration = "03:13",
-            songPercent = 0.73f
-        )
+//        ProgressBar(
+//            modifier = modifier,
+//            colorTheme = DarkTheme,
+//            currentPosition = "01:31",
+//            totalDuration = "03:13",
+//            songPercent = 0.73f
+//        )
 
         Spacer(
             modifier = Modifier
@@ -552,21 +556,31 @@ fun IconRowAboveProgressBar(
     heartImage: Int,
     playlistImage: Int
 ) {
+    var size by remember {
+        mutableStateOf(Size.Zero)
+    }
     Row(
         modifier = modifier
+            .layoutId(Constants.MusicPageValues.AboveProgressBarContainerId)
             .fillMaxWidth()
-            .height(Dimens.Size.MusicPageAboveProgressBarHeight)
-            .padding(16.dp),
+            .padding(16.dp)
+            .onGloballyPositioned { coordinates ->
+                size = coordinates.size.toSize()
+            },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconShadowed(
-            modifier = modifier,
-            iconPainter = playlistImage
-        )
-        IconShadowed(
-            modifier = modifier,
-            iconPainter = heartImage
-        )
+        if (size.width > 0 && size.height > 0) {
+            IconShadowed(
+                modifier = Modifier
+                    .aspectRatio(1f),
+                iconPainter = playlistImage
+            )
+            IconShadowed(
+                modifier = Modifier
+                    .aspectRatio(1f),
+                iconPainter = heartImage
+            )
+        }
     }
 }
 
@@ -754,20 +768,17 @@ fun IconShadowed(
     Box(
         modifier = modifier
             .layoutId(layoutId)
-            .fillMaxHeight()
             .aspectRatio(aspectRatio)
-            .fillMaxWidth()
+            .fillMaxHeight()
             .clip(shape)
             .shadow(
                 elevation = 4.dp,
                 shape = shape,
-                clip = true,
                 spotColor = colorTheme.DarkShadow
             )
             .shadow(
                 elevation = 2.dp,
                 shape = shape,
-                clip = true,
                 spotColor = colorTheme.DarkShadow
             )
             .background(backgroundColor),
@@ -782,7 +793,6 @@ fun IconShadowed(
                 .shadow(
                     elevation = 2.dp,
                     shape = shape,
-                    clip = true,
                     spotColor = colorTheme.LightShadow
                 )
                 .padding(padding)
