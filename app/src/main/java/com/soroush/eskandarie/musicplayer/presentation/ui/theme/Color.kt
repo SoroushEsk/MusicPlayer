@@ -18,6 +18,7 @@ interface ColorTheme{
     val LightShadow     : Color
     val DarkShadow      : Color
     val Text            : Color
+    val Tint            : Color
     val DarkSurface     : Color
     val Icon            : Color
     val FocusedField    : Color
@@ -27,9 +28,10 @@ object LightTheme : ColorTheme {
     override val Surface     = Color(0xFFFAFAFA)
     override val Primary     = Color(0xFF4285F4)
     override val Secondary   = Color(0xFF9C27B0)
-    override val LightShadow = Color(0xFFFFFFFF)
-    override val DarkShadow  = Color(0xFFD1D9E6)
+    override val LightShadow = Color(0x4DFFFFFF)
+    override val DarkShadow  = Color(0xCC5F6268)
     override val Text        = Color(0xFF333333)
+    override val Tint        = Color(0xCC333333)
     override val DarkSurface = Color(0x1EC5C5C5)
     override val Icon        = Color(0xFF25344D)
     override val FocusedField= Color(0xFF284A81)
@@ -39,9 +41,10 @@ object DarkTheme : ColorTheme {
     override val Surface     = Color(0xFF1E1E1E)
     override val Primary     = Color(0xFF4285F4)
     override val Secondary   = Color(0xFF9C27B0)
-    override val LightShadow = Color(0xFF323232)
-    override val DarkShadow  = Color(0xFF0A0A0A)
+    override val LightShadow = Color(0xFF3A3939)
+    override val DarkShadow  = Color(0xFF000000)
     override val Text        = Color(0xE6E0E0E0)
+    override val Tint        = Color(0x99E0E0E0)
     override val DarkSurface = Color(0xFA181818)
     override val Icon        = Color(0xFF4984E2)
     override val FocusedField= Color(0xFF689DF7)

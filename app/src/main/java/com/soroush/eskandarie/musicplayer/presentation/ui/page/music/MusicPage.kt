@@ -13,6 +13,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -43,11 +45,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -91,7 +95,7 @@ fun MusicPage(
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
     val context = LocalContext.current
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableStateOf(0.4f) }
 
     val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
     val palette = Palette.from(bitmap).generate()
@@ -124,6 +128,7 @@ fun MusicPage(
         ).toFloat()
     )
 
+    var isRotatePoster by remember { mutableStateOf(true) }
     var preFingerY by remember { mutableStateOf(0f) }
     var isScroll by remember { mutableStateOf(false) }
     var fingerY by remember { mutableStateOf(0f) }
@@ -215,16 +220,25 @@ fun MusicPage(
                 .padding(Dimens.Padding.MusicBarMusicPoster)
                 .aspectRatio(1f)
                 .clip(posterShape)
-                .onGloballyPositioned { coordinates ->
-                    val width = coordinates.size.width.toFloat()
-                    val height = coordinates.size.height.toFloat()
-                    val offsetX = coordinates.positionInWindow().x.toFloat()
-                    val offsetY = coordinates.positionInWindow().y.toFloat()
+                .then(if ( progress == 1f) Modifier.size(0.dp) else Modifier)
 
-                    posterCoordinates = Offset(offsetX + width / 2, offsetY + height / 2)
-                }
         )
-
+        SongPoster(
+            modifier = Modifier
+                .alpha(progress)
+                .onGloballyPositioned { coordinates ->
+                val width = coordinates.size.width.toFloat()
+                val height = coordinates.size.height.toFloat()
+                val offsetX = coordinates.positionInWindow().x.toFloat()
+                val offsetY = coordinates.positionInWindow().y.toFloat()
+                posterCoordinates = Offset(offsetX + width / 2, offsetY + height / 2)
+            },
+            poster = R.drawable.shaj,
+            discImage = R.drawable.gramaphone_disc,
+            needleImage = R.drawable.needle,
+            isAnimation = progress == 1f,
+            resetRotation = progress == 0f
+        )
 
         Column(
             modifier = Modifier
@@ -291,12 +305,12 @@ fun MusicPage(
 
         )
 
-        IconRowAboveProgressBar(modifier = Modifier, R.drawable.filled_heart, R.drawable.playlist)
+        IconRowAboveProgressBar(modifier = Modifier, progress = progress, R.drawable.filled_heart, R.drawable.playlist)
         ProgressBar(
             modifier = Modifier
                 .layoutId(Constants.MusicPageValues.PlayProgressBarContainerId)
                 .fillMaxWidth()
-                .fillMaxHeight(0.13f),
+                .fillMaxHeight(0.05f),
             colorTheme = DarkTheme,
             currentPosition = "01:31",
             totalDuration = "03:13",
@@ -314,7 +328,6 @@ fun MusicPageFullScreen(
     colorTheme: ColorTheme,
     onDownIconClick: () -> Unit
 ) {
-    var isRotatePoster by remember { mutableStateOf(true) }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -335,19 +348,19 @@ fun MusicPageFullScreen(
                 .weight(1f)
         )
         SongLyricSlider()
-        SongPoster(
-            modifier = modifier,
-            poster = R.drawable.shaj,
-            discImage = R.drawable.gramaphone_disc,
-            needleImage = R.drawable.needle,
-            isAnimation = isRotatePoster
-        )
+//        SongPoster(
+//            modifier = modifier,
+//            poster = R.drawable.shaj,
+//            discImage = R.drawable.gramaphone_disc,
+//            needleImage = R.drawable.needle,
+//            isAnimation = isRotatePoster
+//        )
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f)
         )
-        IconRowAboveProgressBar(modifier = modifier, R.drawable.filled_heart, R.drawable.playlist)
+//        IconRowAboveProgressBar(modifier = modifier, R.drawable.filled_heart, R.drawable.playlist)
 //        ProgressBar(
 //            modifier = modifier,
 //            colorTheme = DarkTheme,
@@ -553,6 +566,7 @@ fun ProgressBar(
 @Composable
 fun IconRowAboveProgressBar(
     modifier: Modifier = Modifier,
+    progress: Float = 0f,
     heartImage: Int,
     playlistImage: Int
 ) {
@@ -569,7 +583,9 @@ fun IconRowAboveProgressBar(
             },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        if (size.width > 0 && size.height > 0) {
+        if (size.width > 6 && size.height > 6) {
+
+            Log.e("Song Poster", "$progress")
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
@@ -591,12 +607,17 @@ fun SongPoster(
     discImage: Int,
     needleImage: Int,
     rotationLength: Int = 20000,
-    isAnimation: Boolean
+    isAnimation: Boolean,
+    resetRotation: Boolean
 ) {
     var currentRotation by remember { mutableStateOf(0f) }
     val rotation = remember { Animatable(currentRotation) }
 
-    LaunchedEffect(isAnimation) {
+    LaunchedEffect(key1 = isAnimation, key2 = resetRotation) {
+        if ( resetRotation ){
+            rotation.stop()
+            currentRotation = 0f
+        }
         if (isAnimation) {
             rotation.animateTo(
                 targetValue = currentRotation + 360f,
@@ -614,99 +635,106 @@ fun SongPoster(
     }
     var posterGradianSize by remember { mutableStateOf(Size.Zero) }
     var needleConnecterSize by remember { mutableStateOf(Size.Zero) }
+    var mainContainerSize by remember {mutableStateOf(Size.Zero)}
     Box(
         modifier = modifier
+            .layoutId(Constants.MusicPageValues.MusicRotateDiskId)
             .fillMaxWidth()
-            .fillMaxHeight(0.5f)
-            .aspectRatio(1f),
+            .aspectRatio(1f)
+            .onGloballyPositioned { layoutCoordinates ->
+                mainContainerSize = layoutCoordinates.size.toSize()
+            },
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = modifier
-                .fillMaxSize(0.8f)
-                .graphicsLayer {
-                    rotationZ = rotation.value
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = poster),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = modifier
-                    .fillMaxSize(142 / 255f)
-                    .clip(CircleShape)
-                    .onGloballyPositioned { layoutCoordinates ->
-                        posterGradianSize = layoutCoordinates.size.toSize()
-                    }
-                    .then(
-                        if (posterGradianSize != Size.Zero) {
-                            Modifier.drawWithContent {
-                                drawContent()
-                                drawCircle(
-                                    brush = Brush.radialGradient(
-                                        colors = listOf(
-                                            Color.Transparent,
-                                            Color.Transparent,
-                                            DarkTheme.Surface
-                                        ),
-                                        center = Offset(size.width / 2, size.height / 2),
-                                        radius = size.minDimension / 2
+
+        if (mainContainerSize.width > 0 && mainContainerSize.height > 0){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(0.8f)
+                    .graphicsLayer {
+                        rotationZ = rotation.value
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Image(
+                    painter = painterResource(id = poster),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize(142 / 255f)
+                        .clip(CircleShape)
+                        .onGloballyPositioned { layoutCoordinates ->
+                            posterGradianSize = layoutCoordinates.size.toSize()
+                        }
+                        .then(
+                            if (posterGradianSize != Size.Zero) {
+                                Modifier.drawWithContent {
+                                    drawContent()
+                                    drawCircle(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(
+                                                Color.Transparent,
+                                                Color.Transparent,
+                                                DarkTheme.Surface
+                                            ),
+                                            center = Offset(size.width / 2, size.height / 2),
+                                            radius = size.minDimension / 2
+                                        )
                                     )
-                                )
-                            }
-                        } else Modifier
-                    )
-            )
-            Image(
-                painter = painterResource(id = discImage),
-                contentDescription = null,
-                modifier = modifier
-                    .fillMaxSize()
-                    .shadow(
-                        elevation = 10.dp,
-                        shape = CircleShape,
-                        clip = false,
-                    )
-            )
-        }
-        Box(modifier = modifier
-            .onGloballyPositioned { layoutCoordinates ->
-                needleConnecterSize = layoutCoordinates.size.toSize()
+                                }
+                            } else Modifier
+                        )
+                )
+                Image(
+                    painter = painterResource(id = discImage),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .shadow(
+                            elevation = 10.dp,
+                            shape = CircleShape,
+                            clip = false,
+                        )
+                )
             }
-            .align(Alignment.TopEnd)
-            .fillMaxHeight(0.4f)
-            .aspectRatio(0.6f)
-            .rotate(-15f)
-            .offset(-16.dp, 32.dp),
-            contentAlignment = Alignment.TopEnd
-        ) {
-            Icon(
-                modifier = modifier
-                    .then(
-                        if (needleConnecterSize != Size.Zero) {
-                            Modifier.offset(
-                                y = -(needleConnecterSize.height * 18f / 211f).dp,
-                                x = (needleConnecterSize.width * 18f / 150f).dp
-                            )
-                        } else Modifier
-                    )
-                    .scale(0.4f)
-                    .shadow(
-                        elevation = 8.dp,
-                        shape = CircleShape,
-                        clip = false,
-                        spotColor = DarkTheme.DarkSurface
-                    )
-                    .rotate(60f),
-                painter = painterResource(R.drawable.rec),
-                contentDescription = null
-            )
-            Image(
-                painter = painterResource(id = needleImage),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize()
-            )
+            Box(modifier = Modifier
+                .onGloballyPositioned { layoutCoordinates ->
+                    needleConnecterSize = layoutCoordinates.size.toSize()
+                }
+                .align(Alignment.TopEnd)
+                .fillMaxHeight(0.4f)
+                .aspectRatio(0.6f)
+                .rotate(-15f)
+                .offset(-16.dp, 32.dp),
+                contentAlignment = Alignment.TopEnd
+            ) {
+                Icon(
+                    modifier = Modifier
+                        .then(
+                            if (needleConnecterSize != Size.Zero) {
+                                Modifier.offset(
+                                    y = -(needleConnecterSize.height * 18f / 211f).dp,
+                                    x = (needleConnecterSize.width * 18f / 150f).dp
+                                )
+                            } else Modifier
+                        )
+                        .scale(0.4f)
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = CircleShape,
+                            clip = false,
+                            spotColor = DarkTheme.DarkSurface
+                        )
+                        .rotate(60f),
+                    painter = painterResource(R.drawable.rec),
+                    contentDescription = null
+                )
+                Image(
+                    painter = painterResource(id = needleImage),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
         }
     }
 }
@@ -757,44 +785,44 @@ fun SongDetail(
 fun IconShadowed(
     modifier: Modifier,
     iconPainter: Int,
-    shape: Shape = RoundedCornerShape(16.dp),
-    colorTheme: ColorTheme = DarkTheme,
+    shape: Shape = RoundedCornerShape(12.dp),
+    colorTheme: ColorTheme = if (isSystemInDarkTheme())  DarkTheme else LightTheme,
     aspectRatio: Float = 1f,
     backgroundColor: Color = Color.Transparent,
-    tint: Color = colorTheme.DarkSurface,
+    tint: Color = colorTheme.Tint,
     padding: Dp = 10.dp,
     layoutId: String = "" //********************
 ) {
     Box(
         modifier = modifier
             .layoutId(layoutId)
-            .aspectRatio(aspectRatio)
             .fillMaxHeight()
             .clip(shape)
-            .shadow(
-                elevation = 4.dp,
-                shape = shape,
-                spotColor = colorTheme.DarkShadow
+            .border(
+                width = 1.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(Color.Transparent, colorTheme.DarkShadow)
+                ),
+                shape = shape
             )
-            .shadow(
-                elevation = 2.dp,
-                shape = shape,
-                spotColor = colorTheme.DarkShadow
+            .border(
+                width = 2.dp,
+                brush = Brush.linearGradient(
+                    colors = listOf(colorTheme.LightShadow, Color.Transparent, Color.Transparent)
+                ),
+                shape = shape
             )
+            .aspectRatio(aspectRatio)
             .background(backgroundColor),
         contentAlignment = Alignment.Center
     ) {
+
         Icon(
             painter = painterResource(id = iconPainter),
             contentDescription = null,
             tint = tint,
             modifier = modifier
                 .fillMaxSize()
-                .shadow(
-                    elevation = 2.dp,
-                    shape = shape,
-                    spotColor = colorTheme.LightShadow
-                )
                 .padding(padding)
         )
     }

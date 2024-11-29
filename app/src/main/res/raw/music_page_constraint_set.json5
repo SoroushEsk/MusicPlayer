@@ -58,6 +58,14 @@
         end: ['motion_music_poster', 'end', 0],
         top: ['motion_music_poster', 'bottom', 20],
         bottom: ['motion_play_icon', 'top', 20]
+      },
+      music_rotate_disk: {
+        height: 0,
+        width: 0,
+        start: ['motion_music_poster', 'start', 0],
+        top: ['motion_music_poster', 'top', 0],
+        end: ['motion_music_poster', 'end', 0],
+        bottom: ['motion_music_poster', 'bottom', 0],
       }
     },
     end: {
@@ -68,13 +76,6 @@
         start: ['parent', 'start', 0],
         end: ['parent', 'end', 0],
         top: ['parent', 'top', 0],
-      },
-      motion_music_poster: {
-        height: 150,
-        start: ['motion_container', 'start', 0],
-        top: ['motion_text_container', 'bottom',150],
-        end: ['motion_container', 'end', 0]
-
       } ,
       motion_text_container: {
         width: 250,
@@ -82,6 +83,10 @@
         end: ['parent', 'end', 4],
         start: ['parent', 'start', 4],
         top: ['motion_container', 'top', 30]
+      },
+      motion_music_poster: {
+        end: ['parent', 'start',0]
+
       },
       motion_back_icon: {
         height: 26,
@@ -106,17 +111,20 @@
       },
       motion_playlist_icon: {
         height: 32,
-        start: ['parent', 'end', 50],
-        top: ['parent', 'bottom', 50],
+        start: ['parent', 'end', 300],
+        top: ['parent', 'bottom', 200],
       },
       above_progress_bar_container: {
         height: 80,
-        top: ['motion_music_poster', 'bottom', 0],
-        bottom: ['play_progress_bar_container', 'top', 0]
+        top: ['motion_music_poster', 'bottom', 32],
+        bottom: ['play_progress_bar_container', 'top', 0],
       },
      play_progress_bar_container: {
-        top: ['above_progress_bar_container', 'bottom', 0],
-        bottom: ['motion_play_icon', 'top', 0]
+        top: ['above_progress_bar_container', 'bottom', 0]
+      },
+      music_rotate_disk: {
+        width: 'parent',
+        top: ['motion_text_container', 'bottom', 0],
       }
     }
   },
@@ -127,12 +135,14 @@
       pathMotionArc: 'startVertical',
       KeyFrames: {
         KeyPositions: [{
-          target: ['above_progress_bar_container'],
-          percentHeight: [25],
+          target: ['motion_music_poster'],
+          progress: [0.5, 1]  // This looks fine for a late-stage animation
         }],
         KeyAttributes: [
           {
-            frames: [0, 25, 50, 75, 100]
+            target: ['motion_music_poster'],
+            frames: [0, 25, 50, 75, 100],
+            progress: [0, 0.2, 0.4, 0.6, 0.8, 1]  // Matches frames length
           }
         ]
       }

@@ -25,6 +25,7 @@ object Constants {
         const val ProgressBarTotalDurationId    : String = "progress_bar_total_duration"
         const val ProgressBar                   : String = "progress_bar"
         const val AboveProgressBarContainerId   : String = "above_progress_bar_container"
+        const val MusicRotateDiskId             : String = "music_rotate_disk"
     }
 
 
