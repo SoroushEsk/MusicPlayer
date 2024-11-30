@@ -60,12 +60,23 @@
         bottom: ['motion_play_icon', 'top', 20]
       },
       music_rotate_disk: {
+        height: 60,
+        start: ['motion_container', 'start', 0],
+        top: ['motion_container', 'top'],
+        bottom: ['motion_container', 'bottom', 0]
+      },
+      music_disk: {
         height: 0,
         width: 0,
-        start: ['motion_music_poster', 'start', 0],
-        top: ['motion_music_poster', 'top', 0],
-        end: ['motion_music_poster', 'end', 0],
-        bottom: ['motion_music_poster', 'bottom', 0],
+        start: ['parent', 'start', 0],
+        end: ['parent', 'end', 0],
+        top: ['parent', 'top', 0],
+        bottom: ['parent', 'bottom', 0],
+        alpha: 0,
+
+      },
+      music_poster: {
+
       }
     },
     end: {
@@ -85,8 +96,10 @@
         top: ['motion_container', 'top', 30]
       },
       motion_music_poster: {
-        end: ['parent', 'start',0]
-
+        width: 100,
+        top: ['motion_text_container', 'bottom', 0],
+        start: ['motion_container', 'start', 0],
+        end: ['motion_container', 'end', 0],
       },
       motion_back_icon: {
         height: 26,
@@ -116,15 +129,16 @@
       },
       above_progress_bar_container: {
         height: 80,
-        top: ['motion_music_poster', 'bottom', 32],
+        top: ['music_rotate_disk', 'bottom', 32],
         bottom: ['play_progress_bar_container', 'top', 0],
       },
      play_progress_bar_container: {
+       width: 'parent',
         top: ['above_progress_bar_container', 'bottom', 0]
       },
       music_rotate_disk: {
         width: 'parent',
-        top: ['motion_text_container', 'bottom', 0],
+        top: ['motion_text_container', 'bottom', 0]
       }
     }
   },

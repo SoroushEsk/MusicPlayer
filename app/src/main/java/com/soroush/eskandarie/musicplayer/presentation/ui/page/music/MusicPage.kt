@@ -169,7 +169,13 @@ fun MusicPage(
             ""
         }
     }
-//    if ( progress < 1f)
+
+    var musicBarPosterWidth by remember { mutableStateOf(1f) }
+    var isTheSameSize by remember { mutableStateOf(false)}
+    val pagePosterAlphaAnimation by animateFloatAsState(
+        targetValue = if (isTheSameSize) 1f else 0f,
+        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else 1500)
+    )
     MotionLayout(
         motionScene = MotionScene(content = scene),
         progress = progress,
@@ -216,23 +222,32 @@ fun MusicPage(
             contentDescription = Constants.MusicPageValues.MusicPosterDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier
+                .alpha(pagePosterAlphaAnimation)
                 .layoutId(Constants.MusicBarValues.MotionLayoutPosterId)
                 .padding(Dimens.Padding.MusicBarMusicPoster)
                 .aspectRatio(1f)
                 .clip(posterShape)
-                .then(if ( progress == 1f) Modifier.size(0.dp) else Modifier)
+                .onGloballyPositioned { layoutCoordinates ->
+                    musicBarPosterWidth = layoutCoordinates.size.width.toFloat()
+                }
+                .then(if (progress == 1f) Modifier.size(0.dp) else Modifier)
+
 
         )
         SongPoster(
             modifier = Modifier
-                .alpha(progress)
+                .alpha(1f - pagePosterAlphaAnimation)
                 .onGloballyPositioned { coordinates ->
-                val width = coordinates.size.width.toFloat()
-                val height = coordinates.size.height.toFloat()
-                val offsetX = coordinates.positionInWindow().x.toFloat()
-                val offsetY = coordinates.positionInWindow().y.toFloat()
-                posterCoordinates = Offset(offsetX + width / 2, offsetY + height / 2)
-            },
+                    val width = coordinates.size.width.toFloat()
+                    val height = coordinates.size.height.toFloat()
+                    val offsetX = coordinates.positionInWindow().x.toFloat()
+                    val offsetY = coordinates.positionInWindow().y.toFloat()
+                    posterCoordinates = Offset(offsetX + width / 2, offsetY + height / 2)
+                    Log.e("Width", "${(width * 0.8f * Constants.MusicPageValues.MusicPosterToDiskRatio)}")
+                    if ((width * 0.8f * Constants.MusicPageValues.MusicPosterToDiskRatio) >= musicBarPosterWidth) {
+                        isTheSameSize = false
+                    }else isTheSameSize = true
+                },
             poster = R.drawable.shaj,
             discImage = R.drawable.gramaphone_disc,
             needleImage = R.drawable.needle,
@@ -583,7 +598,7 @@ fun IconRowAboveProgressBar(
             },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        if (size.width > 6 && size.height > 6) {
+        if (size.width > 30 && size.height > 30) {
 
             Log.e("Song Poster", "$progress")
             IconShadowed(
@@ -606,18 +621,20 @@ fun SongPoster(
     poster: Int,
     discImage: Int,
     needleImage: Int,
-    rotationLength: Int = 20000,
+    rotationLength: Int = 10000,
     isAnimation: Boolean,
     resetRotation: Boolean
 ) {
     var currentRotation by remember { mutableStateOf(0f) }
     val rotation = remember { Animatable(currentRotation) }
 
-    LaunchedEffect(key1 = isAnimation, key2 = resetRotation) {
+    LaunchedEffect(key1 = resetRotation) {
+
         if ( resetRotation ){
-            rotation.stop()
-            currentRotation = 0f
+            rotation.snapTo(0f)
         }
+    }
+    LaunchedEffect(key1 = isAnimation) {
         if (isAnimation) {
             rotation.animateTo(
                 targetValue = currentRotation + 360f,
@@ -639,7 +656,6 @@ fun SongPoster(
     Box(
         modifier = modifier
             .layoutId(Constants.MusicPageValues.MusicRotateDiskId)
-            .fillMaxWidth()
             .aspectRatio(1f)
             .onGloballyPositioned { layoutCoordinates ->
                 mainContainerSize = layoutCoordinates.size.toSize()
@@ -661,7 +677,8 @@ fun SongPoster(
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .fillMaxSize(142 / 255f)
+                        .layoutId(Constants.MusicPageValues.MusicPosterId)
+                        .fillMaxSize(Constants.MusicPageValues.MusicPosterToDiskRatio)
                         .clip(CircleShape)
                         .onGloballyPositioned { layoutCoordinates ->
                             posterGradianSize = layoutCoordinates.size.toSize()
@@ -689,6 +706,7 @@ fun SongPoster(
                     painter = painterResource(id = discImage),
                     contentDescription = null,
                     modifier = Modifier
+                        .layoutId(Constants.MusicPageValues.MusicDiskId)
                         .fillMaxSize()
                         .shadow(
                             elevation = 10.dp,

@@ -27,7 +27,7 @@ object Dimens {
         val HomePageSpaceBetween            : Dp    =  4.dp
         val PlaylistItemDropdownSpace       : Dp    =  2.dp
 
-        val MusicPageSpaceBetween           : Dp    =  12.dp
+        val MusicPageSpaceBetween           : Dp    = 12.dp
     }
     object Rotation {
         val TopPlaylistItemBackRotation     : Float = 4f
