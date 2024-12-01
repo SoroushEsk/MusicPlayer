@@ -26,8 +26,8 @@ object Constants {
         const val ProgressBar                   : String = "progress_bar"
         const val AboveProgressBarContainerId   : String = "above_progress_bar_container"
         const val MusicRotateDiskId             : String = "music_rotate_disk"
-        const val MusicDiskId                   : String = "music_disk"
-        const val MusicPosterId                 : String = "music_poster"
+        const val ShuffleRepeatContainerId      : String = "shuffle_repeat_container"
+        const val DownOptionIconContainerId     : String = "down_option_icon_container"
 
         const val MusicPosterToDiskRatio        : Float = 142 / 255f
     }

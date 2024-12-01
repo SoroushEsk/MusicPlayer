@@ -51,7 +51,6 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -108,7 +107,7 @@ fun MusicPage(
     }
 
     val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = 0.90f)
-    val dominantColor2 = Color(palette.getDominantColor(0)).copy(alpha = 0.70f)
+    val dominantColor2 = Color(palette.getDominantColor(0)).copy(alpha = 0.570f)
     val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = 0.50f)
     val vibrantColor2 = Color(palette.getVibrantColor(0)).copy(alpha = 0.30f)
     val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.10f)
@@ -174,7 +173,11 @@ fun MusicPage(
     var isTheSameSize by remember { mutableStateOf(false)}
     val pagePosterAlphaAnimation by animateFloatAsState(
         targetValue = if (isTheSameSize) 1f else 0f,
-        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else 1500)
+        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else 900)
+    )
+    val barPosterAlphaAnimation by animateFloatAsState(
+        targetValue = if (isTheSameSize) 1f else 0f,
+        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else 300)
     )
     MotionLayout(
         motionScene = MotionScene(content = scene),
@@ -215,14 +218,45 @@ fun MusicPage(
                     }
                 }
         ) {
-
         }
+        Column(
+            modifier = Modifier
+                .layoutId(Constants.MusicBarValues.MotionLayoutTextContainer),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = if(progress == 0f) Alignment.Start else Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Tasnife Saze Khamoosh I have many more to say",
+                modifier = modifier
+                    .layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
+                color = colorTheme.Text,
+                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                maxLines = 1,
+                onTextLayout = { textLayoutResult ->
+                    textWidth = textLayoutResult.size.width.toFloat()
+                }
+            )
+            Text(
+                text = "Mohammadreza Shajarian",
+                modifier = modifier
+                    .layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
+                color = colorTheme.Text.copy(alpha = 0.70f),
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = 1
+            )
+        }
+        IconsAtEndsRow(
+            modifier = Modifier
+                .layoutId(Constants.MusicPageValues.DownOptionIconContainerId),
+            rightIcon =  R.drawable.options_list,
+            leftIcon  =  R.drawable.down_arrow
+        )
         Image(
             painter = painterResource(id = R.drawable.shaj),
             contentDescription = Constants.MusicPageValues.MusicPosterDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .alpha(pagePosterAlphaAnimation)
+                .alpha(barPosterAlphaAnimation)
                 .layoutId(Constants.MusicBarValues.MotionLayoutPosterId)
                 .padding(Dimens.Padding.MusicBarMusicPoster)
                 .aspectRatio(1f)
@@ -255,48 +289,40 @@ fun MusicPage(
             resetRotation = progress == 0f
         )
 
-        Column(
+        IconsAtEndsRow(
             modifier = Modifier
-                .layoutId(Constants.MusicBarValues.MotionLayoutTextContainer),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = if(progress == 0f) Alignment.Start else Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Tasnife Saze Khamoosh I have many more to say",
-                modifier = modifier
-                    .layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
-                color = colorTheme.Text,
-                style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
-                maxLines = 1,
-                onTextLayout = { textLayoutResult ->
-                    textWidth = textLayoutResult.size.width.toFloat()
-                }
-            )
-            Text(
-                text = "Mohammadreza Shajarian",
-                modifier = modifier
-                    .layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
-                color = colorTheme.Text.copy(alpha = 0.55f),
-                style = MaterialTheme.typography.bodyMedium,
-                maxLines = 1
-            )
-        }
+                .layoutId(Constants.MusicPageValues.AboveProgressBarContainerId),
+            rightIcon =  R.drawable.filled_heart,
+            leftIcon  =  R.drawable.playlist
+        )
+
+        ProgressBar(
+            modifier = Modifier
+                .layoutId(Constants.MusicPageValues.PlayProgressBarContainerId)
+                .fillMaxWidth()
+                .fillMaxHeight(0.05f),
+            colorTheme = colorTheme,
+            currentPosition = "01:31",
+            totalDuration = "03:13",
+            songPercent = 0.73f
+        )
+
         PLayControlShadow(
             modifier = modifier.rotate(90f),
             tint = colorTheme.Background,
             iconPainter = R.drawable.fast_forward,
             shape = CircleShape,
             backgroundColor = colorTheme.Icon,
-            padding = 5.dp,
+            padding = 5.dp + (progress * 7.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutBackIconId
         )
         PLayControlShadow(
-            modifier = modifier,
+            modifier = Modifier,
             tint = colorTheme.Background,
             iconPainter = R.drawable.pause,
             shape = CircleShape,
             backgroundColor = colorTheme.Icon,
-            padding = 10.dp,
+            padding = 10.dp + (progress * 10.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutPlayIconId
         )
         PLayControlShadow(
@@ -305,10 +331,15 @@ fun MusicPage(
             iconPainter = R.drawable.fast_forward,
             shape = CircleShape,
             backgroundColor = colorTheme.Icon,
-            padding = 5.dp,
+            padding = 5.dp + (progress * 7.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutForwardIconId
         )
-
+        IconsAtEndsRow(
+            modifier  = Modifier
+                .layoutId(Constants.MusicPageValues.ShuffleRepeatContainerId),
+            rightIcon =  R.drawable.repeat_disable,
+            leftIcon  =  R.drawable.shuffle
+        )
         Icon(
             painter = painterResource(id = R.drawable.playlist),
             contentDescription = Constants.MusicPageValues.MusicPosterDescription,
@@ -318,18 +349,6 @@ fun MusicPage(
                 .aspectRatio(1f),
             tint = colorTheme.Text.copy(alpha = 0.6f)
 
-        )
-
-        IconRowAboveProgressBar(modifier = Modifier, progress = progress, R.drawable.filled_heart, R.drawable.playlist)
-        ProgressBar(
-            modifier = Modifier
-                .layoutId(Constants.MusicPageValues.PlayProgressBarContainerId)
-                .fillMaxWidth()
-                .fillMaxHeight(0.05f),
-            colorTheme = DarkTheme,
-            currentPosition = "01:31",
-            totalDuration = "03:13",
-            songPercent = 0.73f
         )
 
     }
@@ -544,11 +563,11 @@ fun ProgressBar(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(12.dp, 0.dp)
+                .padding(horizontal = 12.dp)
         ) {
             if (size.width > 0 && size.height > 0) {
                 drawLine(
-                    color = colorTheme.DarkShadow,
+                    color = colorTheme.LightShadow,
                     start = Offset(0f, center.y),
                     end = Offset(size.width, center.y),
                     strokeWidth = 8.dp.toPx(),
@@ -556,7 +575,7 @@ fun ProgressBar(
                 )
                 drawLine(
                     brush = Brush.linearGradient(
-                        colors = listOf(colorTheme.Primary, colorTheme.Secondary),
+                        colors = listOf(colorTheme.Icon, colorTheme.Secondary),
                         start = Offset(center.x, center.y),
                         end = Offset(size.width * songPercent, center.y)
                     ),
@@ -579,18 +598,16 @@ fun ProgressBar(
 }
 
 @Composable
-fun IconRowAboveProgressBar(
+fun IconsAtEndsRow(
     modifier: Modifier = Modifier,
-    progress: Float = 0f,
-    heartImage: Int,
-    playlistImage: Int
+    rightIcon: Int,
+    leftIcon: Int
 ) {
     var size by remember {
         mutableStateOf(Size.Zero)
     }
     Row(
         modifier = modifier
-            .layoutId(Constants.MusicPageValues.AboveProgressBarContainerId)
             .fillMaxWidth()
             .padding(16.dp)
             .onGloballyPositioned { coordinates ->
@@ -600,16 +617,15 @@ fun IconRowAboveProgressBar(
     ) {
         if (size.width > 30 && size.height > 30) {
 
-            Log.e("Song Poster", "$progress")
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
-                iconPainter = playlistImage
+                iconPainter = leftIcon
             )
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
-                iconPainter = heartImage
+                iconPainter = rightIcon
             )
         }
     }
@@ -621,7 +637,7 @@ fun SongPoster(
     poster: Int,
     discImage: Int,
     needleImage: Int,
-    rotationLength: Int = 10000,
+    rotationLength: Int = 15000,
     isAnimation: Boolean,
     resetRotation: Boolean
 ) {
@@ -677,7 +693,6 @@ fun SongPoster(
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .layoutId(Constants.MusicPageValues.MusicPosterId)
                         .fillMaxSize(Constants.MusicPageValues.MusicPosterToDiskRatio)
                         .clip(CircleShape)
                         .onGloballyPositioned { layoutCoordinates ->
@@ -706,7 +721,6 @@ fun SongPoster(
                     painter = painterResource(id = discImage),
                     contentDescription = null,
                     modifier = Modifier
-                        .layoutId(Constants.MusicPageValues.MusicDiskId)
                         .fillMaxSize()
                         .shadow(
                             elevation = 10.dp,
