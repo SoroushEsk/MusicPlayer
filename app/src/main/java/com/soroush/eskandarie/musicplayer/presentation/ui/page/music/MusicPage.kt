@@ -94,7 +94,7 @@ fun MusicPage(
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
     val context = LocalContext.current
-    var progress by remember { mutableStateOf(0.4f) }
+    var progress by remember { mutableStateOf(0.8f) }
 
     val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
     val palette = Palette.from(bitmap).generate()
@@ -277,16 +277,20 @@ fun MusicPage(
                     val offsetX = coordinates.positionInWindow().x.toFloat()
                     val offsetY = coordinates.positionInWindow().y.toFloat()
                     posterCoordinates = Offset(offsetX + width / 2, offsetY + height / 2)
-                    Log.e("Width", "${(width * 0.8f * Constants.MusicPageValues.MusicPosterToDiskRatio)}")
+                    Log.e(
+                        "Width",
+                        "${(width * 0.8f * Constants.MusicPageValues.MusicPosterToDiskRatio)}"
+                    )
                     if ((width * 0.8f * Constants.MusicPageValues.MusicPosterToDiskRatio) >= musicBarPosterWidth) {
                         isTheSameSize = false
-                    }else isTheSameSize = true
+                    } else isTheSameSize = true
                 },
             poster = R.drawable.shaj,
-            discImage = R.drawable.gramaphone_disc,
-            needleImage = R.drawable.needle,
+            discImage = if(isSystemInDarkTheme())R.drawable.gramaphone_disc else R.drawable.disk_light,
+            needleImage = if(isSystemInDarkTheme()) R.drawable.needle else R.drawable.needle_light ,
             isAnimation = progress == 1f,
-            resetRotation = progress == 0f
+            resetRotation = progress == 0f,
+            colorTheme = colorTheme
         )
 
         IconsAtEndsRow(
@@ -639,7 +643,8 @@ fun SongPoster(
     needleImage: Int,
     rotationLength: Int = 15000,
     isAnimation: Boolean,
-    resetRotation: Boolean
+    resetRotation: Boolean,
+    colorTheme: ColorTheme
 ) {
     var currentRotation by remember { mutableStateOf(0f) }
     val rotation = remember { Animatable(currentRotation) }
@@ -707,7 +712,7 @@ fun SongPoster(
                                             colors = listOf(
                                                 Color.Transparent,
                                                 Color.Transparent,
-                                                DarkTheme.Surface
+                                                colorTheme.LightShadow
                                             ),
                                             center = Offset(size.width / 2, size.height / 2),
                                             radius = size.minDimension / 2
@@ -722,6 +727,7 @@ fun SongPoster(
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
+                        .alpha(0.8f)
                         .shadow(
                             elevation = 10.dp,
                             shape = CircleShape,
@@ -759,6 +765,7 @@ fun SongPoster(
                         )
                         .rotate(60f),
                     painter = painterResource(R.drawable.rec),
+                    tint = if(isSystemInDarkTheme()) Color.Black else Color.White,
                     contentDescription = null
                 )
                 Image(
