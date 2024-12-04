@@ -18,12 +18,6 @@ val musicPageMotionLayoutConfig = """
         "top": ["motion_text_container", "top", 0],
         "bottom": ["motion_text_container", "bottom", 0]
       },
-      "motion_music_poster": {
-        "height": ${Dimens.Size.MusicBarPosterHeight},
-        "start": ["motion_container", "start", 0],
-        "top": ["motion_container", "top"],
-        "bottom": ["motion_container", "bottom", 0]
-      },
       "motion_text_container": {
         "width": "spread",
         "height": ${Dimens.Size.MusicBarMotionLayoutTextContainerHeight},
@@ -32,45 +26,27 @@ val musicPageMotionLayoutConfig = """
         "top": ["motion_container", "top"],
         "bottom": ["motion_container", "bottom", 0]
       },
-      "motion_back_icon": {
-        "height": 26,
-        "end": ["motion_play_icon", "start", 5],
-        "top": ["motion_container", "top"],
-        "bottom": ["motion_container", "bottom", 0]
-      },
-      "motion_play_icon": {
-        "height": 36,
-        "end": ["motion_forward_icon", "start", 5],
-        "top": ["motion_container", "top"],
-        "bottom": ["motion_container", "bottom", 0]
-      },
-      "motion_forward_icon": {
-        "height": 26,
-        "end": ["motion_playlist_icon", "start", 5],
-        "top": ["motion_container", "top"],
-        "bottom": ["motion_container", "bottom", 0]
-      },
-      "motion_playlist_icon": {
-        "height": 32,
-        "end": ["parent", "end", 4],
+      "motion_music_poster": {
+        "height": ${Dimens.Size.MusicBarMotionLayoutPosterHeight},
+        "start": ["motion_container", "start", 0],
         "top": ["motion_container", "top"],
         "bottom": ["motion_container", "bottom", 0]
       },
       "above_progress_bar_container": {
         "height": 0,
-        "top": ["motion_music_poster", "bottom", 20],
-        "bottom": ["motion_play_icon", "top", 20]
+        "top": ["motion_music_poster", "bottom", ${Dimens.Padding.MusicBarMotionLayoutGeneral}],
+        "bottom": ["motion_play_icon", "top", ${Dimens.Padding.MusicBarMotionLayoutGeneral}]
       },
       "play_progress_bar_container": {
         "height": 0,
         "width": 0,
         "start": ["motion_music_poster", "start", 0],
         "end": ["motion_music_poster", "end", 0],
-        "top": ["motion_music_poster", "bottom", 20],
-        "bottom": ["motion_play_icon", "top", 20]
+        "top": ["motion_music_poster", "bottom", ${Dimens.Padding.MusicBarMotionLayoutGeneral}],
+        "bottom": ["motion_play_icon", "top", ${Dimens.Padding.MusicBarMotionLayoutGeneral}]
       },
       "music_rotate_disk": {
-        "height": 60,
+        "height": ${Dimens.Size.MusicBarMotionLayoutPosterHeight},
         "start": ["motion_container", "start", 0],
         "top": ["motion_container", "top"],
         "bottom": ["motion_container", "bottom", 0]
@@ -79,7 +55,31 @@ val musicPageMotionLayoutConfig = """
         "height": 0,
         "top": ["motion_play_icon", "bottom", 0],
         "bottom": ["motion_play_icon", "top", 0]
-      }
+      ,
+      "motion_back_icon": {
+        "height": ${Dimens.Size.MusicBarMotionLayoutBackForward},
+        "end": ["motion_play_icon", "start", ${Dimens.Padding.MusicBarMotionLayoutControlIcon}],
+        "top": ["motion_container", "top"],
+        "bottom": ["motion_container", "bottom", 0]
+      },
+      "motion_play_icon": {
+        "height": ${Dimens.Size.MusicBarMotionLayoutPauseResume},
+        "end": ["motion_forward_icon", "start", ${Dimens.Padding.MusicBarMotionLayoutControlIcon}],
+        "top": ["motion_container", "top"],
+        "bottom": ["motion_container", "bottom", 0]
+      },
+      "motion_forward_icon": {
+        "height": ${Dimens.Size.MusicBarMotionLayoutBackForward},
+        "end": ["motion_playlist_icon", "start", ${Dimens.Padding.MusicBarMotionLayoutControlIcon}],
+        "top": ["motion_container", "top"],
+        "bottom": ["motion_container", "bottom", 0]
+      },
+      "motion_playlist_icon": {
+        "height": ${Dimens.Size.MusicBarMotionLayoutPlaylistIcon},
+        "end": ["parent", "end", ${Dimens.Padding.MusicBarMotionLayoutPlaylistIcon}],
+        "top": ["motion_container", "top"],
+        "bottom": ["motion_container", "bottom", 0]
+      }}
     },
     "end": {
       "motion_container": {
