@@ -4,19 +4,20 @@ import android.widget.ProgressBar
 
 object Constants {
     object HomePageValues{
-        const val PlaylistSectionTitle      : String = "Playlists"
-        const val MusicPageMotionLayoutId   : String = "music_bar_motion_layout"
+        const val PlaylistSectionTitle          : String = "Playlists"
+        const val MusicPageMotionLayoutId       : String = "music_bar_motion_layout"
     }
     object MusicBarValues{
-        const val MotionLayoutContainerId   : String = "motion_container"
-        const val MotionLayoutPosterId      : String = "motion_music_poster"
-        const val MotionLayoutBackIconId    : String = "motion_back_icon"
-        const val MotionLayoutPlayIconId    : String = "motion_play_icon"
-        const val MotionLayoutTitleId       : String = "motion_music_title"
-        const val MotionLayoutArtistId      : String = "motion_music_artist"
-        const val MotionLayoutForwardIconId : String = "motion_forward_icon"
-        const val MotionLayoutPlaylistIconId: String = "motion_playlist_icon"
-        const val MotionLayoutTextContainer : String = "motion_text_container"
+        const val MotionLayoutContainerId       : String = "motion_container"
+        const val MotionLayoutPosterId          : String = "motion_music_poster"
+        const val MotionLayoutBackIconId        : String = "motion_back_icon"
+        const val MotionLayoutPlayIconId        : String = "motion_play_icon"
+        const val MotionLayoutTitleId           : String = "motion_music_title"
+        const val MotionLayoutArtistId          : String = "motion_music_artist"
+        const val MotionLayoutForwardIconId     : String = "motion_forward_icon"
+        const val MotionLayoutPlaylistIconId    : String = "motion_playlist_icon"
+        const val MotionLayoutTextContainer     : String = "motion_text_container"
+        const val PosterHideDuration            : Int    = 300
 
     }
     object MusicPageValues{
@@ -29,7 +30,14 @@ object Constants {
         const val ShuffleRepeatContainerId      : String = "shuffle_repeat_container"
         const val DownOptionIconContainerId     : String = "down_option_icon_container"
 
-        const val MusicPosterToDiskRatio        : Float = 142 / 255f
+        const val MusicPosterToDiskRatio        : Float = 142f / 255f
+        const val DiskNeedleRotationCenterYRatio: Float = 18f  / 211f
+        const val DiskNeedleRotationCenterXRatio: Float = 18f  / 150f
+        const val DiskRotationDuration          : Int   = 20000
+        const val NeedleRotationDuration        : Int   = 1000
+        const val DiskAndNeedleRevealDuration   : Int   = 900
+        const val LeaveScrollDuration           : Int   = 700
+        const val ProgressBarPointToStrokeRatio : Float = 1.8f
     }
 
 

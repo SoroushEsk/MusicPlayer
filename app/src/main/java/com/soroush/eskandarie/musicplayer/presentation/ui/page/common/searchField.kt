@@ -33,7 +33,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 fun SearchField(
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
     placeHolder: String = "Search",
-    shape: RoundedCornerShape = RoundedCornerShape(Dimens.CornerRadius.AppTextFieldCornerRadius),
+    shape: RoundedCornerShape = RoundedCornerShape(Dimens.CornerRadius.AppTextField),
     themeColors: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     modifier: Modifier = Modifier,
     setState: (HomeSetAction) -> Unit,

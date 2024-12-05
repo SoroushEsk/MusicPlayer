@@ -85,7 +85,7 @@ fun PlaylistItem(
         AsyncImage(
             modifier = Modifier
                 .aspectRatio(1f)
-                .padding(Dimens.Padding.PlaylistItemPosterPadding)
+                .padding(Dimens.Padding.PlaylistItemPoster)
                 .clip(posterShape),
             model = posterUri,
             contentScale = ContentScale.Crop,
@@ -106,7 +106,7 @@ fun PlaylistItem(
         Icon(
             modifier = Modifier
                 .size(Dimens.Size.PlayListItemIconSize)
-                .padding(Dimens.Padding.PlaylistItemIconPadding),
+                .padding(Dimens.Padding.PlaylistItemIcon),
             painter = painterResource(id = icon1),
             contentDescription = "PlayButton",
             tint = themeColor.Icon
@@ -140,7 +140,7 @@ fun PlaylistItem(
                 )
             }
             MaterialTheme(
-                shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.CornerRadius.TopPlaylistItemCornerRadius))
+                shapes = MaterialTheme.shapes.copy(extraSmall = RoundedCornerShape(Dimens.CornerRadius.TopPlaylistItem))
             ) {
                 DropdownMenu(
                     expanded = isExpanded,

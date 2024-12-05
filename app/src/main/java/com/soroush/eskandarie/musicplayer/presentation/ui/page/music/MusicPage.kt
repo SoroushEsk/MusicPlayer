@@ -14,24 +14,27 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -59,6 +62,9 @@ import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
@@ -77,6 +83,7 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.presentation.ui.animation.musicPageMotionLayoutConfig
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
@@ -94,7 +101,7 @@ fun MusicPage(
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
     val context = LocalContext.current
-    var progress by remember { mutableStateOf(0.8f) }
+    var progress by remember { mutableStateOf(0.0f) }
 
     val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
     val palette = Palette.from(bitmap).generate()
@@ -106,11 +113,11 @@ fun MusicPage(
         mutableStateOf(Offset(0f, 0f))
     }
 
-    val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = 0.90f)
-    val dominantColor2 = Color(palette.getDominantColor(0)).copy(alpha = 0.570f)
-    val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = 0.50f)
-    val vibrantColor2 = Color(palette.getVibrantColor(0)).copy(alpha = 0.30f)
-    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.10f)
+    val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = Dimens.Alpha.DomainColor1Alpha)
+    val dominantColor2 = Color(palette.getDominantColor(0)).copy(alpha = Dimens.Alpha.DomainColor2Alpha)
+    val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = Dimens.Alpha.VibrantColor1Alpha)
+    val vibrantColor2 = Color(palette.getVibrantColor(0)).copy(alpha = Dimens.Alpha.VibrantColor2Alpha)
+    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = Dimens.Alpha.MutedColorAlpha)
     val listOfColors =
         listOf(dominantColor1, dominantColor2, vibrantColor1, vibrantColor2, mutedColor)
     val radialGradientBrush = Brush.radialGradient(
@@ -142,7 +149,10 @@ fun MusicPage(
                 if (isScroll) 0.99f else 1f
             } else 0f
         },
-        animationSpec = tween(durationMillis = if (isTouching) 0 else 700)
+        animationSpec = tween(
+            durationMillis = if (isTouching) 0
+                            else Constants.MusicPageValues.LeaveScrollDuration
+        )
     )
     progress = animatedProgress
 
@@ -159,28 +169,38 @@ fun MusicPage(
         ), label = ""
     )
 
-    // TODO(" create rotate functionalty" )
-    val scene = remember {
-        try {
-            context.resources.openRawResource(R.raw.music_page_constraint_set).readBytes()
-                .decodeToString()
-        } catch (e: Exception) {
-            ""
-        }
-    }
 
     var musicBarPosterWidth by remember { mutableStateOf(1f) }
     var isTheSameSize by remember { mutableStateOf(false)}
     val pagePosterAlphaAnimation by animateFloatAsState(
         targetValue = if (isTheSameSize) 1f else 0f,
-        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else 900)
+        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else Constants.MusicPageValues.DiskAndNeedleRevealDuration)
     )
     val barPosterAlphaAnimation by animateFloatAsState(
         targetValue = if (isTheSameSize) 1f else 0f,
-        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else 300)
+        animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else Constants.MusicBarValues.PosterHideDuration)
     )
+    val scrollState = rememberScrollState()
+    var offset by remember { mutableStateOf(0f) }
+    val nestedScrollConnection = remember {
+        object : NestedScrollConnection {
+            override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                if (available.y != 0f) {
+                }
+                return Offset.Zero
+            }
+
+            override fun onPostScroll(
+                consumed: Offset,
+                available: Offset,
+                source: NestedScrollSource
+            ): Offset {
+                return super.onPostScroll(consumed, available, source)
+            }
+        }
+    }
     MotionLayout(
-        motionScene = MotionScene(content = scene),
+        motionScene = MotionScene(content = musicPageMotionLayoutConfig),
         progress = progress,
         modifier = modifier
             .fillMaxHeight()
@@ -200,7 +220,20 @@ fun MusicPage(
                     )
                 )
                 .background(colorTheme.Background)
+                .nestedScroll(nestedScrollConnection)
                 .background(radialGradientBrush)
+                .scrollable(
+                    orientation = Orientation.Vertical,
+                    // Scrollable state: describes how to consume
+                    // scrolling delta and update offset
+                    state = rememberScrollableState { delta ->
+                        offset += delta
+                        Log.e("Scroll", "$delta, $offset")
+                        if (delta < -40) progress = 1f
+                        else if (delta > 70) progress = 0f
+                        delta
+                    }
+                )
                 .onGloballyPositioned { coordinates ->
                     mainContainerCoordinates =
                         Offset(coordinates.positionInWindow().x, coordinates.positionInWindow().y)
@@ -210,7 +243,7 @@ fun MusicPage(
                         while (true) {
                             val event = awaitPointerEvent()
                             val position = event.changes.first().position
-                            isTouching = event.changes.any { it.pressed }
+                            //isTouching = event.changes.any { it.pressed }
                             if (isTouching) {
                                 fingerY = position.y + mainContainerCoordinates.y
                             }
@@ -249,7 +282,8 @@ fun MusicPage(
             modifier = Modifier
                 .layoutId(Constants.MusicPageValues.DownOptionIconContainerId),
             rightIcon =  R.drawable.options_list,
-            leftIcon  =  R.drawable.down_arrow
+            leftIcon  =  R.drawable.down_arrow,
+            colorTheme = colorTheme
         )
         Image(
             painter = painterResource(id = R.drawable.shaj),
@@ -274,13 +308,9 @@ fun MusicPage(
                 .onGloballyPositioned { coordinates ->
                     val width = coordinates.size.width.toFloat()
                     val height = coordinates.size.height.toFloat()
-                    val offsetX = coordinates.positionInWindow().x.toFloat()
-                    val offsetY = coordinates.positionInWindow().y.toFloat()
+                    val offsetX = coordinates.positionInWindow().x
+                    val offsetY = coordinates.positionInWindow().y
                     posterCoordinates = Offset(offsetX + width / 2, offsetY + height / 2)
-                    Log.e(
-                        "Width",
-                        "${(width * 0.8f * Constants.MusicPageValues.MusicPosterToDiskRatio)}"
-                    )
                     if ((width * 0.8f * Constants.MusicPageValues.MusicPosterToDiskRatio) >= musicBarPosterWidth) {
                         isTheSameSize = false
                     } else isTheSameSize = true
@@ -297,7 +327,8 @@ fun MusicPage(
             modifier = Modifier
                 .layoutId(Constants.MusicPageValues.AboveProgressBarContainerId),
             rightIcon =  R.drawable.filled_heart,
-            leftIcon  =  R.drawable.playlist
+            leftIcon  =  R.drawable.playlist,
+            colorTheme = colorTheme
         )
 
         ProgressBar(
@@ -342,7 +373,8 @@ fun MusicPage(
             modifier  = Modifier
                 .layoutId(Constants.MusicPageValues.ShuffleRepeatContainerId),
             rightIcon =  R.drawable.repeat_disable,
-            leftIcon  =  R.drawable.shuffle
+            leftIcon  =  R.drawable.shuffle,
+            colorTheme = colorTheme
         )
         Icon(
             painter = painterResource(id = R.drawable.playlist),
@@ -359,156 +391,16 @@ fun MusicPage(
 
 
 }
-
-@Composable
-fun MusicPageFullScreen(
-    modifier: Modifier = Modifier,
-    colorTheme: ColorTheme,
-    onDownIconClick: () -> Unit
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(colorTheme.Background)
-            .navigationBarsPadding()
-            .statusBarsPadding()
-    ) {
-
-        SongDetail(
-            modifier = modifier,
-            songName = "Harighe Sabs",
-            songArtist = "Ebi",
-            onDownIconClick = onDownIconClick
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        )
-        SongLyricSlider()
-//        SongPoster(
-//            modifier = modifier,
-//            poster = R.drawable.shaj,
-//            discImage = R.drawable.gramaphone_disc,
-//            needleImage = R.drawable.needle,
-//            isAnimation = isRotatePoster
-//        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        )
-//        IconRowAboveProgressBar(modifier = modifier, R.drawable.filled_heart, R.drawable.playlist)
-//        ProgressBar(
-//            modifier = modifier,
-//            colorTheme = DarkTheme,
-//            currentPosition = "01:31",
-//            totalDuration = "03:13",
-//            songPercent = 0.73f
-//        )
-
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        )
-        IconBelowProgressBar(
-            modifier = modifier
-        )
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(3f)
-        )
-        Spacer(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(Dimens.Spacing.MusicPageSpaceBetween)
-        )
-    }
-}
-
-@Composable
-fun IconBelowProgressBar(
-    modifier: Modifier = Modifier,
-    colorTheme: ColorTheme = DarkTheme
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .fillMaxHeight(0.30f)
-            .padding(16.dp, 20.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        IconShadowed(
-            modifier = modifier
-                .weight(1f),
-            iconPainter = R.drawable.shuffle,
-        )
-        Spacer(
-            modifier = Modifier
-                .width(28.dp)
-                .fillMaxHeight()
-        )
-        PLayControlShadow(
-            modifier = modifier
-                .rotate(90f)
-                .weight(1.3f),
-            iconPainter = R.drawable.fast_forward,
-            shape = CircleShape,
-            backgroundColor = colorTheme.Icon,
-            padding = 18.dp
-        )
-        Spacer(
-            modifier = Modifier
-                .width(24.dp)
-                .fillMaxHeight()
-        )
-        PLayControlShadow(
-            modifier = modifier
-                .weight(1.75f),
-            iconPainter = R.drawable.pause,
-            backgroundColor = colorTheme.Icon,
-            shape = CircleShape,
-            padding = 26.dp
-        )
-        Spacer(
-            modifier = Modifier
-                .width(24.dp)
-                .fillMaxHeight()
-        )
-        PLayControlShadow(
-            modifier = modifier
-                .weight(1.3f),
-            iconPainter = R.drawable.fast_forward,
-            shape = CircleShape,
-            backgroundColor = colorTheme.Icon,
-            padding = 18.dp
-        )
-        Spacer(
-            modifier = Modifier
-                .width(28.dp)
-                .fillMaxHeight()
-        )
-        IconShadowed(
-            modifier = modifier
-                .weight(1f),
-            iconPainter = R.drawable.repeat_disable,
-        )
-    }
-}
-
 @Composable
 fun PLayControlShadow(
     modifier: Modifier,
     iconPainter: Int,
-    shape: Shape = RoundedCornerShape(16.dp),
+    shape: Shape = RoundedCornerShape(Dimens.CornerRadius.MusicPagePlayControlShadowIconDefault),
     colorTheme: ColorTheme = DarkTheme,
     aspectRatio: Float = 1f,
     backgroundColor: Color = Color.Transparent,
     tint: Color = colorTheme.DarkSurface,
-    padding: Dp = 10.dp,
+    padding: Dp = Dimens.Padding.MusicPagePlayControlShadowDefault,
     layoutId: String = ""
 ) {
     Box(
@@ -519,13 +411,13 @@ fun PLayControlShadow(
             .fillMaxWidth()
             .clip(shape)
             .shadow(
-                elevation = 4.dp,
+                elevation = Dimens.Elevation.MusicPagePlayControlShadowDarkLarge,
                 shape = shape,
                 clip = true,
                 spotColor = colorTheme.DarkShadow
             )
             .shadow(
-                elevation = 2.dp,
+                elevation = Dimens.Elevation.MusicPagePlayControlShadowDarkMedium,
                 shape = shape,
                 clip = true,
                 spotColor = colorTheme.DarkShadow
@@ -543,19 +435,22 @@ fun PLayControlShadow(
         )
     }
 }
-
 @Composable
 fun ProgressBar(
     modifier: Modifier = Modifier,
     colorTheme: ColorTheme,
     currentPosition: String,
     totalDuration: String,
-    songPercent: Float
+    songPercent: Float,
+    padding: PaddingValues = PaddingValues(
+        horizontal = Dimens.Padding.MusicPageProgressBarDefaultHorizontal,
+        vertical = Dimens.Padding.MusicPageProgressBarDefaultVertical
+    )
 ) {
 
     Row(
         modifier = modifier
-            .padding(16.dp, 0.dp),
+            .padding(padding),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
@@ -567,14 +462,14 @@ fun ProgressBar(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxHeight()
-                .padding(horizontal = 12.dp)
+                .padding(horizontal = Dimens.Padding.MusicPageProgressBarCanvasHorizontal)
         ) {
             if (size.width > 0 && size.height > 0) {
                 drawLine(
                     color = colorTheme.LightShadow,
                     start = Offset(0f, center.y),
                     end = Offset(size.width, center.y),
-                    strokeWidth = 8.dp.toPx(),
+                    strokeWidth = Dimens.Size.MusicPageProgressBarStrokeWidth.toPx(),
                     cap = StrokeCap.Round
                 )
                 drawLine(
@@ -585,27 +480,33 @@ fun ProgressBar(
                     ),
                     start = Offset(0f, center.y),
                     end = Offset(size.width * songPercent, center.y),
-                    strokeWidth = 8.dp.toPx(),
+                    strokeWidth = Dimens.Size.MusicPageProgressBarStrokeWidth.toPx(),
                     cap = StrokeCap.Round
                 )
                 drawPoints(
                     points = listOf(Offset(size.width * songPercent, center.y)),
                     pointMode = PointMode.Points,
                     color = colorTheme.Secondary,
-                    strokeWidth = (8 * 1.8f).dp.toPx(),
+                    strokeWidth = (
+                            Dimens.Size.MusicPageProgressBarStrokeWidth.value *
+                                    Constants.MusicPageValues.ProgressBarPointToStrokeRatio).dp.toPx(),
                     cap = StrokeCap.Round
                 )
             }
         }
-        Text(text = totalDuration, color = colorTheme.Text)
+        Text(
+            text = totalDuration,
+            color = colorTheme.Text
+        )
     }
 }
-
 @Composable
 fun IconsAtEndsRow(
     modifier: Modifier = Modifier,
+    colorTheme: ColorTheme,
     rightIcon: Int,
-    leftIcon: Int
+    leftIcon: Int,
+    extraPadding: Dp = Dimens.Padding.MusicPageIconsAtEndRowDefault
 ) {
     var size by remember {
         mutableStateOf(Size.Zero)
@@ -613,7 +514,7 @@ fun IconsAtEndsRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(extraPadding)
             .onGloballyPositioned { coordinates ->
                 size = coordinates.size.toSize()
             },
@@ -624,33 +525,41 @@ fun IconsAtEndsRow(
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
-                iconPainter = leftIcon
+                iconPainter = leftIcon,
+                colorTheme = colorTheme
             )
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
-                iconPainter = rightIcon
+                iconPainter = rightIcon,
+                colorTheme = colorTheme
             )
         }
     }
 }
-
 @Composable
 fun SongPoster(
     modifier: Modifier,
     poster: Int,
     discImage: Int,
     needleImage: Int,
-    rotationLength: Int = 15000,
     isAnimation: Boolean,
     resetRotation: Boolean,
-    colorTheme: ColorTheme
+    colorTheme: ColorTheme,
+    needleBase: Int = R.drawable.rec,
+    rotationLength: Int = Constants.MusicPageValues.DiskRotationDuration
 ) {
     var currentRotation by remember { mutableStateOf(0f) }
     val rotation = remember { Animatable(currentRotation) }
 
+    val needleRotation = animateFloatAsState(
+        targetValue = if (isAnimation)
+            Dimens.Rotation.MusicPageNeedleFinal
+        else Dimens.Rotation.MusicPageNeedleInitial,
+        animationSpec = tween(Constants.MusicPageValues.NeedleRotationDuration)
+    )
+    // Actions when the it's full screen and compact
     LaunchedEffect(key1 = resetRotation) {
-
         if ( resetRotation ){
             rotation.snapTo(0f)
         }
@@ -671,9 +580,13 @@ fun SongPoster(
             currentRotation = rotation.value
         }
     }
+
+
     var posterGradianSize by remember { mutableStateOf(Size.Zero) }
     var needleConnecterSize by remember { mutableStateOf(Size.Zero) }
     var mainContainerSize by remember {mutableStateOf(Size.Zero)}
+
+
     Box(
         modifier = modifier
             .layoutId(Constants.MusicPageValues.MusicRotateDiskId)
@@ -687,7 +600,7 @@ fun SongPoster(
         if (mainContainerSize.width > 0 && mainContainerSize.height > 0){
             Box(
                 modifier = Modifier
-                    .fillMaxSize(0.8f)
+                    .fillMaxSize(Dimens.Size.MusicPageDiskSizeRatio)
                     .graphicsLayer {
                         rotationZ = rotation.value
                     },
@@ -727,9 +640,9 @@ fun SongPoster(
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxSize()
-                        .alpha(0.8f)
+                        .alpha(Dimens.Alpha.MusicPageDiskPoster)
                         .shadow(
-                            elevation = 10.dp,
+                            elevation = Dimens.Elevation.MusicPageDiskPoster,
                             shape = CircleShape,
                             clip = false,
                         )
@@ -740,10 +653,13 @@ fun SongPoster(
                     needleConnecterSize = layoutCoordinates.size.toSize()
                 }
                 .align(Alignment.TopEnd)
-                .fillMaxHeight(0.4f)
-                .aspectRatio(0.6f)
-                .rotate(-15f)
-                .offset(-16.dp, 32.dp),
+                .fillMaxHeight(Dimens.Size.MusicPageNeedleHeightRatio)
+                .aspectRatio(Dimens.AspectRatio.MusicPageNeedle)
+                .rotate(needleRotation.value)
+                .offset(
+                    x = Dimens.Offset.MusicPageNeedleXOffset,
+                    y = Dimens.Offset.MusicPageNeedleYOffset
+                ),
                 contentAlignment = Alignment.TopEnd
             ) {
                 Icon(
@@ -751,20 +667,20 @@ fun SongPoster(
                         .then(
                             if (needleConnecterSize != Size.Zero) {
                                 Modifier.offset(
-                                    y = -(needleConnecterSize.height * 18f / 211f).dp,
-                                    x = (needleConnecterSize.width * 18f / 150f).dp
+                                    y = -(needleConnecterSize.height * Constants.MusicPageValues.DiskNeedleRotationCenterYRatio).dp,
+                                    x = (needleConnecterSize.width * Constants.MusicPageValues.DiskNeedleRotationCenterYRatio).dp
                                 )
                             } else Modifier
                         )
-                        .scale(0.4f)
+                        .scale(Dimens.Scale.MusicPageSongPosterNeedle)
                         .shadow(
-                            elevation = 8.dp,
+                            elevation = Dimens.Elevation.MusicPageNeedle,
                             shape = CircleShape,
                             clip = false,
                             spotColor = DarkTheme.DarkSurface
                         )
-                        .rotate(60f),
-                    painter = painterResource(R.drawable.rec),
+                        .rotate(Dimens.Rotation.MusicPageNeedleBase),
+                    painter = painterResource(needleBase),
                     tint = if(isSystemInDarkTheme()) Color.Black else Color.White,
                     contentDescription = null
                 )
@@ -777,59 +693,21 @@ fun SongPoster(
         }
     }
 }
-
 @Composable
 fun SongLyricSlider(
 ) {
 
 }
-
-@Composable
-fun SongDetail(
-    modifier: Modifier,
-    songName: String,
-    onDownIconClick: () -> Unit,
-    songArtist: String
-) {
-    Row(
-        modifier = modifier
-            .fillMaxHeight(0.13f)
-            .fillMaxWidth()
-            .padding(16.dp, 0.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        IconShadowed(
-            modifier = modifier
-                .weight(1.5f)
-                .clickable {
-                    onDownIconClick()
-                },
-            iconPainter = R.drawable.down_arrow
-        )
-        SongTitle(
-            modifier = modifier.weight(10f),
-            name = songName,
-            artist = songArtist
-        )
-        IconShadowed(
-            modifier = modifier
-                .weight(1.5f),
-            iconPainter = R.drawable.options_list
-        )
-    }
-}
-
 @Composable
 fun IconShadowed(
     modifier: Modifier,
     iconPainter: Int,
-    shape: Shape = RoundedCornerShape(12.dp),
-    colorTheme: ColorTheme = if (isSystemInDarkTheme())  DarkTheme else LightTheme,
+    colorTheme: ColorTheme,
+    shape: Shape = RoundedCornerShape(Dimens.CornerRadius.MusicPageShadowedIconDefault),
     aspectRatio: Float = 1f,
     backgroundColor: Color = Color.Transparent,
     tint: Color = colorTheme.Tint,
-    padding: Dp = 10.dp,
+    padding: Dp = Dimens.Padding.MusicPageShadowedIconDefault,
     layoutId: String = "" //********************
 ) {
     Box(
@@ -838,14 +716,14 @@ fun IconShadowed(
             .fillMaxHeight()
             .clip(shape)
             .border(
-                width = 1.dp,
+                width = Dimens.Size.MusicPageShadowedIconDarkBorder,
                 brush = Brush.linearGradient(
                     colors = listOf(Color.Transparent, colorTheme.DarkShadow)
                 ),
                 shape = shape
             )
             .border(
-                width = 2.dp,
+                width = Dimens.Size.MusicPageShadowedIconLightBorder,
                 brush = Brush.linearGradient(
                     colors = listOf(colorTheme.LightShadow, Color.Transparent, Color.Transparent)
                 ),
@@ -865,28 +743,4 @@ fun IconShadowed(
                 .padding(padding)
         )
     }
-}
-
-@Composable
-fun SongTitle(
-    modifier: Modifier = Modifier,
-    name: String,
-    artist: String
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.SpaceBetween,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = name,
-            color = DarkTheme.Text
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = artist,
-            color = DarkTheme.Text
-        )
-    }
-
 }

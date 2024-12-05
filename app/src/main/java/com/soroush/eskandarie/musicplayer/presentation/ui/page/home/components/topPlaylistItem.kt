@@ -47,8 +47,8 @@ fun TopPlaylistItem(
     uriBack2: Uri,
     modifier: Modifier = Modifier,
     themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
-    extraPadding: Dp = Dimens.Padding.TopPlaylistItemDefaultPadding,
-    imageShape: Shape = RoundedCornerShape(Dimens.CornerRadius.TopPlaylistItemCornerRadius),
+    extraPadding: Dp = Dimens.Padding.TopPlaylistItemDefault,
+    imageShape: Shape = RoundedCornerShape(Dimens.CornerRadius.TopPlaylistItem),
     errorResource: Int = R.drawable.empty_album,
     textColor: TextStyle = MaterialTheme.typography.bodyLarge.copy(
         fontWeight = FontWeight.Medium

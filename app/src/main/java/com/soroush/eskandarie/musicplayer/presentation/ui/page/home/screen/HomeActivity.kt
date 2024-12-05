@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
@@ -50,7 +51,8 @@ class HomeActivity : ComponentActivity() {
                         modifier = Modifier
                             .statusBarsPadding()
                             .align(Alignment.TopCenter)
-                            .padding(horizontal = (Dimens.Padding.HomeActivity)),
+                            .padding(horizontal = (Dimens.Padding.HomeActivity))
+                            .padding(bottom = 68.dp),
                         playlists = getPlaylist()
                     )
 
