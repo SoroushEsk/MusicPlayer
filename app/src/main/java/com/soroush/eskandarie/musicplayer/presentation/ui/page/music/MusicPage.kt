@@ -83,6 +83,7 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.presentation.ui.MusicPageScrollState
 import com.soroush.eskandarie.musicplayer.presentation.ui.animation.musicPageMotionLayoutConfig
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
@@ -100,9 +101,8 @@ fun MusicPage(
 
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
-    val context = LocalContext.current
     var progress by remember { mutableStateOf(0.0f) }
-
+    var scrollStatus by remember { mutableStateOf(MusicPageScrollState.NoScroll) }
     val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
     val palette = Palette.from(bitmap).generate()
 
@@ -133,21 +133,23 @@ fun MusicPage(
             )
         ).toFloat()
     )
-
-    var isRotatePoster by remember { mutableStateOf(true) }
-    var preFingerY by remember { mutableStateOf(0f) }
-    var isScroll by remember { mutableStateOf(false) }
     var fingerY by remember { mutableStateOf(0f) }
     var isTouching by remember { mutableStateOf(false) }
     val maxScrollRange = configuration.screenHeightDp * LocalDensity.current.density
 
     val animatedProgress by animateFloatAsState(
-        targetValue = if (isTouching) {
-            Math.abs(fingerY - maxScrollRange) / maxScrollRange
-        } else {
-            if (progress > 0.5f) {
-                if (isScroll) 0.99f else 1f
-            } else 0f
+        targetValue = when( scrollStatus ) {
+            MusicPageScrollState.ScrollUp -> 1f
+            MusicPageScrollState.ScrollDown -> 0f
+            else -> {
+                if (isTouching) {
+                    Math.abs(fingerY - maxScrollRange) / maxScrollRange
+                } else {
+                    if (progress > 0.5f) {
+                        1f
+                    } else 0f
+                }
+            }
         },
         animationSpec = tween(
             durationMillis = if (isTouching) 0
@@ -168,8 +170,6 @@ fun MusicPage(
             ), repeatMode = RepeatMode.Restart
         ), label = ""
     )
-
-
     var musicBarPosterWidth by remember { mutableStateOf(1f) }
     var isTheSameSize by remember { mutableStateOf(false)}
     val pagePosterAlphaAnimation by animateFloatAsState(
@@ -180,7 +180,6 @@ fun MusicPage(
         targetValue = if (isTheSameSize) 1f else 0f,
         animationSpec = tween(durationMillis = if( progress == 1f || progress == 0f ) 0 else Constants.MusicBarValues.PosterHideDuration)
     )
-    val scrollState = rememberScrollState()
     var offset by remember { mutableStateOf(0f) }
     val nestedScrollConnection = remember {
         object : NestedScrollConnection {
@@ -188,14 +187,6 @@ fun MusicPage(
                 if (available.y != 0f) {
                 }
                 return Offset.Zero
-            }
-
-            override fun onPostScroll(
-                consumed: Offset,
-                available: Offset,
-                source: NestedScrollSource
-            ): Offset {
-                return super.onPostScroll(consumed, available, source)
             }
         }
     }
@@ -224,13 +215,11 @@ fun MusicPage(
                 .background(radialGradientBrush)
                 .scrollable(
                     orientation = Orientation.Vertical,
-                    // Scrollable state: describes how to consume
-                    // scrolling delta and update offset
                     state = rememberScrollableState { delta ->
                         offset += delta
-                        Log.e("Scroll", "$delta, $offset")
-                        if (delta < -40) progress = 1f
-                        else if (delta > 70) progress = 0f
+                        if (delta < -30) scrollStatus = MusicPageScrollState.ScrollDown
+                        else if (delta > 60) scrollStatus = MusicPageScrollState.ScrollUp
+                        else scrollStatus = MusicPageScrollState.NoScroll
                         delta
                     }
                 )
@@ -243,15 +232,16 @@ fun MusicPage(
                         while (true) {
                             val event = awaitPointerEvent()
                             val position = event.changes.first().position
-                            //isTouching = event.changes.any { it.pressed }
+                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
+                                isTouching = event.changes.any { it.pressed }
+                            else isTouching = false
                             if (isTouching) {
                                 fingerY = position.y + mainContainerCoordinates.y
                             }
                         }
                     }
                 }
-        ) {
-        }
+            ) {}
         Column(
             modifier = Modifier
                 .layoutId(Constants.MusicBarValues.MotionLayoutTextContainer),
@@ -299,8 +289,6 @@ fun MusicPage(
                     musicBarPosterWidth = layoutCoordinates.size.width.toFloat()
                 }
                 .then(if (progress == 1f) Modifier.size(0.dp) else Modifier)
-
-
         )
         SongPoster(
             modifier = Modifier
@@ -322,7 +310,6 @@ fun MusicPage(
             resetRotation = progress == 0f,
             colorTheme = colorTheme
         )
-
         IconsAtEndsRow(
             modifier = Modifier
                 .layoutId(Constants.MusicPageValues.AboveProgressBarContainerId),
@@ -330,7 +317,6 @@ fun MusicPage(
             leftIcon  =  R.drawable.playlist,
             colorTheme = colorTheme
         )
-
         ProgressBar(
             modifier = Modifier
                 .layoutId(Constants.MusicPageValues.PlayProgressBarContainerId)
@@ -341,7 +327,6 @@ fun MusicPage(
             totalDuration = "03:13",
             songPercent = 0.73f
         )
-
         PLayControlShadow(
             modifier = modifier.rotate(90f),
             tint = colorTheme.Background,
@@ -384,13 +369,10 @@ fun MusicPage(
                 .padding(7.dp)
                 .aspectRatio(1f),
             tint = colorTheme.Text.copy(alpha = 0.6f)
-
         )
-
     }
-
-
 }
+
 @Composable
 fun PLayControlShadow(
     modifier: Modifier,
