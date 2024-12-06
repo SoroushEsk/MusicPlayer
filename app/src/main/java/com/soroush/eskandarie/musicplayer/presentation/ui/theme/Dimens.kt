@@ -43,7 +43,7 @@ object Dimens {
         val MusicBarMotionLayoutTextContainer               : Int       =   4
         val MusicBarMotionLayoutControlIcon                 : Int       =   5
         val MusicBarMotionLayoutPlaylistIcon                : Int       =   4
-        val MusicBarMotionLayoutGeneral                     : Int       =  20
+        val MusicBarMotionLayoutGeneral                     : Int       =  28
         val MusicPageMotionLayoutPlayResumeTop              : Int       = 100
         val MusicPageShadowedIconDefault                    : Dp        =  10.dp
         val MusicPageIconsAtEndRowDefault                   : Dp        =  16.dp

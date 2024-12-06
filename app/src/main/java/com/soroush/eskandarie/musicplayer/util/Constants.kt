@@ -36,7 +36,7 @@ object Constants {
         const val DiskRotationDuration          : Int   = 20000
         const val NeedleRotationDuration        : Int   = 1000
         const val DiskAndNeedleRevealDuration   : Int   = 900
-        const val LeaveScrollDuration           : Int   = 700
+        const val LeaveScrollDuration           : Int   = 900
         const val ProgressBarPointToStrokeRatio : Float = 1.8f
     }
 

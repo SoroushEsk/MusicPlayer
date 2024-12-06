@@ -141,15 +141,16 @@ fun MusicPage(
         targetValue = when( scrollStatus ) {
             MusicPageScrollState.ScrollUp -> 1f
             MusicPageScrollState.ScrollDown -> 0f
-            else -> {
-                if (isTouching) {
-                    Math.abs(fingerY - maxScrollRange) / maxScrollRange
-                } else {
-                    if (progress > 0.5f) {
-                        1f
-                    } else 0f
-                }
-            }
+            else -> 0f
+//            else -> {
+//                if (isTouching) {
+//                    Math.abs(fingerY - maxScrollRange) / maxScrollRange
+//                } else {
+//                    if (progress > 0.5f) {
+//                        1f
+//                    } else 0f
+//                }
+//            }
         },
         animationSpec = tween(
             durationMillis = if (isTouching) 0
@@ -192,7 +193,7 @@ fun MusicPage(
     }
     MotionLayout(
         motionScene = MotionScene(content = musicPageMotionLayoutConfig),
-        progress = progress,
+        progress = animatedProgress,
         modifier = modifier
             .fillMaxHeight()
             .fillMaxWidth()
@@ -217,9 +218,8 @@ fun MusicPage(
                     orientation = Orientation.Vertical,
                     state = rememberScrollableState { delta ->
                         offset += delta
-                        if (delta < -30) scrollStatus = MusicPageScrollState.ScrollDown
-                        else if (delta > 60) scrollStatus = MusicPageScrollState.ScrollUp
-                        else scrollStatus = MusicPageScrollState.NoScroll
+                        if (delta < -5) scrollStatus = MusicPageScrollState.ScrollDown
+                        else if (delta > 0) scrollStatus = MusicPageScrollState.ScrollUp
                         delta
                     }
                 )
@@ -227,20 +227,20 @@ fun MusicPage(
                     mainContainerCoordinates =
                         Offset(coordinates.positionInWindow().x, coordinates.positionInWindow().y)
                 }
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val position = event.changes.first().position
-                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
-                                isTouching = event.changes.any { it.pressed }
-                            else isTouching = false
-                            if (isTouching) {
-                                fingerY = position.y + mainContainerCoordinates.y
-                            }
-                        }
-                    }
-                }
+//                .pointerInput(Unit) {
+//                    awaitPointerEventScope {
+//                        while (true) {
+//                            val event = awaitPointerEvent()
+//                            val position = event.changes.first().position
+////                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
+////                                isTouching = event.changes.any { it.pressed }
+////                            else isTouching = false
+//                            if (isTouching) {
+//                                fingerY = position.y + mainContainerCoordinates.y
+//                            }
+//                        }
+//                    }
+//                }
             ) {}
         Column(
             modifier = Modifier
@@ -567,7 +567,9 @@ fun SongPoster(
     var posterGradianSize by remember { mutableStateOf(Size.Zero) }
     var needleConnecterSize by remember { mutableStateOf(Size.Zero) }
     var mainContainerSize by remember {mutableStateOf(Size.Zero)}
-
+    LaunchedEffect(key1 = rotation.value) {
+        Log.e("Rotation", "${rotation.value} ${isAnimation} ${resetRotation} \n ${currentRotation}")
+    }
 
     Box(
         modifier = modifier
