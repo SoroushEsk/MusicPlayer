@@ -86,7 +86,10 @@ dependencies {
     // Color thief
     implementation(libs.androidx.palette.ktx)
 
-
+    // ExoPlayer
+    implementation("androidx.media3:media3-exoplayer:1.5.0")
+    implementation("androidx.media3:media3-exoplayer-dash:1.5.0")
+    implementation("androidx.media3:media3-ui:1.5.0")
 
 
     implementation(libs.hilt.navigation.compose)

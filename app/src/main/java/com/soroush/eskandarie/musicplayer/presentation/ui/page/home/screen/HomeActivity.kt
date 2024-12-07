@@ -1,16 +1,24 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,6 +28,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.H
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.MusicPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
+import com.soroush.eskandarie.musicplayer.service.MusicPlayerService
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -31,41 +40,60 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .navigationBarsPadding()
-            ) {
-
-//                    SearchField(
-//                        setState = viewmodel::getHomeSetAction,
-//                        getState = viewmodel.homeState.map { homeState ->
-//                            homeState.searchFieldState.searchText
-//                        }.collectAsState(initial = "")
-//                    ) {
+            ControlServiceScreen()
+//            Box(
+//                modifier = Modifier
+//                    .fillMaxSize()
+//                    .navigationBarsPadding()
+//            ) {
 //
-//                    }
-
-                    HomePage(
-                        modifier = Modifier
-                            .statusBarsPadding()
-                            .align(Alignment.TopCenter)
-                            .padding(horizontal = (Dimens.Padding.HomeActivity))
-                            .padding(bottom = 68.dp),
-                        playlists = getPlaylist()
-                    )
-
-                    MusicPage(
-                        modifier = Modifier
-                    )
-
-//                MusicPage(scrollState = scrollState)
-            }
+////                    SearchField(
+////                        setState = viewmodel::getHomeSetAction,
+////                        getState = viewmodel.homeState.map { homeState ->
+////                            homeState.searchFieldState.searchText
+////                        }.collectAsState(initial = "")
+////                    ) {
+////
+////                    }
+//
+//                    HomePage(
+//                        modifier = Modifier
+//                            .statusBarsPadding()
+//                            .align(Alignment.TopCenter)
+//                            .padding(horizontal = (Dimens.Padding.HomeActivity))
+//                            .padding(bottom = 68.dp),
+//                        playlists = getPlaylist()
+//                    )
+//
+//                    MusicPage(
+//                        modifier = Modifier
+//                    )
+//
+////                MusicPage(scrollState = scrollState)
+//            }
         }
     }
 
+    @Composable
+    fun ControlServiceScreen() {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(onClick = { startService(Intent(this@HomeActivity, MusicPlayerService::class.java)) }) {
+                Text("Start Service")
+            }
 
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(onClick = { stopService(Intent(this@HomeActivity, MusicPlayerService::class.java)) }) {
+                Text("Stop Service")
+            }
+        }
+    }
     //region Init Methods
 
     //endregion
