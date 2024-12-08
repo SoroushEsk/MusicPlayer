@@ -25,7 +25,7 @@ class MusicPlayerService : Service() {
         Log.d(TAG, "Service Started")
         if (exoPlayer == null) {
             exoPlayer = ExoPlayer.Builder(this).build()
-            val audioUri = Uri.parse("android.resource://${packageName}/raw/a")
+            val audioUri = Uri.parse("android.resource://${packageName}/raw/a") 
             val mediaItem = MediaItem.fromUri(audioUri)
 
             exoPlayer?.apply {

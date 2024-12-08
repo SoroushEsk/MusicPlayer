@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="90dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:id="@+id/notification_music_poster"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_margin="10dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintStart_toStartOf="parent"
+        android:src="@drawable/ed"
+        />
+    <ImageButton
+        android:id="@+id/notification_like"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/notification_music_poster"
+        app:layout_constraintEnd_toStartOf="@id/notification_last_song"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/empty_heart"
+        app:layout_constraintDimensionRatio="1:1"
+        android:layout_margin="4dp"
+        android:padding="32dp"
+        />
+    <ImageButton
+        android:id="@+id/notification_last_song"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/notification_like"
+        app:layout_constraintEnd_toStartOf="@id/notification_play_pause"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:rotation="180"
+        android:background="@drawable/fast_forward"
+        app:layout_constraintDimensionRatio="1:1"
+        />
+    <ImageButton
+        android:id="@+id/notification_play_pause"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/notification_last_song"
+        app:layout_constraintEnd_toStartOf="@+id/notification_next_song"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:background="@drawable/play_button"
+        app:layout_constraintDimensionRatio="1:1"
+        />
+    <ImageButton
+        android:id="@+id/notification_next_song"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/notification_play_pause"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/notification_shuffle"
+        android:background="@drawable/fast_forward"
+        app:layout_constraintDimensionRatio="1:1"
+        />
+    <ImageButton
+        android:id="@+id/notification_shuffle"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toEndOf="@id/notification_next_song"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/shuffle"
+        app:layout_constraintDimensionRatio="1:1"
+        />
+
+
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>
