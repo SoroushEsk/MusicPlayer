@@ -1,8 +1,15 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.widget.RemoteViews
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -22,6 +29,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
@@ -34,11 +44,23 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
 
+    private val CHANNEL_ID = "simple_notification_channel"
+    private val NOTIFICATION_ID = 1
     private val viewmodel: HomeViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        createNotificationChannel()
+
+        createNotificationChannel()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        val notificationLayout = RemoteViews(packageName, R.layout.music_notification)
+
+
+
         setContent {
             ControlServiceScreen()
 //            Box(
@@ -72,6 +94,25 @@ class HomeActivity : ComponentActivity() {
 ////                MusicPage(scrollState = scrollState)
 //            }
         }
+        createNotificationChannel()
+
+        // Show a simple notification
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.ic_dialog_info) // Use a default system icon
+            .setContentTitle("Hello, Notification!")
+            .setContentText("This is your first notification.")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+
+        // Show notification when the app starts
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
     }
 
     @Composable
@@ -83,7 +124,14 @@ class HomeActivity : ComponentActivity() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Button(onClick = { startService(Intent(this@HomeActivity, MusicPlayerService::class.java)) }) {
+            Button(onClick = {
+                val serviceIntent = Intent(this@HomeActivity, MusicPlayerService::class.java)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(serviceIntent) // Required for Android 8.0 and above
+                } else {
+                    startService(serviceIntent)
+                }
+            }) {
                 Text("Start Service")
             }
 
@@ -130,5 +178,21 @@ class HomeActivity : ComponentActivity() {
             Uri.parse("android.resource://${this.packageName}/" + R.drawable.empty_album)
         )
     )
+
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val name = "Simple Notification Channel"
+            val descriptionText = "Channel for simple notifications"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+                description = descriptionText
+            }
+
+            val notificationManager: NotificationManager =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
     //endregion
 }
