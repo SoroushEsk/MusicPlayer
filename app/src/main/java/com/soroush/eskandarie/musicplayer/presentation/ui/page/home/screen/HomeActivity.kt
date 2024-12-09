@@ -51,14 +51,6 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        createNotificationChannel()
-
-        createNotificationChannel()
-
-        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        val notificationLayout = RemoteViews(packageName, R.layout.music_notification)
-
 
 
         setContent {
@@ -94,25 +86,6 @@ class HomeActivity : ComponentActivity() {
 ////                MusicPage(scrollState = scrollState)
 //            }
         }
-        createNotificationChannel()
-
-        // Show a simple notification
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // Use a default system icon
-            .setContentTitle("Hello, Notification!")
-            .setContentText("This is your first notification.")
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .build()
-
-        // Show notification when the app starts
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            return
-        }
-        NotificationManagerCompat.from(this).notify(NOTIFICATION_ID, notification)
     }
 
     @Composable

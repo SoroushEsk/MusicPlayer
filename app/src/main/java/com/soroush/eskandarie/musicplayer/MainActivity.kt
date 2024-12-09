@@ -25,17 +25,17 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
-                requestNotificationPermission()
-            } else {
-                showNotification()
-            }
-        } else {
-            showNotification()
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+//            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+//                != PackageManager.PERMISSION_GRANTED
+//            ) {
+//                requestNotificationPermission()
+//            } else {
+//                showNotification()
+//            }
+//        } else {
+//            showNotification()
+//        }
         val intent = Intent(this, HomeActivity::class.java)
         startActivity(intent)
 
