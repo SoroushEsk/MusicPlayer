@@ -36,7 +36,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
-import com.soroush.eskandarie.musicplayer.util.Constants
+import com.soroush.eskandarie.musicplayer.framework.util.Constants
 
 @Composable
 fun HomePage(

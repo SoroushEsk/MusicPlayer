@@ -38,7 +38,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.H
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.MusicPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
-import com.soroush.eskandarie.musicplayer.service.MusicPlayerService
+import com.soroush.eskandarie.musicplayer.framework.service.MusicPlayerService
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

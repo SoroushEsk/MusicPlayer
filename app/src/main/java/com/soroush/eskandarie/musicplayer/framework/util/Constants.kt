@@ -1,4 +1,4 @@
-package com.soroush.eskandarie.musicplayer.util
+package com.soroush.eskandarie.musicplayer.framework.util
 
 import android.widget.ProgressBar
 

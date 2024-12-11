@@ -1,4 +1,4 @@
-package com.soroush.eskandarie.musicplayer.service
+package com.soroush.eskandarie.musicplayer.framework.service
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
