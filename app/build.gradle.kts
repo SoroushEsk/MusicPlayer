@@ -77,6 +77,7 @@ dependencies {
     // KSP & Dagger/ Hilt
     implementation(libs.hilt.android)
     implementation(libs.androidx.window)
+    implementation(libs.androidx.media3.session)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.android.compiler)
 
@@ -86,8 +87,15 @@ dependencies {
     // Color thief
     implementation(libs.androidx.palette.ktx)
 
+    // ExoPlayer
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.exoplayer.dash)
+    implementation(libs.androidx.media3.ui)
 
-
+    // Room
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    annotationProcessor(libs.androidx.room.room.compiler)
 
     implementation(libs.hilt.navigation.compose)
     implementation(libs.material)

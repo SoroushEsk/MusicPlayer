@@ -39,6 +39,10 @@ object Constants {
         const val LeaveScrollDuration           : Int   = 900
         const val ProgressBarPointToStrokeRatio : Float = 1.8f
     }
+    object PlaybackAction{
+        const val Pause                         : String = "com.soroush.eskandarie.musicplayer.PAUSE"
+        const val Resume                        : String = "com.soroush.eskandarie.musicplayer.RESUME"
 
+    }
 
 }

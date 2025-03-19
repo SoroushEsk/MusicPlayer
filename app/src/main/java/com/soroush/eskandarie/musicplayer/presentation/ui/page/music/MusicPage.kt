@@ -14,6 +14,7 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
@@ -83,6 +84,7 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.domain.model.PlaybackState
 import com.soroush.eskandarie.musicplayer.presentation.ui.MusicPageScrollState
 import com.soroush.eskandarie.musicplayer.presentation.ui.animation.musicPageMotionLayoutConfig
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
@@ -96,7 +98,8 @@ import com.soroush.eskandarie.musicplayer.util.Constants
 fun MusicPage(
     modifier: Modifier = Modifier,
     colorTheme: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
-    posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.General)
+    posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.General),
+    onClick: (playbackState: PlaybackState) -> Unit
 ) {
 
     val configuration = LocalConfiguration.current
@@ -190,6 +193,10 @@ fun MusicPage(
                 return Offset.Zero
             }
         }
+    }
+
+    var playbackState by remember{
+        mutableStateOf(PlaybackState.PAUSED)
     }
     MotionLayout(
         motionScene = MotionScene(content = musicPageMotionLayoutConfig),
@@ -339,12 +346,16 @@ fun MusicPage(
         PLayControlShadow(
             modifier = Modifier,
             tint = colorTheme.Background,
-            iconPainter = R.drawable.pause,
+            iconPainter = if (playbackState == PlaybackState.PLAYING) R.drawable.play_button else R.drawable.pause,
             shape = CircleShape,
             backgroundColor = colorTheme.Icon,
             padding = 10.dp + (progress * 10.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutPlayIconId
-        )
+        ){
+            onClick(playbackState)
+            if(playbackState == PlaybackState.PLAYING) playbackState = PlaybackState.PAUSED
+            else playbackState = PlaybackState.PLAYING
+        }
         PLayControlShadow(
             modifier = modifier,
             tint = colorTheme.Background,
@@ -383,7 +394,8 @@ fun PLayControlShadow(
     backgroundColor: Color = Color.Transparent,
     tint: Color = colorTheme.DarkSurface,
     padding: Dp = Dimens.Padding.MusicPagePlayControlShadowDefault,
-    layoutId: String = ""
+    layoutId: String = "",
+    onClick: ()->Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -404,7 +416,10 @@ fun PLayControlShadow(
                 clip = true,
                 spotColor = colorTheme.DarkShadow
             )
-            .background(backgroundColor),
+            .background(backgroundColor)
+            .clickable{
+                onClick()
+            },
         contentAlignment = Alignment.Center
     ) {
         Icon(

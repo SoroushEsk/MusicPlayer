@@ -1,4 +1,4 @@
-package com.soroush.eskandarie.musicplayer.domain
+package com.soroush.eskandarie.musicplayer.domain.model
 
 import android.net.Uri
 
