@@ -9,6 +9,7 @@ import com.soroush.eskandarie.musicplayer.data.local.dao.MusicQueueDao
 import com.soroush.eskandarie.musicplayer.data.repository.MusicQueueRepositoryImpl
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
 import dagger.Module
 import dagger.Provides
@@ -57,6 +58,12 @@ object MediaModule{
     @Singleton
     fun provideGetAllMusicFromQueueUseCase(musicQueueRepository: MusicQueueRepository): GetAllMusicOfQueueUseCase {
         return GetAllMusicOfQueueUseCase(musicQueueRepository)
+    }
+
+    @Provides
+    @Singleton
+    fun provideGetMusicFromQueueUseCase(musicQueueRepository: MusicQueueRepository): GetMusicFromQueueUseCase{
+        return GetMusicFromQueueUseCase(musicQueueRepository)
     }
 
     @Provides

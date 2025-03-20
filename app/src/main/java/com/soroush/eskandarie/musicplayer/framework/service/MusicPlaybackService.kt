@@ -22,6 +22,7 @@ import androidx.media3.session.MediaStyleNotificationHelper
 import com.google.common.util.concurrent.ListenableFuture
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.framework.notification.MusicNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +35,7 @@ import javax.inject.Inject
 class MusicPlaybackService: Service() {
     //region Fields
     @Inject lateinit var mediaSession: MediaSession
-    @Inject lateinit var usecase: GetAllMusicOfQueueUseCase
+    @Inject lateinit var getMusicByIdUseCase: GetMusicFromQueueUseCase
     private lateinit var notificationManager: NotificationManager
     private lateinit var musicNotificationManager: MusicNotificationManager
     companion object {
@@ -56,17 +57,12 @@ class MusicPlaybackService: Service() {
         val notification = createNotification()
         startForeground(NOTIFICATION_ID, notification)
         CoroutineScope(Dispatchers.IO).launch{
-            usecase().forEach{
-                if (it.id.toInt() == 2 ){
-                    val mediaItems = usecase().map { music ->
-                        MediaItem.fromUri(music.path)
-                    }
 
-                    withContext(Dispatchers.Main) {
-                        playMusic(mediaItems)
-                    }
-                }
-                Log.e("music paht", "id:${it.id} path:${it.path}")
+            val music = getMusicByIdUseCase(8)
+            val mediaItem = music?.path?.let { MediaItem.fromUri(it) }
+            withContext(Dispatchers.IO){
+                if ( mediaItem != null)
+                    playMusic(mutableListOf(mediaItem))
             }
         }
         return START_STICKY
