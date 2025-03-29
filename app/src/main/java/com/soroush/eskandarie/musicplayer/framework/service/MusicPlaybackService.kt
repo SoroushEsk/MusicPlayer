@@ -57,11 +57,10 @@ class MusicPlaybackService: Service() {
         val notification = createNotification()
         startForeground(NOTIFICATION_ID, notification)
         CoroutineScope(Dispatchers.IO).launch{
-
             val music = getMusicByIdUseCase(8)
             val mediaItem = music?.path?.let { MediaItem.fromUri(it) }
-            withContext(Dispatchers.IO){
-                if ( mediaItem != null)
+            withContext(Dispatchers.Main) {
+                if (mediaItem != null)
                     playMusic(mutableListOf(mediaItem))
             }
         }

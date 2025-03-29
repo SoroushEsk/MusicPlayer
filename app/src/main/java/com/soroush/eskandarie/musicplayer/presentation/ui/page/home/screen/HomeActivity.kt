@@ -1,6 +1,7 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.Manifest
+import android.content.ComponentName
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -30,11 +32,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaController
+import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
+import com.google.common.util.concurrent.MoreExecutors
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.data.local.MusicEntity
 import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
-import com.soroush.eskandarie.musicplayer.domain.model.PlaybackState
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUsecase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
@@ -45,28 +50,53 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
 import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeActivity  : ComponentActivity() {
+    //region Fields
     private val viewmodel: HomeViewModel by viewModels()
     @Inject lateinit var refreshQueueUseCase: RefreshQueueUseCase
+    lateinit var mediaFuture: ListenableFuture<MediaController>
+
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var progressUpdateJob: Job? = null
+
+    var songPercentage :Float = 0f
     private val PERMISSIONS = arrayOf(
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.READ_MEDIA_AUDIO
     )
-
+    //endregion
     @OptIn(UnstableApi::class)
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        startService(
+            Intent(
+                this@HomeActivity,
+                MusicPlaybackService::class.java
+            ).apply {
+                action = Constants.PlaybackAction.Resume
+            })
         val rep = DeviceMusicRepositoryImpl(this)
         val usecase = GetAllMusicFromDeviceUsecase(rep)
         checkPermissions()
         setContent {
+            LaunchedEffect(Unit) {
+                while(true) {
+                    viewmodel.setSongPercent()
+                    delay(1000)
+                }
+            }
             val scope = rememberCoroutineScope()
             var musicList by remember { mutableStateOf<List<MusicFile>>(emptyList()) }
             LaunchedEffect(Unit) {
@@ -108,27 +138,10 @@ class HomeActivity  : ComponentActivity() {
                     )
 
                     MusicPage(
-                        modifier = Modifier
+                        modifier = Modifier,
+                        songPercent = viewmodel.songPercent.collectAsState()
                     ){playbackState ->
-                        if( playbackState == PlaybackState.PAUSED) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                startService(
-                                    Intent(
-                                        this@HomeActivity,
-                                        MusicPlaybackService::class.java
-                                    ).apply {
-                                        action = Constants.PlaybackAction.Pause
-                                    })
-                            }
-                        }else {
-                            startService(
-                                Intent(
-                                    this@HomeActivity,
-                                    MusicPlaybackService::class.java
-                                ).apply {
-                                    action = Constants.PlaybackAction.Resume
-                                })
-                        }
+
                     }
 
 //                MusicPage(scrollState = scrollState)
@@ -137,6 +150,21 @@ class HomeActivity  : ComponentActivity() {
         }
     }
 
+    override fun onStart() {
+        super.onStart()
+        val sessionToken =
+            SessionToken(this@HomeActivity, ComponentName( this@HomeActivity, MusicPlaybackService::class.java))
+        mediaFuture =
+            MediaController.Builder(this@HomeActivity, sessionToken).buildAsync()
+
+        mediaFuture.addListener({
+            try {
+            }catch (e: Exception){
+            }
+
+        }, MoreExecutors.directExecutor())
+//        MediaController.releaseFuture(mediaFuture)
+    }
     //region Init Methods
 
     private fun checkPermissions() {

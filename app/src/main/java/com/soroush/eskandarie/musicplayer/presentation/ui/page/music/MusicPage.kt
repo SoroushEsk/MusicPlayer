@@ -43,6 +43,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -92,11 +93,13 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.util.Constants
+import java.util.concurrent.Flow
 
 @OptIn(ExperimentalMotionApi::class)
 @Composable
 fun MusicPage(
     modifier: Modifier = Modifier,
+    songPercent: State<Float>,
     colorTheme: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.General),
     onClick: (playbackState: PlaybackState) -> Unit
@@ -115,6 +118,8 @@ fun MusicPage(
     var mainContainerCoordinates by remember {
         mutableStateOf(Offset(0f, 0f))
     }
+//    var songPercentState by remember { mutableStateOf(0f) }
+
 
     val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = Dimens.Alpha.DomainColor1Alpha)
     val dominantColor2 = Color(palette.getDominantColor(0)).copy(alpha = Dimens.Alpha.DomainColor2Alpha)
@@ -332,7 +337,7 @@ fun MusicPage(
             colorTheme = colorTheme,
             currentPosition = "01:31",
             totalDuration = "03:13",
-            songPercent = 0.73f
+            songPercent = songPercent.value
         )
         PLayControlShadow(
             modifier = modifier.rotate(90f),
@@ -417,7 +422,7 @@ fun PLayControlShadow(
                 spotColor = colorTheme.DarkShadow
             )
             .background(backgroundColor)
-            .clickable{
+            .clickable {
                 onClick()
             },
         contentAlignment = Alignment.Center
