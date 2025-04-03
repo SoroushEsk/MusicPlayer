@@ -1,8 +1,11 @@
 package com.soroush.eskandarie.musicplayer.util
 
-import android.widget.ProgressBar
-
 object Constants {
+    object SplashScreen{
+        const val SplashDuration                : Long   = 2500
+        const val SplashScreenIconDescription   : String = "music_player_icon"
+        const val SplashScreenAppName           : String = "Music Player"
+    }
     object HomePageValues{
         const val PlaylistSectionTitle          : String = "Playlists"
         const val MusicPageMotionLayoutId       : String = "music_bar_motion_layout"

@@ -80,13 +80,7 @@ class HomeActivity  : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        startService(
-            Intent(
-                this@HomeActivity,
-                MusicPlaybackService::class.java
-            ).apply {
-                action = Constants.PlaybackAction.Resume
-            })
+
         val rep = DeviceMusicRepositoryImpl(this)
         val usecase = GetAllMusicFromDeviceUsecase(rep)
         checkPermissions()

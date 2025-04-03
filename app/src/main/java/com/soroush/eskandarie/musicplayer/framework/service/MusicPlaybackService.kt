@@ -47,23 +47,23 @@ class MusicPlaybackService: Service() {
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
-        pausePlayback()
         notificationManager = getSystemService(NotificationManager::class.java)
         musicNotificationManager = MusicNotificationManager(this)
         createNotificationChannel()
+        val notification = createNotification()
+        startForeground(NOTIFICATION_ID, notification)
 
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        val notification = createNotification()
-        startForeground(NOTIFICATION_ID, notification)
-        CoroutineScope(Dispatchers.IO).launch{
-            val music = getMusicByIdUseCase(8)
-            val mediaItem = music?.path?.let { MediaItem.fromUri(it) }
-            withContext(Dispatchers.Main) {
-                if (mediaItem != null)
-                    playMusic(mutableListOf(mediaItem))
-            }
-        }
+
+//        CoroutineScope(Dispatchers.IO).launch{
+//            val music = getMusicByIdUseCase(8)
+//            val mediaItem = music?.path?.let { MediaItem.fromUri(it) }
+//            withContext(Dispatchers.Main) {
+//                if (mediaItem != null)
+//                    playMusic(mutableListOf(mediaItem))
+//            }
+//        }
         return START_STICKY
     }
     override fun onDestroy() {

@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 
 object Dimens {
     object Size{
+        val SplashScreenIcon                                : Float     =  0.56f
         val TopPlaylistItemTextWeight                       : Float     =  0.15f
         val TopPlaylistItemBackWeight                       : Float     =  0.85f
         val GeneralItemHeight                               : Dp        =  64.dp
@@ -31,6 +32,8 @@ object Dimens {
         val MusicPageProgressBarStrokeWidth                 : Dp        =   8.dp
     }
     object Padding{
+        val Zero                                            : Dp        =   0.dp
+        val SplashScreenTextDown                            : Dp        =  40.dp
         val HomeActivity                                    : Dp        =  10.dp
         val TopPlaylistItemDefault                          : Dp        =   6.dp
         val PlayListItemIconSize                            : Dp        =  16.dp
@@ -92,6 +95,7 @@ object Dimens {
     }
     object AspectRatio {
         val MusicPageNeedle                                 : Float     = 0.6f
+        val SplashIcon                                      : Float     = 1f
     }
     object Offset{
         val MusicPageNeedleXOffset                          : Dp        = -16.dp
