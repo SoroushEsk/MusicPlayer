@@ -11,6 +11,7 @@ import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
+import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -21,7 +22,18 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object MediaModule{
+    //region ViewModels
 
+    //endregion
+    //region SharedPreference
+    @Provides
+    @Singleton
+    fun provideSharedPreference(@ApplicationContext context: Context) = context.getSharedPreferences(
+        Constants.SharedPreference.Name,
+        Context.MODE_PRIVATE
+    )
+    //endregion
+    //region MediaSession
     @Provides
     @Singleton
     fun provideMediaSessin(@ApplicationContext context: Context): MediaSession {
@@ -33,43 +45,46 @@ object MediaModule{
             .build()
         return mediaSession
     }
-
+    //endregion
+    //region Database
     @Provides
     @Singleton
     fun provideMusicDatabase(@ApplicationContext context: Context): MusicPlayerDatabase{
         return Room.databaseBuilder(
             context,
             MusicPlayerDatabase::class.java,
-            "music_player_database"
+            Constants.Database.MusicPlayerDatabaseName
         ).build()
     }
-
     @Provides
     @Singleton
     fun provideMusicQueueDao(musicPlayerDatabase: MusicPlayerDatabase) = musicPlayerDatabase.getMusicQueueDao()
-
+    @Provides
+    @Singleton
+    fun providePlaylistDao(musicPlayerDatabase: MusicPlayerDatabase) = musicPlayerDatabase.getPlaylistDao()
+    //endregion
+    //region Repository
     @Provides
     @Singleton
     fun provideMusicQueueRepository(musicQueueDao: MusicQueueDao): MusicQueueRepository {
         return MusicQueueRepositoryImpl(musicQueueDao)
     }
-
+    //endregion
+    //region MusicQueueUseCases
     @Provides
     @Singleton
     fun provideGetAllMusicFromQueueUseCase(musicQueueRepository: MusicQueueRepository): GetAllMusicOfQueueUseCase {
         return GetAllMusicOfQueueUseCase(musicQueueRepository)
     }
-
     @Provides
     @Singleton
     fun provideGetMusicFromQueueUseCase(musicQueueRepository: MusicQueueRepository): GetMusicFromQueueUseCase{
         return GetMusicFromQueueUseCase(musicQueueRepository)
     }
-
     @Provides
     @Singleton
     fun provideRefreshQueueUseCase(musicQueueRepository: MusicQueueRepository): RefreshQueueUseCase {
         return RefreshQueueUseCase(musicQueueRepository)
     }
-
+    //endregion
 }

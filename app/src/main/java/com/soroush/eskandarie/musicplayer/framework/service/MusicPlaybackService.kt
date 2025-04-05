@@ -27,6 +27,7 @@ import com.soroush.eskandarie.musicplayer.framework.notification.MusicNotificati
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -36,6 +37,9 @@ class MusicPlaybackService: Service() {
     //region Fields
     @Inject lateinit var mediaSession: MediaSession
     @Inject lateinit var getMusicByIdUseCase: GetMusicFromQueueUseCase
+    @Inject lateinit var getAllMusicOfQueueUseCase: GetAllMusicOfQueueUseCase
+    private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
     private lateinit var notificationManager: NotificationManager
     private lateinit var musicNotificationManager: MusicNotificationManager
     companion object {
@@ -56,14 +60,18 @@ class MusicPlaybackService: Service() {
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
-//        CoroutineScope(Dispatchers.IO).launch{
-//            val music = getMusicByIdUseCase(8)
-//            val mediaItem = music?.path?.let { MediaItem.fromUri(it) }
-//            withContext(Dispatchers.Main) {
-//                if (mediaItem != null)
-//                    playMusic(mutableListOf(mediaItem))
-//            }
-//        }
+        serviceScope.launch {
+            val mutableList = mutableListOf<MediaItem>()
+            val music = getAllMusicOfQueueUseCase().forEach {
+                val mediaItem = it.path.let { MediaItem.fromUri(it) }
+                mutableList.add(mediaItem)
+            }
+            withContext(Dispatchers.Main) {
+                mediaSession.player.addMediaItems(mutableList)
+                mediaSession.player.prepare()
+            }
+
+        }
         return START_STICKY
     }
     override fun onDestroy() {

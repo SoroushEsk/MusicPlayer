@@ -2,7 +2,6 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.Manifest
 import android.content.ComponentName
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
@@ -37,7 +36,7 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.soroush.eskandarie.musicplayer.R
-import com.soroush.eskandarie.musicplayer.data.local.MusicEntity
+import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
 import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
@@ -48,7 +47,6 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.H
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.MusicPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
-import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -97,13 +95,13 @@ class HomeActivity  : ComponentActivity() {
                 scope.launch {
                     usecase().collect{ music ->
                         musicList = music
-                        val musicEntityList: MutableList<MusicEntity> = mutableListOf()
+                        val musicQueueEntityList: MutableList<MusicQueueEntity> = mutableListOf()
                         musicList.forEachIndexed{i, musicFile ->
-                        val add = musicEntityList.add(MusicEntity(i.toLong(), musicFile.path))
+                        val add = musicQueueEntityList.add(MusicQueueEntity(i.toLong(), musicFile.path))
                         }
 
-                        Log.e("sth is wrong", "2 : ${musicEntityList.size}")
-                        refreshQueueUseCase(musicEntityList)
+                        Log.e("sth is wrong", "2 : ${musicQueueEntityList.size}")
+                        refreshQueueUseCase(musicQueueEntityList)
                     }
                 }
             }

@@ -1,6 +1,20 @@
 package com.soroush.eskandarie.musicplayer.util
 
 object Constants {
+    object SharedPreference{
+        const val Name                          : String = "music_player_shared_preference"
+        const val IntroductionToken             : String = "introduction_token"
+    }
+    object Database{
+        const val MusicPlayerDatabaseName       : String = "music_player_database"
+        const val MusicQueueTableName           : String = "music_queue"
+        const val MusicQueueIdColumn            : String = "id"
+        const val MusicQueuePathColumn          : String = "music_path"
+        const val PlaylistTableName             : String = "playlist"
+        const val PlaylistIdColumn              : String = "id"
+        const val PlaylistNameColumn            : String = "name"
+        const val PlaylistPosterPath            : String = "poster_path"
+    }
     object SplashScreen{
         const val SplashDuration                : Long   = 2500
         const val SplashScreenIconDescription   : String = "music_player_icon"

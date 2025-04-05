@@ -2,6 +2,7 @@ package com.soroush.eskandarie.musicplayer
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -43,13 +44,17 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.MusicPlayerTheme
 import com.soroush.eskandarie.musicplayer.util.Constants
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : ComponentActivity() {
+    @Inject lateinit var sharedPreferences: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -60,7 +65,6 @@ class SplashActivity : ComponentActivity() {
             finish()
         }
         setContent {
-            val context = LocalContext.current
             val iconAnimation = rememberInfiniteTransition()
             val iconScale by iconAnimation.animateFloat(
                 initialValue = 1f,
