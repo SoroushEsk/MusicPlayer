@@ -97,7 +97,7 @@ class HomeActivity  : ComponentActivity() {
                         musicList = music
                         val musicQueueEntityList: MutableList<MusicQueueEntity> = mutableListOf()
                         musicList.forEachIndexed{i, musicFile ->
-                        val add = musicQueueEntityList.add(MusicQueueEntity(i.toLong(), musicFile.path))
+                        val add = musicQueueEntityList.add(MusicQueueEntity(i.toLong(), musicFile.path, false))
                         }
 
                         Log.e("sth is wrong", "2 : ${musicQueueEntityList.size}")

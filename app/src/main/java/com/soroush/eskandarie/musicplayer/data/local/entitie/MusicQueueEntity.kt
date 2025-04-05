@@ -11,5 +11,7 @@ data class MusicQueueEntity(
     @ColumnInfo(name = Constants.Database.MusicQueueIdColumn)
     val id:   Long,
     @ColumnInfo(name = Constants.Database.MusicQueuePathColumn)
-    val path: String
+    val path: String,
+    @ColumnInfo(name = Constants.Database.MusicQueueIsFavoriteColumn)
+    val isFavorite: Boolean
 )

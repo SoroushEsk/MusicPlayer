@@ -10,10 +10,21 @@ object Constants {
         const val MusicQueueTableName           : String = "music_queue"
         const val MusicQueueIdColumn            : String = "id"
         const val MusicQueuePathColumn          : String = "music_path"
+        const val MusicQueueIsFavoriteColumn    : String = "is_favorite"
         const val PlaylistTableName             : String = "playlist"
         const val PlaylistIdColumn              : String = "id"
         const val PlaylistNameColumn            : String = "name"
         const val PlaylistPosterPath            : String = "poster_path"
+        const val MusicTableName                : String = "music"
+        const val MusicIdColumn                 : String = "id"
+        const val MusicTitleColumn              : String = "title"
+        const val MusicArtistColumn             : String = "artist"
+        const val MusicPathColumn               : String = "path"
+        const val MusicPosterPathColumn         : String = "poster_path"
+        const val MusicPlayCountColumn          : String = "play_count"
+        const val MusicIsFavoriteColumn         : String = "is_favorite"
+        const val MusicDatePlayedColumn         : String = "date_played"
+        const val MusicDurationColumn           : String = "duration"
     }
     object SplashScreen{
         const val SplashDuration                : Long   = 2500

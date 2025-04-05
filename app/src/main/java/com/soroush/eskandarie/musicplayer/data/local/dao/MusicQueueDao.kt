@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
+import com.soroush.eskandarie.musicplayer.util.Constants
 
 @Dao
 interface MusicQueueDao {
@@ -18,13 +19,13 @@ interface MusicQueueDao {
     @Delete
     fun deleteMusic(musicQueueEntity: MusicQueueEntity)
 
-    @Query("SELECT * FROM music_queue")
+    @Query("SELECT * FROM ${Constants.Database.MusicQueueTableName}")
     fun getAllMusic(): MutableList<MusicQueueEntity>
 
-    @Query("Select * FROM music_queue WHERE id=:musicId")
+    @Query("Select * FROM ${Constants.Database.MusicQueueTableName} WHERE ${Constants.Database.MusicQueueIdColumn}=:musicId")
     fun getMusicById(musicId: Long): MusicQueueEntity?
 
-    @Query("DELETE FROM music_queue")
+    @Query("DELETE FROM ${Constants.Database.MusicQueueTableName}")
     fun deleteAllMusic()
 
 

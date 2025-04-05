@@ -22,4 +22,8 @@ interface PlaylistDao {
     @Query("SELECT * FROM ${Constants.Database.PlaylistTableName}")
     fun getAllPlaylists(): MutableList<PlaylistEntity>
 
+    @Query("DELETE FROM ${Constants.Database.PlaylistTableName}")
+    fun deleteAllPlaylists()
+
+
 }
