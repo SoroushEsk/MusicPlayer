@@ -5,9 +5,15 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.room.Room
 import com.soroush.eskandarie.musicplayer.data.local.MusicPlayerDatabase
+import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicQueueDao
+import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
 import com.soroush.eskandarie.musicplayer.data.repository.MusicQueueRepositoryImpl
+import com.soroush.eskandarie.musicplayer.data.repository.MusicRepositoryImp
+import com.soroush.eskandarie.musicplayer.domain.repository.DeviceMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
+import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
@@ -78,6 +84,20 @@ object MediaModule{
     fun provideMusicQueueRepository(musicQueueDao: MusicQueueDao): MusicQueueRepository {
         return MusicQueueRepositoryImpl(musicQueueDao)
     }
+    @Provides
+    @Singleton
+    fun provideDeviceMusicRepository(@ApplicationContext context: Context):DeviceMusicRepository{
+        return DeviceMusicRepositoryImpl(context)
+    }
+    @Provides
+    @Singleton
+    fun provideMusicRepository(
+        getAllMusicFromDeviceUseCase: GetAllMusicFromDeviceUseCase,
+        musicDao: MusicDao
+    ): MusicRepository = MusicRepositoryImp(
+        getAllMusicFromDeviceUseCase,
+        musicDao
+    )
     //endregion
     //region MusicQueueUseCases
     @Provides

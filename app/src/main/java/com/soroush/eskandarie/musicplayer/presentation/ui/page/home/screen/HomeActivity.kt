@@ -40,7 +40,7 @@ import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
 import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUsecase
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
 import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
@@ -80,7 +80,7 @@ class HomeActivity  : ComponentActivity() {
 
 
         val rep = DeviceMusicRepositoryImpl(this)
-        val usecase = GetAllMusicFromDeviceUsecase(rep)
+        val usecase = GetAllMusicFromDeviceUseCase(rep)
         checkPermissions()
         setContent {
             LaunchedEffect(Unit) {

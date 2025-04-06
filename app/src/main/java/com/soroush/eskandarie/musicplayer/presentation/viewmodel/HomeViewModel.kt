@@ -57,6 +57,7 @@ class HomeViewModel @Inject constructor(
 //                Log.e("viewmodel action", (action as HomeSetAction.SetSearchText).searchText)
                 when( action ){
                     is HomeSetAction.SetSearchText -> setSearchText(action.searchText)
+                    else -> {}
                 }
             }
         }

@@ -10,8 +10,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-class DeviceMusicRepositoryImpl(private val context : Context):
+class DeviceMusicRepositoryImpl @Inject constructor(private val context : Context):
+
     DeviceMusicRepository{
     override suspend fun getAllMusicFiles(): Flow<List<MusicFile>> = flow {
         val musicList = mutableListOf<DeviceMusicEntity>()
