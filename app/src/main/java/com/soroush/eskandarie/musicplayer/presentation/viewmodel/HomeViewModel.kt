@@ -71,7 +71,6 @@ class HomeViewModel @Inject constructor(
     }
     private fun updateSongPercent(newPercent: Float) {
         _songPercent.value = newPercent
-        Log.e("percent", newPercent.toString())
     }
     //endregion
     //region Override Methods

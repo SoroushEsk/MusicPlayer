@@ -239,20 +239,20 @@ fun MusicPage(
                     mainContainerCoordinates =
                         Offset(coordinates.positionInWindow().x, coordinates.positionInWindow().y)
                 }
-//                .pointerInput(Unit) {
-//                    awaitPointerEventScope {
-//                        while (true) {
-//                            val event = awaitPointerEvent()
-//                            val position = event.changes.first().position
-////                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
-////                                isTouching = event.changes.any { it.pressed }
-////                            else isTouching = false
-//                            if (isTouching) {
-//                                fingerY = position.y + mainContainerCoordinates.y
-//                            }
-//                        }
-//                    }
-//                }
+                .pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val position = event.changes.first().position
+//                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
+//                                isTouching = event.changes.any { it.pressed }
+//                            else isTouching = false
+                            if (isTouching) {
+                                fingerY = position.y + mainContainerCoordinates.y
+                            }
+                        }
+                    }
+                }
             ) {}
         Column(
             modifier = Modifier

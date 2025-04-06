@@ -1,5 +1,7 @@
 package com.soroush.eskandarie.musicplayer.util
 
+import com.google.common.base.Strings
+
 object Constants {
     object SharedPreference{
         const val Name                          : String = "music_player_shared_preference"
@@ -25,6 +27,9 @@ object Constants {
         const val MusicIsFavoriteColumn         : String = "is_favorite"
         const val MusicDatePlayedColumn         : String = "date_played"
         const val MusicDurationColumn           : String = "duration"
+        const val MusicPlaylistRelationTableName: String = "playlist_music"
+        const val MusicPlaylistPlaylistIdColumn : String = "playlist_id"
+        const val MusicPlaylistMusicIdColumn    : String = "music_id"
     }
     object SplashScreen{
         const val SplashDuration                : Long   = 2500

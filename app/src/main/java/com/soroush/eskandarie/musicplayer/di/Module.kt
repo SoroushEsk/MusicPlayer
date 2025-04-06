@@ -65,6 +65,12 @@ object MediaModule{
     @Provides
     @Singleton
     fun provideMusicDao(musicPlayerDatabase: MusicPlayerDatabase) = musicPlayerDatabase.getMusicDao()
+    @Provides
+    @Singleton
+    fun providePlaylistMusicRelationDao(musicPlayerDatabase: MusicPlayerDatabase) = musicPlayerDatabase.getPlaylistMusicRelationDao()
+    @Provides
+    @Singleton
+    fun providePlaylistWithMusicDao(musicPlayerDatabase: MusicPlayerDatabase) = musicPlayerDatabase.getPlaylistWithMusicDao()
     //endregion
     //region Repository
     @Provides
