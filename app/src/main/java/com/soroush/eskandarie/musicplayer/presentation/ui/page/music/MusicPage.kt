@@ -47,6 +47,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -107,7 +108,7 @@ fun MusicPage(
 
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
-    var progress by remember { mutableStateOf(0.0f) }
+    var progress by rememberSaveable { mutableStateOf(0.0f) }
     var scrollStatus by remember { mutableStateOf(MusicPageScrollState.NoScroll) }
     val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
     val palette = Palette.from(bitmap).generate()
@@ -149,7 +150,7 @@ fun MusicPage(
         targetValue = when( scrollStatus ) {
             MusicPageScrollState.ScrollUp -> 1f
             MusicPageScrollState.ScrollDown -> 0f
-            else -> 0f
+            else -> progress
 //            else -> {
 //                if (isTouching) {
 //                    Math.abs(fingerY - maxScrollRange) / maxScrollRange
@@ -209,10 +210,7 @@ fun MusicPage(
         modifier = modifier
             .fillMaxHeight()
             .fillMaxWidth()
-            .then(
-                if (progress < 1f) Modifier.navigationBarsPadding()
-                else Modifier.statusBarsPadding()
-            )
+
     ) {
         Column(
             modifier = modifier
@@ -548,7 +546,6 @@ fun SongPoster(
     isAnimation: Boolean,
     resetRotation: Boolean,
     colorTheme: ColorTheme,
-    needleBase: Int = R.drawable.rec,
     rotationLength: Int = Constants.MusicPageValues.DiskRotationDuration
 ) {
     var currentRotation by remember { mutableStateOf(0f) }
@@ -660,34 +657,13 @@ fun SongPoster(
                 .fillMaxHeight(Dimens.Size.MusicPageNeedleHeightRatio)
                 .aspectRatio(Dimens.AspectRatio.MusicPageNeedle)
                 .rotate(needleRotation.value)
+                .scale(1.3f)
                 .offset(
                     x = Dimens.Offset.MusicPageNeedleXOffset,
                     y = Dimens.Offset.MusicPageNeedleYOffset
                 ),
                 contentAlignment = Alignment.TopEnd
             ) {
-                Icon(
-                    modifier = Modifier
-                        .then(
-                            if (needleConnecterSize != Size.Zero) {
-                                Modifier.offset(
-                                    y = -(needleConnecterSize.height * Constants.MusicPageValues.DiskNeedleRotationCenterYRatio).dp,
-                                    x = (needleConnecterSize.width * Constants.MusicPageValues.DiskNeedleRotationCenterYRatio).dp
-                                )
-                            } else Modifier
-                        )
-                        .scale(Dimens.Scale.MusicPageSongPosterNeedle)
-                        .shadow(
-                            elevation = Dimens.Elevation.MusicPageNeedle,
-                            shape = CircleShape,
-                            clip = false,
-                            spotColor = DarkTheme.DarkSurface
-                        )
-                        .rotate(Dimens.Rotation.MusicPageNeedleBase),
-                    painter = painterResource(needleBase),
-                    tint = if(isSystemInDarkTheme()) Color.Black else Color.White,
-                    contentDescription = null
-                )
                 Image(
                     painter = painterResource(id = needleImage),
                     contentDescription = null,

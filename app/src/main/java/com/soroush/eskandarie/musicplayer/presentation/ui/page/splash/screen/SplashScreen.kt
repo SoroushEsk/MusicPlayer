@@ -47,7 +47,7 @@ fun SplashScreen(){
     LaunchedEffect (Unit){
         alphaAnimation.animateTo(
             targetValue = 1f,
-            animationSpec = tween(Constants.SplashScreen.SplashDuration.toInt())
+            animationSpec = tween(Constants.SplashScreen.SplashDuration.toInt()/2)
         )
     }
     Surface(

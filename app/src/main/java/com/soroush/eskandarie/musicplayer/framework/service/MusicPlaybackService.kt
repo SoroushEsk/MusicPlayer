@@ -120,7 +120,7 @@ class MusicPlaybackService: Service() {
         // For simplicity, I'm creating a basic notification
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setSmallIcon(R.drawable.rec)
+            .setSmallIcon(R.drawable.shaj)
             .setStyle(MediaStyleNotificationHelper.MediaStyle(mediaSession))
             .setContentTitle("Wonderful music")
             .setContentText("My Awesome Band")
