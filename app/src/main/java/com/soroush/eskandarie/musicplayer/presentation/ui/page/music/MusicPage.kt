@@ -626,7 +626,8 @@ fun SongPoster(
                                             colors = listOf(
                                                 Color.Transparent,
                                                 Color.Transparent,
-                                                colorTheme.LightShadow
+                                                Color.Transparent,
+                                                colorTheme.LightShadow.copy(alpha = 0.5f)
                                             ),
                                             center = Offset(size.width / 2, size.height / 2),
                                             radius = size.minDimension / 2

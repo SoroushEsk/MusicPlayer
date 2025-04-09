@@ -1,9 +1,14 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.common
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.interaction.FocusInteraction
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -14,10 +19,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -31,7 +44,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchField(
-    textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    textStyle: TextStyle = MaterialTheme.typography.headlineSmall,
     placeHolder: String = "Search",
     shape: RoundedCornerShape = RoundedCornerShape(Dimens.CornerRadius.AppTextField),
     themeColors: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
@@ -41,13 +54,24 @@ fun SearchField(
     onChange: (String) -> Unit
 ) {
     val searchText by getState
-
+    val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    var isFocused by remember { mutableStateOf(false) }
+    LaunchedEffect(interactionSource) {
+        interactionSource.interactions.collect { interaction ->
+            when (interaction) {
+                is FocusInteraction.Focus -> isFocused = true
+                is FocusInteraction.Unfocus -> isFocused = false
+            }
+        }
+    }
     Box(
-        modifier = Modifier
+        modifier = modifier
+            .height(if (isFocused) 64.dp else 52.dp)
             .clip(shape)
             .border(
                 1.dp,
-                themeColors.Text,
+                themeColors.LightShadow,
                 shape = shape
             )
     ) {
@@ -58,13 +82,24 @@ fun SearchField(
             },
             singleLine = true,
             modifier = modifier
+                .focusRequester(focusRequester)
                 .fillMaxWidth(),
-            label = {
-                Text(
-                    text = placeHolder,
-                    style = textStyle
-                )
-            },
+            label = if (isFocused.not()) {
+                {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = "Search Field Icon"
+                        )
+                        Text(
+                            text = placeHolder,
+                            style = textStyle
+                        )
+                    }
+                }
+            } else null,
             prefix = {
                 Icon(
                     imageVector = Icons.Filled.Search,
@@ -78,7 +113,8 @@ fun SearchField(
                 containerColor = Color.Transparent,
                 focusedPrefixColor = themeColors.FocusedField,
                 focusedLabelColor = themeColors.FocusedField
-            )
+            ),
+            interactionSource = interactionSource
         )
     }
 }

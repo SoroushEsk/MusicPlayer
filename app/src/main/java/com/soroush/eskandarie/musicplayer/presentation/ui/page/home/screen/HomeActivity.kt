@@ -14,6 +14,7 @@ import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -33,6 +34,7 @@ import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
+import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.soroush.eskandarie.musicplayer.R
@@ -43,6 +45,8 @@ import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
 import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
+import com.soroush.eskandarie.musicplayer.presentation.nav.HomeActivityNavHost
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.MusicPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
@@ -53,6 +57,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -77,32 +82,14 @@ class HomeActivity  : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-
-        val rep = DeviceMusicRepositoryImpl(this)
-        val usecase = GetAllMusicFromDeviceUseCase(rep)
         checkPermissions()
         setContent {
+            val navController = rememberNavController()
             LaunchedEffect(Unit) {
+
                 while(true) {
                     viewmodel.setSongPercent()
                     delay(1000)
-                }
-            }
-            val scope = rememberCoroutineScope()
-            var musicList by remember { mutableStateOf<List<MusicFile>>(emptyList()) }
-            LaunchedEffect(Unit) {
-                scope.launch {
-                    usecase().collect{ music ->
-                        musicList = music
-                        val musicQueueEntityList: MutableList<MusicQueueEntity> = mutableListOf()
-                        musicList.forEachIndexed{i, musicFile ->
-                        val add = musicQueueEntityList.add(MusicQueueEntity(i.toLong(), musicFile.path, false))
-                        }
-
-                        Log.e("sth is wrong", "2 : ${musicQueueEntityList.size}")
-                        refreshQueueUseCase(musicQueueEntityList)
-                    }
                 }
             }
             Box(
@@ -111,23 +98,34 @@ class HomeActivity  : ComponentActivity() {
                     .navigationBarsPadding()
             ) {
 
-//                    SearchField(
-//                        setState = viewmodel::getHomeSetAction,
-//                        getState = viewmodel.homeState.map { homeState ->
-//                            homeState.searchFieldState.searchText
-//                        }.collectAsState(initial = "")
-//                    ) {
-//
-//                    }
-
-                    HomePage(
+                Column(
+                    modifier = Modifier.statusBarsPadding()
+                ){
+                    SearchField(
                         modifier = Modifier
-                            .statusBarsPadding()
-                            .align(Alignment.TopCenter)
+                            .padding(horizontal = (Dimens.Padding.HomeActivity)),
+                        setState = viewmodel::getHomeSetAction,
+                        getState = viewmodel.homeState.map { homeState ->
+                            homeState.searchFieldState.searchText
+                        }.collectAsState(initial = "")
+                    ) {
+
+                    }
+                    HomeActivityNavHost(
+                        navController = navController,
+                        modifier = Modifier
                             .padding(horizontal = (Dimens.Padding.HomeActivity))
-                            .padding(bottom = 68.dp),
-                        playlists = getPlaylist()
+                            .padding(bottom = 68.dp)
                     )
+                }
+//                    HomePage(
+//                        modifier = Modifier
+//                            .statusBarsPadding()
+//                            .align(Alignment.TopCenter)
+//                            .padding(horizontal = (Dimens.Padding.HomeActivity))
+//                            .padding(bottom = 68.dp),
+//                        playlists = getPlaylist()
+//                    )
 
                     MusicPage(
                         modifier = Modifier,
@@ -142,21 +140,22 @@ class HomeActivity  : ComponentActivity() {
         }
     }
 
-    override fun onStart() {
-        super.onStart()
-        val sessionToken =
-            SessionToken(this@HomeActivity, ComponentName( this@HomeActivity, MusicPlaybackService::class.java))
-        mediaFuture =
-            MediaController.Builder(this@HomeActivity, sessionToken).buildAsync()
-
-        mediaFuture.addListener({
-            try {
-            }catch (e: Exception){
-            }
-
-        }, MoreExecutors.directExecutor())
-//        MediaController.releaseFuture(mediaFuture)
-    }
+//    @OptIn(UnstableApi::class)
+//    override fun onStart() {
+//        super.onStart()
+//        val sessionToken =
+//            SessionToken(this@HomeActivity, ComponentName( this@HomeActivity, MusicPlaybackService::class.java))
+//        mediaFuture =
+//            MediaController.Builder(this@HomeActivity, sessionToken).buildAsync()
+//
+//        mediaFuture.addListener({
+//            try {
+//            }catch (e: Exception){
+//            }
+//
+//        }, MoreExecutors.directExecutor())
+////        MediaController.releaseFuture(mediaFuture)
+//    }
     //region Init Methods
 
     private fun checkPermissions() {

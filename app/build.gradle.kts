@@ -96,6 +96,8 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.room.compiler)
+    // Nav Host
+    implementation(libs.navigation.compose)
 
     implementation(libs.hilt.navigation.compose)
     implementation(libs.material)
