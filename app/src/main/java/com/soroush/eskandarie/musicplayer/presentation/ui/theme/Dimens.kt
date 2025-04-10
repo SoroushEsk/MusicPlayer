@@ -57,12 +57,12 @@ object Dimens {
 
     }
     object CornerRadius{
-        val General                                         : Dp        =  12.dp
-        val TopPlaylistItem                                 : Dp        =  16.dp
-        val AppTextField                                    : Dp        =  12.dp
+        val General                                         : Dp        =  26.dp
+        val TopPlaylistItem                                 : Dp        =  26.dp
+        val AppTextField                                    : Dp        =  26.dp
         val MusicBar                                        : Dp        =  48.dp
-        val MusicPageShadowedIconDefault                    : Dp        =  12.dp
-        val MusicPagePlayControlShadowIconDefault           : Dp        =  16.dp
+        val MusicPageShadowedIconDefault                    : Dp        =  26.dp
+        val MusicPagePlayControlShadowIconDefault           : Dp        =  26.dp
     }
     object Spacing{
         val HomePageSpaceBetween                            : Dp        =   4.dp

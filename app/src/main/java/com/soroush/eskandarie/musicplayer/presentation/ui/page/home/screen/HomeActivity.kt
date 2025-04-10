@@ -1,12 +1,10 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.Manifest
-import android.content.ComponentName
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -21,34 +19,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
-import androidx.media3.session.SessionToken
 import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
 import com.soroush.eskandarie.musicplayer.R
-import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
-import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
-import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
-import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
 import com.soroush.eskandarie.musicplayer.presentation.nav.HomeActivityNavHost
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
-import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
-import com.soroush.eskandarie.musicplayer.presentation.ui.page.music.MusicPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -58,7 +41,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -170,37 +152,6 @@ class HomeActivity  : ComponentActivity() {
     }
     //endregion
     //region Normal Methods
-    private fun getPlaylist(): List<Playlist> = listOf(
-        Playlist(
-            0,
-            "Favorite",
-            Uri.parse("android.resource://${this.packageName}/" + R.drawable.favorite_playlist)
-        ),
-        Playlist(
-            1,
-            "Playlist 1",
-            Uri.parse("android.resource://${this.packageName}/" + R.drawable.shaj)
-        ),
-        Playlist(
-            2,
-            "Playlist 2",
-            Uri.parse("android.resource://${this.packageName}/" + R.drawable.ghader)
-        ),
-        Playlist(
-            3,
-            "Playlist 3",
-            Uri.parse("android.resource://${this.packageName}/" + R.drawable.simint)
-        ),
-        Playlist(
-            4,
-            "Playlist 4",
-            Uri.parse("android.resource://${this.packageName}/" + R.drawable.sharhram)
-        ),
-        Playlist(
-            5,
-            "Playlist 5",
-            Uri.parse("android.resource://${this.packageName}/" + R.drawable.empty_album)
-        )
-    )
+
     //endregion
 }
