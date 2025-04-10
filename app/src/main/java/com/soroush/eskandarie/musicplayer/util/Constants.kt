@@ -1,5 +1,6 @@
 package com.soroush.eskandarie.musicplayer.util
 
+import androidx.compose.ui.unit.sp
 import com.google.common.base.Strings
 
 object Constants {
@@ -78,5 +79,9 @@ object Constants {
         const val Resume                        : String = "com.soroush.eskandarie.musicplayer.RESUME"
 
     }
-
+    object MusicItem{
+        const val PlayStatusIconDescription     : String = "playlist_page_music_item_play_status_image"
+        const val MusicAlbumArtImageDescription : String = "playlist_page_music_item_album_art_image"
+        const val MusicItemDefaultMaxLine       : Int    = 1
+    }
 }

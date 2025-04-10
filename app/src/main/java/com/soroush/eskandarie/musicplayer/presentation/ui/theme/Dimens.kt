@@ -5,6 +5,9 @@ import androidx.compose.ui.unit.dp
 
 object Dimens {
     object Size{
+        val MusicItemShadowBorder                           : Dp        =   1.dp
+        val MusicItemHeight                                 : Dp        =  92.dp
+        val MusicItemPlayStatusIcon                         : Float     =  0.5f
         val SplashScreenIcon                                : Float     =  0.56f
         val TopPlaylistItemTextWeight                       : Float     =  0.15f
         val TopPlaylistItemBackWeight                       : Float     =  0.85f
@@ -33,6 +36,9 @@ object Dimens {
     }
     object Padding{
         val Zero                                            : Dp        =   0.dp
+        val MusicItemTextContainerHorizontal                : Dp        =  10.dp
+        val MusicItemTextContainerVertical                  : Dp        =  16.dp
+        val MusicItemPosterInsidePadding                    : Dp        =  10.dp
         val SplashScreenTextDown                            : Dp        =  40.dp
         val HomeActivity                                    : Dp        =  10.dp
         val TopPlaylistItemDefault                          : Dp        =   6.dp
@@ -63,6 +69,7 @@ object Dimens {
         val MusicBar                                        : Dp        =  48.dp
         val MusicPageShadowedIconDefault                    : Dp        =  26.dp
         val MusicPagePlayControlShadowIconDefault           : Dp        =  26.dp
+        val MusicItemDefault                                : Dp        =  26.dp
     }
     object Spacing{
         val HomePageSpaceBetween                            : Dp        =   4.dp
@@ -82,6 +89,10 @@ object Dimens {
         val VibrantColor1Alpha                              : Float     = 0.5f
         val VibrantColor2Alpha                              : Float     = 0.3f
         val MutedColorAlpha                                 : Float     = 0.1f
+        val MusicItemPlayStatusIcon                         : Float     = 0.8f
+        val MusicItemFadeText                               : Float     = 0.6f
+        val MusicItemLightShadowBorderColor                 : Float     = 0.3f
+        val MusicItemDarkShadowBorderColor                  : Float     = 0.4f
     }
     object Elevation {
         val MusicPageDiskPoster                             : Dp        =  10.dp
@@ -96,6 +107,7 @@ object Dimens {
     object AspectRatio {
         val MusicPageNeedle                                 : Float     = 0.6f
         val SplashIcon                                      : Float     = 1f
+        val MusicItemPoster                                 : Float     = 1f
     }
     object Offset{
         val MusicPageNeedleXOffset                          : Dp        = -16.dp

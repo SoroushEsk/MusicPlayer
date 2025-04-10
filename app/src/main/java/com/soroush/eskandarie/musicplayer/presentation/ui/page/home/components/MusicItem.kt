@@ -1,6 +1,5 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
-import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
@@ -12,9 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,21 +24,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
@@ -50,6 +45,7 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
+import com.soroush.eskandarie.musicplayer.util.Constants
 
 @Preview(showBackground = true)
 @Composable
@@ -77,6 +73,7 @@ fun MusicItem(
     resumeIconId: Int = R.drawable.play_button,
     defaultAlbumArt: Int = R.drawable.empty_album,
     isPlaying: Boolean,
+    shape: Shape = RoundedCornerShape(Dimens.CornerRadius.MusicItemDefault)
 ) {
     val albumArtBitmap = music.getAlbumArtBitmap() ?: BitmapFactory.decodeResource(
         LocalContext.current.resources,
@@ -84,22 +81,29 @@ fun MusicItem(
     )
     Row (
         modifier = modifier
-            .clip(RoundedCornerShape(26.dp))
+            .clip(shape)
             .fillMaxWidth()
-            .height(92.dp)
+            .height(Dimens.Size.MusicItemHeight)
             .border(
-                width = 1.dp,
+                width = Dimens.Size.MusicItemShadowBorder,
                 brush = Brush.linearGradient(
-                    colors = listOf(colorTheme.DarkShadow.copy(alpha = 0.4f), Color.Transparent, Color.Transparent)
+                    colors = listOf(
+                        colorTheme.DarkShadow.copy(alpha = Dimens.Alpha.MusicItemDarkShadowBorderColor),
+                        Color.Transparent,
+                        Color.Transparent
+                    )
                 ),
-                shape = RoundedCornerShape(26.dp)
+                shape = shape
             )
             .border(
-                width = 1.dp,
+                width = Dimens.Size.MusicItemShadowBorder,
                 brush = Brush.linearGradient(
-                    colors = listOf(Color.Transparent, colorTheme.LightShadow.copy(alpha = 0.3f))
+                    colors = listOf(
+                        Color.Transparent,
+                        colorTheme.LightShadow.copy(alpha = Dimens.Alpha.MusicItemLightShadowBorderColor)
+                    )
                 ),
-                shape = RoundedCornerShape(26.dp)
+                shape = shape
             )
             .background(colorTheme.Surface
             )
@@ -109,14 +113,18 @@ fun MusicItem(
             pauseIconId = pauseIconId,
             resumeIconId = resumeIconId,
             isPlaying = isPlaying,
-            playStatusIconColor = colorTheme.Text
+            playStatusIconColor = colorTheme.Text,
+            shape = shape
         )
         Column(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.SpaceAround,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 10.dp, vertical = 16.dp)
+                .padding(
+                    horizontal = Dimens.Padding.MusicItemTextContainerHorizontal,
+                    vertical =   Dimens.Padding.MusicItemTextContainerVertical
+                )
         ) {
             Text(
                 text = music.title,
@@ -125,7 +133,7 @@ fun MusicItem(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 ),
-                maxLines = 1
+                maxLines = Constants.MusicItem.MusicItemDefaultMaxLine
             )
             Row (
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -134,9 +142,9 @@ fun MusicItem(
             ){
                 Text(
                     text = music.artist,
-                    color = colorTheme.Text.copy(alpha = 0.6f),
+                    color = colorTheme.Text.copy(alpha = Dimens.Alpha.MusicItemFadeText),
                     style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1
+                    maxLines = Constants.MusicItem.MusicItemDefaultMaxLine
                 )
                 val minute = (music.duration / 1000) / 60
                 val seconds = (music.duration / 1000) % 60
@@ -144,9 +152,9 @@ fun MusicItem(
                 val secondsString = if (seconds >= 10) seconds.toString() else "0$seconds"
                 Text(
                     text = "$minuteString:$secondsString",
-                    color = colorTheme.Text.copy(alpha = 0.6f),
+                    color = colorTheme.Text.copy(alpha = Dimens.Alpha.MusicItemFadeText),
                     style = MaterialTheme.typography.bodyLarge,
-                    maxLines = 1
+                    maxLines = Constants.MusicItem.MusicItemDefaultMaxLine
                 )
             }
         }
@@ -161,35 +169,35 @@ fun SongAlbumArt(
     resumeIconId: Int,
     pauseIconId: Int,
     isPlaying: Boolean,
-    playStatusIconColor: Color
+    playStatusIconColor: Color,
+    shape: Shape
 ) {
     var isResume by remember {
         mutableStateOf(true)
     }
     Box (
         modifier = modifier
-            .padding(10.dp)
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(26.dp))
+            .padding(Dimens.Padding.MusicItemPosterInsidePadding)
+            .aspectRatio(Dimens.AspectRatio.MusicItemPoster)
+            .clip(shape)
             .clickable {
-                if (isResume) isResume = false
-                else isResume = true
+                isResume = !isResume
             },
         contentAlignment = Alignment.Center
     ){
         Image(
             modifier = Modifier.fillMaxSize(),
             bitmap = songAlbumArt.asImageBitmap(),
-            contentDescription = "playlist_page_music_item_album_art_image"
+            contentDescription = Constants.MusicItem.MusicAlbumArtImageDescription
         )
         if(isPlaying){
             Icon(
                 modifier = Modifier
-                    .fillMaxSize(0.5f)
-                    .alpha(0.8f),
+                    .fillMaxSize(Dimens.Size.MusicItemPlayStatusIcon)
+                    .alpha(Dimens.Alpha.MusicItemPlayStatusIcon),
                 tint = playStatusIconColor,
                 painter = painterResource(id = if(isResume) resumeIconId else pauseIconId),
-                contentDescription = "playlist_page_music_item_play_status_image"
+                contentDescription = Constants.MusicItem.PlayStatusIconDescription
             )
         }
     }
