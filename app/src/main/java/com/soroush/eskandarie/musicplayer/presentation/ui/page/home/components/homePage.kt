@@ -2,6 +2,7 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
 import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdownItem
@@ -38,8 +40,8 @@ import com.soroush.eskandarie.musicplayer.util.Constants
 fun HomePage(
     modifier: Modifier = Modifier,
     themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
-    playlists: List<Playlist>
-
+    playlists: List<Playlist>,
+    navController: NavController
 
 ) {
     LazyColumn(
@@ -50,7 +52,8 @@ fun HomePage(
         item{
             FourTopPlaylist(
                 modifier = Modifier,
-                themeColor = themeColor
+                themeColor = themeColor,
+                navController = navController
             )
         }
         item{
@@ -106,7 +109,8 @@ fun HomePage(
 @Composable
 fun FourTopPlaylist(
     modifier: Modifier = Modifier,
-    themeColor : ColorTheme
+    themeColor : ColorTheme,
+    navController: NavController
 ) {
     Box(modifier = modifier
         .fillMaxWidth()
@@ -150,6 +154,9 @@ fun FourTopPlaylist(
                 ){
 
                     TopPlaylistItem(
+                        modifier = Modifier.clickable {
+                            navController.navigate
+                        },
                         title = "All Songs",
                         uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.sandi),
                         uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.mahasti),

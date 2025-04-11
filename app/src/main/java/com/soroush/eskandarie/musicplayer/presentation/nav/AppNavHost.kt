@@ -12,8 +12,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen.PlaylistPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 
 @Composable
@@ -31,7 +33,8 @@ fun HomeActivityNavHost(
         composable (route = Destination.HomeScreen.route ){
             HomePage(
                 modifier = Modifier,
-                playlists = getPlaylist(localContext)
+                playlists = getPlaylist(localContext),
+                navController = navController
             )
         }
     }
@@ -70,3 +73,18 @@ private fun getPlaylist(context : Context): List<Playlist> = listOf(
         Uri.parse("android.resource://${context.packageName}/" + R.drawable.empty_album)
     )
 )
+fun start()=
+            List(50) {
+                MusicFile(
+                    id = System.currentTimeMillis() + it,
+                    title = "Z - The warning",
+                    artist = "The warning",
+                    album = "",
+                    duration = 213443,
+                    recordingDate = null,
+                    genre = null,
+                    size = 234,
+                    path = "/storage/emulated/0/Download/NeginKt - Paiz   Saraabe Toe.mp3"
+                )
+            }
+
