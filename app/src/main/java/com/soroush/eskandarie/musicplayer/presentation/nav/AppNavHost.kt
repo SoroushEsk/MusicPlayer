@@ -2,6 +2,7 @@ package com.soroush.eskandarie.musicplayer.presentation.nav
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,10 +33,16 @@ fun HomeActivityNavHost(
     ) {
         composable (route = Destination.HomeScreen.route ){
             HomePage(
-                modifier = Modifier,
+                modifier = Modifier
+                    .padding(horizontal = (Dimens.Padding.HomeActivity)),
                 playlists = getPlaylist(localContext),
                 navController = navController
             )
+        }
+        composable (route = Destination.AllMusicScreen.route) {
+            PlaylistPage(loadMoreItems = { _, _1 ->
+                start()
+            })
         }
     }
 

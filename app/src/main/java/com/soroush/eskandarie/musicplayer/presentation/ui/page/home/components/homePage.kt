@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
+import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdownItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
@@ -155,7 +156,7 @@ fun FourTopPlaylist(
 
                     TopPlaylistItem(
                         modifier = Modifier.clickable {
-                            navController.navigate
+                            navController.navigate(Destination.AllMusicScreen.route)
                         },
                         title = "All Songs",
                         uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.sandi),

@@ -96,7 +96,6 @@ class HomeActivity  : ComponentActivity() {
                     HomeActivityNavHost(
                         navController = navController,
                         modifier = Modifier
-                            .padding(horizontal = (Dimens.Padding.HomeActivity))
                             .padding(bottom = 68.dp)
                     )
                 }
