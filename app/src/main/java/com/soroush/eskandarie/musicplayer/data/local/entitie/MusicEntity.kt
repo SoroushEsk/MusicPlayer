@@ -3,6 +3,7 @@ package com.soroush.eskandarie.musicplayer.data.local.entitie
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.util.Constants
 
 @Entity(tableName = Constants.Database.MusicTableName)
@@ -26,4 +27,15 @@ data class MusicEntity(
     val duration: Long,
     @ColumnInfo(name = Constants.Database.MusicDatePlayedColumn)
     val datePlayed: Long
-)
+){
+    fun toMusicFile(): MusicFile {
+        return MusicFile(
+            id = id,
+            title = title,
+            artist = artist,
+            album = "",
+            duration = duration,
+            path = path
+        )
+    }
+}

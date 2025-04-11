@@ -1,8 +1,10 @@
 package com.soroush.eskandarie.musicplayer.data.repository
 
+
 import android.util.Log
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +33,13 @@ class MusicRepositoryImp @Inject constructor(
                     musicTableDao.insertMusic(musicEntity)
                 }
             }
+        }
+    }
+
+    override suspend fun getAllMusicFiles(): List<MusicFile> = withContext(Dispatchers.IO){
+        val musicListFromDatabase = musicTableDao.getAllMusic()
+        musicListFromDatabase.map { musicEntity: MusicEntity ->
+            musicEntity.toMusicFile()
         }
     }
 }

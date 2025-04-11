@@ -7,11 +7,11 @@ data class MusicFile(
     val id: Long,
     val title: String,
     val artist: String,
-    val album: String,
+    val album: String = "",
     val duration: Long,
-    val recordingDate: String?,
-    val genre: String?,
-    val size: Long,
+    val recordingDate: String? = null,
+    val genre: String? = null,
+    val size: Long = 0,
     val path: String
 )
 fun MusicFile. getAlbumArtBitmap(): Bitmap? {

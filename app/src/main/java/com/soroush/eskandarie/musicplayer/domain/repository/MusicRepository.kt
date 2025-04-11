@@ -4,4 +4,5 @@ import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 
 interface MusicRepository {
     suspend fun saveDeviceMusicFile( )
+    suspend fun getAllMusicFiles(): List<MusicFile>
 }

@@ -13,6 +13,7 @@ import com.soroush.eskandarie.musicplayer.data.repository.MusicRepositoryImp
 import com.soroush.eskandarie.musicplayer.domain.repository.DeviceMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
@@ -114,6 +115,11 @@ object MediaModule{
     @Singleton
     fun provideRefreshQueueUseCase(musicQueueRepository: MusicQueueRepository): RefreshQueueUseCase {
         return RefreshQueueUseCase(musicQueueRepository)
+    }
+    @Provides
+    @Singleton
+    fun proviceGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabaseUseCase{
+        return GetAllMusicFromDatabaseUseCase(musicRepository)
     }
     //endregion
 }

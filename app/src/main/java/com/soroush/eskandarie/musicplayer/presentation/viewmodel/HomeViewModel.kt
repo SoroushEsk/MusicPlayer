@@ -6,6 +6,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.session.MediaSession
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
@@ -22,7 +24,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val mediaSession: MediaSession
+    private val mediaSession: MediaSession,
+    private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase
 ): ViewModel() {
     //region Viewmodel States
     private val _homeState = MutableStateFlow(
@@ -38,6 +41,9 @@ class HomeViewModel @Inject constructor(
 
     private val _songPercent = MutableStateFlow(0.0f)
     val songPercent: StateFlow<Float> = _songPercent.asStateFlow()
+
+    private val _musicList: MutableStateFlow<List<MusicFile>> = MutableStateFlow(emptyList())
+    val musicList: StateFlow<List<MusicFile>> = _musicList.asStateFlow()
     //endregion
     //region Viewmodel Action Channels
     private val setActionChannel = Channel<HomeSetAction> ( Channel.UNLIMITED )
@@ -49,6 +55,11 @@ class HomeViewModel @Inject constructor(
     fun getHomeSetAction(action: HomeSetAction){
         viewModelScope.launch {
             setActionChannel.send(action)
+        }
+    }
+    fun getAllMusicFiles(){
+        viewModelScope.launch {
+            _musicList.value = getAllMusicFromDatabaseUseCase()
         }
     }
     private fun handleSetActions(){

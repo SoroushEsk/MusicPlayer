@@ -29,15 +29,20 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
@@ -49,8 +54,9 @@ import com.soroush.eskandarie.musicplayer.util.Constants
 
 @Preview(showBackground = true)
 @Composable
-fun PlaylistPage(){
-    MusicItem(Modifier,
+fun PlaylistPage() {
+    MusicItem(
+        Modifier,
         MusicFile(
             id = 12,
             title = "Z - The warning",
@@ -62,13 +68,15 @@ fun PlaylistPage(){
             size = 234,
             path = "/storage/emulated/0/Download/NeginKt - Paiz   Saraabe Toe.mp3"
         ),
-        isPlaying = false)
+        isPlaying = false
+    )
 }
+
 @Composable
 fun MusicItem(
     modifier: Modifier = Modifier,
     music: MusicFile,
-    colorTheme: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
+    colorTheme: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     pauseIconId: Int = R.drawable.pause,
     resumeIconId: Int = R.drawable.play_button,
     defaultAlbumArt: Int = R.drawable.empty_album,
@@ -79,7 +87,17 @@ fun MusicItem(
         LocalContext.current.resources,
         defaultAlbumArt
     )
-    Row (
+    val palette = Palette.from(albumArtBitmap).generate()
+    val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = 0.1f)
+    val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = 0.04f)
+    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.02f)
+    val listOfColors =
+        listOf(dominantColor1, vibrantColor1, mutedColor)
+    val radialGradientBrush = Brush.horizontalGradient(
+        colors = listOfColors
+    )
+
+    Row(
         modifier = modifier
             .clip(shape)
             .fillMaxWidth()
@@ -105,9 +123,9 @@ fun MusicItem(
                 ),
                 shape = shape
             )
-            .background(colorTheme.Surface
-            )
-    ){
+            .background(colorTheme.Surface)
+            .background(radialGradientBrush)
+    ) {
         SongAlbumArt(
             songAlbumArt = albumArtBitmap,
             pauseIconId = pauseIconId,
@@ -123,7 +141,7 @@ fun MusicItem(
                 .fillMaxSize()
                 .padding(
                     horizontal = Dimens.Padding.MusicItemTextContainerHorizontal,
-                    vertical =   Dimens.Padding.MusicItemTextContainerVertical
+                    vertical = Dimens.Padding.MusicItemTextContainerVertical
                 )
         ) {
             Text(
@@ -133,18 +151,23 @@ fun MusicItem(
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 ),
-                maxLines = Constants.MusicItem.MusicItemDefaultMaxLine
+                maxLines = Constants.MusicItem.MusicItemDefaultMaxLine,
+                overflow = TextOverflow.Ellipsis
             )
-            Row (
+            Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxWidth()
-            ){
+            ) {
                 Text(
                     text = music.artist,
                     color = colorTheme.Text.copy(alpha = Dimens.Alpha.MusicItemFadeText),
                     style = MaterialTheme.typography.bodyLarge,
-                    maxLines = Constants.MusicItem.MusicItemDefaultMaxLine
+                    maxLines = Constants.MusicItem.MusicItemDefaultMaxLine,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 20.dp)
                 )
                 val minute = (music.duration / 1000) / 60
                 val seconds = (music.duration / 1000) % 60
@@ -175,7 +198,7 @@ fun SongAlbumArt(
     var isResume by remember {
         mutableStateOf(true)
     }
-    Box (
+    Box(
         modifier = modifier
             .padding(Dimens.Padding.MusicItemPosterInsidePadding)
             .aspectRatio(Dimens.AspectRatio.MusicItemPoster)
@@ -184,19 +207,19 @@ fun SongAlbumArt(
                 isResume = !isResume
             },
         contentAlignment = Alignment.Center
-    ){
+    ) {
         Image(
             modifier = Modifier.fillMaxSize(),
             bitmap = songAlbumArt.asImageBitmap(),
             contentDescription = Constants.MusicItem.MusicAlbumArtImageDescription
         )
-        if(isPlaying){
+        if (isPlaying) {
             Icon(
                 modifier = Modifier
                     .fillMaxSize(Dimens.Size.MusicItemPlayStatusIcon)
                     .alpha(Dimens.Alpha.MusicItemPlayStatusIcon),
                 tint = playStatusIconColor,
-                painter = painterResource(id = if(isResume) resumeIconId else pauseIconId),
+                painter = painterResource(id = if (isResume) resumeIconId else pauseIconId),
                 contentDescription = Constants.MusicItem.PlayStatusIconDescription
             )
         }
