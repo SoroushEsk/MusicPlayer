@@ -30,6 +30,7 @@ class MusicRepositoryImp @Inject constructor(
                         duration = musicFile.duration,
                         datePlayed = System.currentTimeMillis()
                     )
+                    Log.e("MusicItemArtistTextEndPadding", musicFile.toString())
                     musicTableDao.insertMusic(musicEntity)
                 }
             }

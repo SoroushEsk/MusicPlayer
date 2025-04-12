@@ -2,12 +2,15 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,17 +30,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
@@ -46,14 +47,10 @@ import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.MusicItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
-import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
-import com.soroush.eskandarie.musicplayer.util.Constants
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.withContext
+import kotlin.math.abs
 
 @Preview
 @Composable
@@ -76,6 +73,7 @@ fun start(){
         }
     )
 }
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlaylistPage(
     modifier: Modifier = Modifier,
@@ -96,7 +94,12 @@ fun PlaylistPage(
             musicList[0].getAlbumArtBitmap()?:BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         }
     }
-
+    val layoutInfo = lazyState.layoutInfo
+    val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == 4 }
+    itemInfo?.let {
+        val centerOffset = it.offset + it.size / 2
+        Log.e("view post", "$centerOffset")
+    }
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -107,7 +110,11 @@ fun PlaylistPage(
     ) {
         item {
             PlaylistPoster(
-                modifier = Modifier,
+                modifier = Modifier
+                    .animateItem(
+                        fadeInSpec = tween(1500),
+                        placementSpec = tween(1500)
+                    ),
                 colorTheme = colorTheme,
                 playlistName = "Rock and Roll baby!!",
                 playlistImage = playlistImage
@@ -116,10 +123,27 @@ fun PlaylistPage(
         items(musicList.size, key = { index: Int ->
             musicList[index].hashCode()
         }){ index ->
-            MusicItem(
-                modifier = Modifier.padding(horizontal = 10.dp),
+//            MusicItem(
+//                modifier = Modifier
+//                    .padding(horizontal = 10.dp)
+//                    .animateItem(
+//                        fadeInSpec = tween(900),
+//                        fadeOutSpec = null,
+//                        placementSpec = tween(
+//                            durationMillis = 900
+//                        )
+//                    )
+//                ,
+//                music = musicList[index],
+//                isPlaying = false
+//            )
+            AnimatedMusicItem(
                 music = musicList[index],
-                isPlaying = false
+                isPlaying = false,
+                modifier = Modifier.padding(horizontal = 10.dp)
+                    .animateItem(
+                        placementSpec = tween(1200)
+                    )
             )
         }
 
@@ -129,6 +153,34 @@ fun PlaylistPage(
         musicList += newItems
     }
 
+}
+@Composable
+fun AnimatedMusicItem(
+    music: MusicFile,
+    isPlaying: Boolean,
+    modifier: Modifier = Modifier
+) {
+    var startAnimation by remember { mutableStateOf(false) }
+
+    val rotation by animateFloatAsState(
+        targetValue = if (startAnimation) 0f else -90f,
+        animationSpec = tween(durationMillis = 600),
+        label = "rotationZ"
+    )
+
+    LaunchedEffect(Unit) {
+        startAnimation = true
+    }
+
+    MusicItem(
+        music = music,
+        isPlaying = isPlaying,
+        modifier = modifier
+            .graphicsLayer {
+                rotationX = rotation
+                transformOrigin = TransformOrigin.Center
+            }
+    )
 }
 @Composable
 fun InfiniteListHandler(

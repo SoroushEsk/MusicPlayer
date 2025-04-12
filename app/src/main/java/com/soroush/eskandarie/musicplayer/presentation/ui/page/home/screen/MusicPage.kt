@@ -202,6 +202,7 @@ fun MusicPage(
         motionScene = MotionScene(content = musicPageMotionLayoutConfig),
         progress = animatedProgress,
         modifier = modifier
+            .background(Color.Transparent)
             .fillMaxHeight()
             .fillMaxWidth()
 
@@ -209,6 +210,7 @@ fun MusicPage(
         Column(
             modifier = modifier
                 .layoutId(Constants.MusicBarValues.MotionLayoutContainerId)
+                .background(Color.Transparent)
                 .clip(
                     RoundedCornerShape(
                         topStart = if (progress < 1f) Dimens.CornerRadius.General else 0.dp,

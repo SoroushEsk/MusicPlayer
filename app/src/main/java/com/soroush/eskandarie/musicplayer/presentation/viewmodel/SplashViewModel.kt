@@ -16,19 +16,21 @@ class SplashViewModel @Inject constructor(
     private val saveDeviceMusicToLocalDB : SavingDeviceMusicToLocalDBUseCase
 ): ViewModel() {
     fun firstTimeLauchActions(){
+
+
         if(sharedPreferences.getBoolean(
             Constants.SharedPreference.IntroductionToken,
             true
         )){
             viewModelScope.launch {
                 saveDeviceMusicToLocalDB()
-                with(sharedPreferences.edit()) {
-                    putBoolean(
-                        Constants.SharedPreference.IntroductionToken,
-                        false
-                    )
-                    apply()
-                }
+            }
+            with(sharedPreferences.edit()) {
+                putBoolean(
+                    Constants.SharedPreference.IntroductionToken,
+                    false
+                )
+                apply()
             }
         }
     }

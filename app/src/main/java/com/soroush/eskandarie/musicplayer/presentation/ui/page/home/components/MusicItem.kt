@@ -167,7 +167,7 @@ fun MusicItem(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier
                         .weight(1f)
-                        .padding(end = 20.dp)
+                        .padding(end = Dimens.Padding.MusicItemArtistTextEndPadding)
                 )
                 val minute = (music.duration / 1000) / 60
                 val seconds = (music.duration / 1000) % 60

@@ -99,6 +99,10 @@ dependencies {
     // Nav Host
     implementation(libs.navigation.compose)
 
+
+    // Accompanist Permissions
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+
     implementation(libs.hilt.navigation.compose)
     implementation(libs.material)
     implementation(libs.androidx.appcompat)

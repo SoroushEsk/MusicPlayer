@@ -41,19 +41,10 @@ fun SplashScreen(){
             repeatMode = RepeatMode.Restart
         ), label = ""
     )
-    val alphaAnimation = remember {
-        Animatable(0f)
-    }
-    LaunchedEffect (Unit){
-        alphaAnimation.animateTo(
-            targetValue = 1f,
-            animationSpec = tween(Constants.SplashScreen.SplashDuration.toInt()/2)
-        )
-    }
+
     Surface(
         modifier = Modifier
-            .fillMaxSize()
-            .alpha(alphaAnimation.value),
+            .fillMaxSize(),
         color = if(isSystemInDarkTheme()) DarkTheme.Surface else LightTheme.Surface
     ) {
         Box(

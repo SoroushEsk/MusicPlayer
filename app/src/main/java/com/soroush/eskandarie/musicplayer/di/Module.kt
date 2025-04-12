@@ -35,7 +35,7 @@ object MediaModule{
     //region SharedPreference
     @Provides
     @Singleton
-    fun provideSharedPreference(@ApplicationContext context: Context) = context.getSharedPreferences(
+    fun provideSharedPreference(@ApplicationContext context: Context) = context.applicationContext.getSharedPreferences(
         Constants.SharedPreference.Name,
         Context.MODE_PRIVATE
     )

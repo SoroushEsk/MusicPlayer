@@ -67,7 +67,7 @@ class HomeActivity  : ComponentActivity() {
         enableEdgeToEdge()
 
         viewmodel.getAllMusicFiles()
-        checkPermissions()
+        //checkPermissions()
         setContent {
             val navController = rememberNavController()
             LaunchedEffect(Unit) {
@@ -159,6 +159,7 @@ class HomeActivity  : ComponentActivity() {
     }
     //endregion
     //region Normal Methods
+
 
     //endregion
 }

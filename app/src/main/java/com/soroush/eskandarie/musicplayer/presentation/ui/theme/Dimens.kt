@@ -6,9 +6,9 @@ import androidx.compose.ui.unit.dp
 object Dimens {
     object Size{
         val MusicItemShadowBorder                           : Dp        =   3.dp
-        val MusicItemHeight                                 : Dp        =  92.dp
+        val MusicItemHeight                                 : Dp        =  80.dp
         val MusicItemPlayStatusIcon                         : Float     =  0.5f
-        val SplashScreenIcon                                : Float     =  0.56f
+        val SplashScreenIcon                                : Float     =  0.45f
         val TopPlaylistItemTextWeight                       : Float     =  0.15f
         val TopPlaylistItemBackWeight                       : Float     =  0.85f
         val GeneralItemHeight                               : Dp        =  64.dp
@@ -16,7 +16,7 @@ object Dimens {
         val PlayListItemIconSize                            : Dp        =  18.dp
         val MinMusicBarHeight                               : Dp        =  80.dp
         val MusicPageAboveProgressBarHeight                 : Dp        =  80.dp
-        val MusicBarMotionLayoutContainerHeight             : Int       =  64
+        val MusicBarMotionLayoutContainerHeight             : Int       =  68
         val MusicBarMotionLayoutPosterHeight                : Int       =  60
         val MusicBarMotionLayoutTextContainerHeight         : Int       =  64
         val MusicBarMotionLayoutBackForward                 : Int       =  26
@@ -36,10 +36,11 @@ object Dimens {
     }
     object Padding{
         val Zero                                            : Dp        =   0.dp
+        val MusicItemArtistTextEndPadding                   : Dp        =  20.dp
         val MusicItemTextContainerHorizontal                : Dp        =  10.dp
         val MusicItemTextContainerVertical                  : Dp        =  16.dp
         val MusicItemPosterInsidePadding                    : Dp        =  10.dp
-        val SplashScreenTextDown                            : Dp        =  40.dp
+        val SplashScreenTextDown                            : Dp        =  60.dp
         val HomeActivity                                    : Dp        =  10.dp
         val TopPlaylistItemDefault                          : Dp        =   6.dp
         val PlayListItemIconSize                            : Dp        =  16.dp
