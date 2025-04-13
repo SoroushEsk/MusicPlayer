@@ -2,7 +2,6 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -20,7 +19,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -77,29 +83,50 @@ class HomeActivity  : ComponentActivity() {
                     delay(1000)
                 }
             }
+            val scrollDirection = remember { mutableStateOf("none") }
+
+            val nestedScrollConnection = remember {
+                object : NestedScrollConnection {
+                    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                        if (available.y > 0) {
+                            scrollDirection.value = "up"
+                        } else if (available.y < 0) {
+                            scrollDirection.value = "down"
+                        }
+                        return Offset.Zero
+                    }
+                }
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .navigationBarsPadding()
             ) {
-
                 Column(
-                    modifier = Modifier.statusBarsPadding()
+                    modifier = Modifier.statusBarsPadding().nestedScroll(nestedScrollConnection)
                 ){
-                    SearchField(
-                        modifier = Modifier
-                            .padding(horizontal = (Dimens.Padding.HomeActivity)),
-                        setState = viewmodel::getHomeSetAction,
-                        getState = viewmodel.homeState.map { homeState ->
-                            homeState.searchFieldState.searchText
-                        }.collectAsState(initial = "")
-                    ) {
+//                    Log.e("12345", "${isTopBarVisible.value} $isAtStart $isScrollingUp")
+                    if(scrollDirection.value == "up") {
+                        SearchField(
+                            modifier = Modifier
+                                .padding(horizontal = (Dimens.Padding.HomeActivity)),
+                            setState = viewmodel::getHomeSetAction,
+                            getState = viewmodel.homeState.map { homeState ->
+                                homeState.searchFieldState.searchText
+                            }.collectAsState(initial = "")
+                        ) {}
 
                     }
                     HomeActivityNavHost(
                         navController = navController,
                         modifier = Modifier
-                            .padding(bottom = 68.dp)
+                            .padding(bottom = 68.dp),
+                        getLazyListState = {
+                            viewmodel.lazyListState.collectAsState()
+                        },
+                        setLazyState = {playlistName: String->
+                            viewmodel.setNewPlaylistLazyListState(playlistName)
+                        }
                     ){
                         viewmodel.musicList.value.forEach{
                             Log.e("music database error", it.toString())
@@ -159,7 +186,6 @@ class HomeActivity  : ComponentActivity() {
     }
     //endregion
     //region Normal Methods
-
 
     //endregion
 }

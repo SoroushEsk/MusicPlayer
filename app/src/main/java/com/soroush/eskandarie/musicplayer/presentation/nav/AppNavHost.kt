@@ -3,12 +3,12 @@ package com.soroush.eskandarie.musicplayer.presentation.nav
 import android.content.Context
 import android.net.Uri
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -27,7 +27,9 @@ import kotlinx.coroutines.withContext
 fun HomeActivityNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    getAllMusic: ()->List<MusicFile>
+    getLazyListState: @Composable () -> State<LazyListState>,
+    setLazyState: (playlistName: String)->Unit,
+    getAllMusic: () -> List<MusicFile>
 ) {
     val startDestination: String = Destination.HomeScreen.route
     val localContext = LocalContext.current
@@ -36,7 +38,7 @@ fun HomeActivityNavHost(
         startDestination = Destination.HomeScreen.route,
         modifier = modifier
     ) {
-        composable (route = Destination.HomeScreen.route ){
+        composable(route = Destination.HomeScreen.route) {
             HomePage(
                 modifier = Modifier
                     .padding(horizontal = (Dimens.Padding.HomeActivity)),
@@ -44,16 +46,23 @@ fun HomeActivityNavHost(
                 navController = navController
             )
         }
-        composable (route = Destination.AllMusicScreen.route) {
-            PlaylistPage(loadMoreItems = { _, _1 ->
-                getAllMusic().shuffled()
-            })
+        composable(route = Destination.AllMusicScreen.route) {
+            LaunchedEffect (Unit){
+                setLazyState(Destination.AllMusicScreen.route)
+            }
+            PlaylistPage(
+                lazyListState = getLazyListState().value,
+                loadMoreItems = { _, _1 ->
+                    getAllMusic().shuffled()
+                }
+            )
         }
     }
 
 
 }
-private fun getPlaylist(context : Context): List<Playlist> = listOf(
+
+private fun getPlaylist(context: Context): List<Playlist> = listOf(
     Playlist(
         0,
         "Favorite",

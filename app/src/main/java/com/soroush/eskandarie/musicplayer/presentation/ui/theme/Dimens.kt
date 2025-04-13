@@ -5,7 +5,7 @@ import androidx.compose.ui.unit.dp
 
 object Dimens {
     object Size{
-        val MusicItemShadowBorder                           : Dp        =   3.dp
+        val MusicItemShadowBorder                           : Dp        =   2.dp
         val MusicItemHeight                                 : Dp        =  80.dp
         val MusicItemPlayStatusIcon                         : Float     =  0.5f
         val SplashScreenIcon                                : Float     =  0.45f

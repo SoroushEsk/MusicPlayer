@@ -1,6 +1,8 @@
 package com.soroush.eskandarie.musicplayer.presentation.viewmodel
 
 import android.util.Log
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
@@ -44,6 +46,11 @@ class HomeViewModel @Inject constructor(
 
     private val _musicList: MutableStateFlow<List<MusicFile>> = MutableStateFlow(emptyList())
     val musicList: StateFlow<List<MusicFile>> = _musicList.asStateFlow()
+
+    private val _lazyListState = MutableStateFlow(LazyListState())
+    val lazyListState: StateFlow<LazyListState> = _lazyListState.asStateFlow()
+    private val _playlistName = MutableStateFlow("")
+    val playlistName: StateFlow<String> = _playlistName.asStateFlow()
     //endregion
     //region Viewmodel Action Channels
     private val setActionChannel = Channel<HomeSetAction> ( Channel.UNLIMITED )
@@ -56,6 +63,13 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             setActionChannel.send(action)
         }
+    }
+    fun setNewPlaylistLazyListState(playlistName: String) {
+        _lazyListState.value = LazyListState()
+        _playlistName.value = playlistName
+    }
+    fun backToHomeScreen(){
+        _playlistName.value = ""
     }
     fun getAllMusicFiles(){
         viewModelScope.launch {

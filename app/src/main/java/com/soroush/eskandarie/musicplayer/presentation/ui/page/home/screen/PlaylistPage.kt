@@ -51,36 +51,39 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlin.math.abs
-
-@Preview
-@Composable
-fun start(){
-    PlaylistPage(
-        loadMoreItems = { count, start ->
-            List(50) {
-                MusicFile(
-                    id = System.currentTimeMillis() + it,
-                    title = "Z - The warning",
-                    artist = "The warning",
-                    album = "",
-                    duration = 213443,
-                    recordingDate = null,
-                    genre = null,
-                    size = 234,
-                    path = "/storage/emulated/0/Download/NeginKt - Paiz   Saraabe Toe.mp3"
-                )
-            }
-        }
-    )
-}
+//
+//@Preview
+//@Composable
+//fun start(){
+//    PlaylistPage(
+//        loadMoreItems = { count, start ->
+//            List(50) {
+//                MusicFile(
+//                    id = System.currentTimeMillis() + it,
+//                    title = "Z - The warning",
+//                    artist = "The warning",
+//                    album = "",
+//                    duration = 213443,
+//                    recordingDate = null,
+//                    genre = null,
+//                    size = 234,
+//                    path = "/storage/emulated/0/Download/NeginKt - Paiz   Saraabe Toe.mp3"
+//                )
+//            }
+//        }
+//    )
+//}
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlaylistPage(
     modifier: Modifier = Modifier,
     loadMoreItems: (count: Int, start: Int)->List<MusicFile>,
     colorTheme: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
-    lazyState: LazyListState = rememberLazyListState()
+    lazyListState: LazyListState
 ) {
+    val lazyState = remember{
+        lazyListState
+    }
     var musicList by remember {
         mutableStateOf(
             listOf<MusicFile>()
@@ -98,7 +101,6 @@ fun PlaylistPage(
     val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == 4 }
     itemInfo?.let {
         val centerOffset = it.offset + it.size / 2
-        Log.e("view post", "$centerOffset")
     }
     LazyColumn(
         modifier = modifier
