@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -79,7 +80,7 @@ class HomeViewModel @Inject constructor(
     private fun handleSetActions(){
         viewModelScope.launch {
             setActionChannel.receiveAsFlow().collect{ action ->
-//                Log.e("viewmodel action", (action as HomeSetAction.SetSearchText).searchText)
+                Log.e("viewmodel action", homeState.value.searchFieldState.searchText)
                 when( action ){
                     is HomeSetAction.SetSearchText -> setSearchText(action.searchText)
                     else -> {}
@@ -87,8 +88,14 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-    private suspend fun setSearchText(searchText: String){
-        _homeState.value.searchFieldState = _homeState.value.searchFieldState.copy(searchText = searchText)
+    private fun setSearchText(searchText: String){
+        _homeState.update {
+            it.copy(
+                searchFieldState =  it.searchFieldState.copy(
+                    searchText = searchText
+                )
+            )
+        }
     }
     fun setSongPercent(){
         val currentDuration = mediaSession.player.currentPosition.toFloat()

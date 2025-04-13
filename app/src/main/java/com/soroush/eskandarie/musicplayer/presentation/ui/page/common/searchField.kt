@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -28,13 +27,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
+import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
@@ -54,6 +53,7 @@ fun SearchField(
     onChange: (String) -> Unit
 ) {
     val searchText by getState
+
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
     var isFocused by remember { mutableStateOf(false) }
@@ -79,6 +79,7 @@ fun SearchField(
             value = searchText,
             onValueChange = { newText ->
                 setState(HomeSetAction.SetSearchText(newText))
+//                searchText = newText
             },
             singleLine = true,
             modifier = modifier
@@ -112,7 +113,8 @@ fun SearchField(
                 unfocusedIndicatorColor = themeColors.Surface,
                 containerColor = Color.Transparent,
                 focusedPrefixColor = themeColors.FocusedField,
-                focusedLabelColor = themeColors.FocusedField
+                focusedLabelColor = themeColors.FocusedField,
+                focusedTextColor = themeColors.Text
             ),
             interactionSource = interactionSource
         )
