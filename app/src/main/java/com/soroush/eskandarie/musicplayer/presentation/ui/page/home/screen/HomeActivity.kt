@@ -134,24 +134,12 @@ class HomeActivity  : ComponentActivity() {
                         viewmodel.musicList.value
                     }
                 }
-//                    HomePage(
-//                        modifier = Modifier
-//                            .statusBarsPadding()
-//                            .align(Alignment.TopCenter)
-//                            .padding(horizontal = (Dimens.Padding.HomeActivity))
-//                            .padding(bottom = 68.dp),
-//                        playlists = getPlaylist()
-//                    )
-
                     MusicPage(
                         modifier = Modifier,
                         songPercent = viewmodel.songPercent.collectAsState()
                     ){playbackState ->
 
                     }
-
-//                MusicPage(scrollState = scrollState)
-
             }
         }
     }

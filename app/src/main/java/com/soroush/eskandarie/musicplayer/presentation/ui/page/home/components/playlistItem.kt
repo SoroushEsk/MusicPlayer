@@ -56,7 +56,7 @@ fun PlaylistItem(
     icon2: Int = R.drawable.shuffle,
     errorImage: Int = R.drawable.empty_album,
     themeColor: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
-    playlistId: Int,
+    playlistId: Long,
     title: String,
     posterUri: Uri,
     onIcon1Click: () -> Unit,

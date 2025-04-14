@@ -86,7 +86,7 @@ fun HomePage(
             PlaylistItem(
                 playlistId = playlists[index].id,
                 title = playlists[index].name,
-                posterUri = playlists[index].poster,
+                posterUri = Uri.parse(playlists[index].poster),
                 posterShape = RoundedCornerShape(12.dp),
                 onIcon1Click = { },
                 onIcon2Click = { },

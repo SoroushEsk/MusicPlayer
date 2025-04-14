@@ -15,13 +15,9 @@ import androidx.navigation.compose.composable
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen.PlaylistPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 
 @Composable
 fun HomeActivityNavHost(
@@ -66,32 +62,32 @@ private fun getPlaylist(context: Context): List<Playlist> = listOf(
     Playlist(
         0,
         "Favorite",
-        Uri.parse("android.resource://${context.packageName}/" + R.drawable.favorite_playlist)
+        "android.resource://${context.packageName}/" + R.drawable.favorite_playlist
     ),
     Playlist(
         1,
         "Playlist 1",
-        Uri.parse("android.resource://${context.packageName}/" + R.drawable.shaj)
+        "android.resource://${context.packageName}/" + R.drawable.shaj
     ),
     Playlist(
         2,
         "Playlist 2",
-        Uri.parse("android.resource://${context.packageName}/" + R.drawable.ghader)
+        "android.resource://${context.packageName}/" + R.drawable.ghader
     ),
     Playlist(
         3,
         "Playlist 3",
-        Uri.parse("android.resource://${context.packageName}/" + R.drawable.simint)
+        "android.resource://${context.packageName}/" + R.drawable.simint
     ),
     Playlist(
         4,
         "Playlist 4",
-        Uri.parse("android.resource://${context.packageName}/" + R.drawable.sharhram)
+        "android.resource://${context.packageName}/" + R.drawable.sharhram
     ),
     Playlist(
         5,
         "Playlist 5",
-        Uri.parse("android.resource://${context.packageName}/" + R.drawable.empty_album)
+       "android.resource://${context.packageName}/" + R.drawable.empty_album
     )
 )
 

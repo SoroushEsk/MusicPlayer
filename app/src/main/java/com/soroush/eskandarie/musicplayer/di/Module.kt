@@ -7,14 +7,21 @@ import androidx.room.Room
 import com.soroush.eskandarie.musicplayer.data.local.MusicPlayerDatabase
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicQueueDao
+import com.soroush.eskandarie.musicplayer.data.local.dao.PlaylistDao
 import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
 import com.soroush.eskandarie.musicplayer.data.repository.MusicQueueRepositoryImpl
 import com.soroush.eskandarie.musicplayer.data.repository.MusicRepositoryImp
+import com.soroush.eskandarie.musicplayer.data.repository.PlaylistRepositoryImp
 import com.soroush.eskandarie.musicplayer.domain.repository.DeviceMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
+import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.DeleteAPlaylistUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.ModifyAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
@@ -38,22 +45,22 @@ object MediaModule{
     fun provideSharedPreference(@ApplicationContext context: Context) = context.applicationContext.getSharedPreferences(
         Constants.SharedPreference.Name,
         Context.MODE_PRIVATE
-    )
+    )!!
     //endregion
     //region MediaSession
     @Provides
     @Singleton
-    fun provideMediaSessin(@ApplicationContext context: Context): MediaSession {
+    fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
         val exoPlayer = ExoPlayer.Builder(context).build()
-        val mediaSession = androidx.media3.session.MediaSession.Builder(context, exoPlayer)
-            .setCallback(object: androidx.media3.session.MediaSession.Callback{
+        val mediaSession = MediaSession.Builder(context, exoPlayer)
+            .setCallback(object: MediaSession.Callback{
 
             })
             .build()
         return mediaSession
     }
     //endregion
-    //region Database
+    //region Database + Dao
     @Provides
     @Singleton
     fun provideMusicDatabase(@ApplicationContext context: Context): MusicPlayerDatabase{
@@ -99,8 +106,12 @@ object MediaModule{
         getAllMusicFromDeviceUseCase,
         musicDao
     )
+    @Provides
+    @Singleton
+    fun providePlaylistRepository(playlistDao: PlaylistDao): PlaylistRepository =
+        PlaylistRepositoryImp(playlistDao)
     //endregion
-    //region MusicQueueUseCases
+    //region Music Queue Use Cases
     @Provides
     @Singleton
     fun provideGetAllMusicFromQueueUseCase(musicQueueRepository: MusicQueueRepository): GetAllMusicOfQueueUseCase {
@@ -116,10 +127,30 @@ object MediaModule{
     fun provideRefreshQueueUseCase(musicQueueRepository: MusicQueueRepository): RefreshQueueUseCase {
         return RefreshQueueUseCase(musicQueueRepository)
     }
+    //endregion
+    //region Content Resolver Use Case
     @Provides
     @Singleton
-    fun proviceGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabaseUseCase{
+    fun provideGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabaseUseCase{
         return GetAllMusicFromDatabaseUseCase(musicRepository)
     }
+    //endregion
+    //region Playlist Use Cases
+    @Provides
+    @Singleton
+    fun provideModifyAPlaylistUseCase(playlistRepository: PlaylistRepository): ModifyAPlaylistUseCase =
+        ModifyAPlaylistUseCase(playlistRepository)
+    @Provides
+    @Singleton
+    fun provideGetAllPlaylistItemsUseCase(playlistRepository: PlaylistRepository): GetAllPlaylistItemsUseCase =
+        GetAllPlaylistItemsUseCase(playlistRepository)
+    @Provides
+    @Singleton
+    fun provideCreateANewPlaylistUseCase(playlistRepository: PlaylistRepository): CreateANewPlaylistUseCase =
+        CreateANewPlaylistUseCase(playlistRepository)
+    @Provides
+    @Singleton
+    fun provideDeleteAPlaylistUseCase(playlistRepository: PlaylistRepository): DeleteAPlaylistUseCase =
+        DeleteAPlaylistUseCase(playlistRepository)
     //endregion
 }

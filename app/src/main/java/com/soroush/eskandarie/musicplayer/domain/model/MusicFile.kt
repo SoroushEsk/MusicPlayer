@@ -14,6 +14,20 @@ data class MusicFile(
     val size: Long = 0,
     val path: String
 )
+fun MusicFile.getAlbumArtBitmap(path: String): Bitmap? {
+    val retriever = MediaMetadataRetriever()
+    return try {
+        retriever.setDataSource(path)
+        val art = retriever.embeddedPicture
+        art?.let {
+            android.graphics.BitmapFactory.decodeByteArray(art, 0, art.size)
+        }
+    } catch (e: Exception) {
+        null
+    } finally {
+        retriever.release()
+    }
+}
 fun MusicFile. getAlbumArtBitmap(): Bitmap? {
     val retriever = MediaMetadataRetriever()
     return try {
