@@ -1,7 +1,6 @@
 package com.soroush.eskandarie.musicplayer.presentation.nav
 
-import android.content.Context
-import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
@@ -12,7 +11,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
@@ -24,6 +22,7 @@ fun HomeActivityNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     getLazyListState: @Composable () -> State<LazyListState>,
+    getPlaylist: State<List<Playlist>>,
     setLazyState: (playlistName: String)->Unit,
     getAllMusic: () -> List<MusicFile>
 ) {
@@ -38,7 +37,8 @@ fun HomeActivityNavHost(
             HomePage(
                 modifier = Modifier
                     .padding(horizontal = (Dimens.Padding.HomeActivity)),
-                playlists = getPlaylist(localContext),
+                loadPlaylist = getPlaylist
+                ,
                 navController = navController
             )
         }
@@ -58,37 +58,6 @@ fun HomeActivityNavHost(
 
 }
 
-private fun getPlaylist(context: Context): List<Playlist> = listOf(
-    Playlist(
-        0,
-        "Favorite",
-        "android.resource://${context.packageName}/" + R.drawable.favorite_playlist
-    ),
-    Playlist(
-        1,
-        "Playlist 1",
-        "android.resource://${context.packageName}/" + R.drawable.shaj
-    ),
-    Playlist(
-        2,
-        "Playlist 2",
-        "android.resource://${context.packageName}/" + R.drawable.ghader
-    ),
-    Playlist(
-        3,
-        "Playlist 3",
-        "android.resource://${context.packageName}/" + R.drawable.simint
-    ),
-    Playlist(
-        4,
-        "Playlist 4",
-        "android.resource://${context.packageName}/" + R.drawable.sharhram
-    ),
-    Playlist(
-        5,
-        "Playlist 5",
-       "android.resource://${context.packageName}/" + R.drawable.empty_album
-    )
-)
+
 
 

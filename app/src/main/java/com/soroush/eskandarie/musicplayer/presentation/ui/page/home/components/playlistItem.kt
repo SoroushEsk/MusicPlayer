@@ -1,6 +1,8 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
+import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -58,7 +61,7 @@ fun PlaylistItem(
     themeColor: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     playlistId: Long,
     title: String,
-    posterUri: Uri,
+    posterBitmap: Bitmap,
     onIcon1Click: () -> Unit,
     onIcon2Click: () -> Unit,
     dropdownList: List<PlaylistDropdownItem>,
@@ -82,15 +85,14 @@ fun PlaylistItem(
             .background(themeColor.DarkSurface),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        AsyncImage(
+        Image(
             modifier = Modifier
                 .aspectRatio(1f)
                 .padding(Dimens.Padding.PlaylistItemPoster)
                 .clip(posterShape),
-            model = posterUri,
+            bitmap = posterBitmap.asImageBitmap(),
             contentScale = ContentScale.Crop,
-            contentDescription = "Playlist: ${title} Poster",
-            error = painterResource(id = errorImage)
+            contentDescription = "Playlist: ${title} Poster"
         )
         Spacer(
             modifier = Modifier

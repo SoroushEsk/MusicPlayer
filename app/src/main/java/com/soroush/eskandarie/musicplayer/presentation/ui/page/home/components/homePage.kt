@@ -1,5 +1,9 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,10 +20,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdownItem
@@ -36,19 +51,25 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.util.Constants
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 
 @Composable
 fun HomePage(
     modifier: Modifier = Modifier,
     themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
-    playlists: List<Playlist>,
+    loadPlaylist: State<List<Playlist>>,
     navController: NavController
 
 ) {
+    val playlistList by loadPlaylist
+    val lazyListState = rememberLazyListState()
     LazyColumn(
         modifier = modifier
             .fillMaxSize(),
-        horizontalAlignment = Alignment.Start
+        horizontalAlignment = Alignment.Start,
+        state = lazyListState
     ) {
         item{
             FourTopPlaylist(
@@ -82,11 +103,11 @@ fun HomePage(
                     .height(Dimens.Spacing.HomePageSpaceBetween)
             )
         }
-        items(playlists.size){index ->
+        items(playlistList.size){index ->
             PlaylistItem(
-                playlistId = playlists[index].id,
-                title = playlists[index].name,
-                posterUri = Uri.parse(playlists[index].poster),
+                playlistId = playlistList[index].id,
+                title = playlistList[index].name,
+                posterBitmap = getAlbumArtBitmap( playlistList[index].poster, LocalContext.current),
                 posterShape = RoundedCornerShape(12.dp),
                 onIcon1Click = { },
                 onIcon2Click = { },
@@ -106,7 +127,9 @@ fun HomePage(
             )
         }
     }
+
 }
+
 @Composable
 fun FourTopPlaylist(
     modifier: Modifier = Modifier,
@@ -203,5 +226,21 @@ fun FourTopPlaylist(
                 }
             }
         }
+    }
+}
+private fun getAlbumArtBitmap(path: String, context: Context): Bitmap {
+    val retriever = MediaMetadataRetriever()
+    return try {
+        retriever.setDataSource(path)
+        val art = retriever.embeddedPicture
+        if (art != null) {
+            BitmapFactory.decodeByteArray(art, 0, art.size)
+        } else {
+            BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
+        }
+    } catch (e: Exception) {
+        BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
+    } finally {
+        retriever.release()
     }
 }

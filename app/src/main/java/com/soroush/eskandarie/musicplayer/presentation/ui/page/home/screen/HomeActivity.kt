@@ -77,6 +77,9 @@ class HomeActivity  : ComponentActivity() {
 
                 while(true) {
                     viewmodel.setSongPercent()
+                    if( viewmodel.playlistItems.value.isEmpty()) {
+                        viewmodel.getAllPlaylists()
+                    }
                     delay(1000)
                 }
             }
@@ -124,13 +127,11 @@ class HomeActivity  : ComponentActivity() {
                         getLazyListState = {
                             viewmodel.lazyListState.collectAsState()
                         },
+                        getPlaylist = viewmodel.playlistItems.collectAsState(),
                         setLazyState = {playlistName: String->
                             viewmodel.setNewPlaylistLazyListState(playlistName)
                         }
                     ){
-                        viewmodel.musicList.value.forEach{
-                            Log.e("music database error", it.toString())
-                        }
                         viewmodel.musicList.value
                     }
                 }

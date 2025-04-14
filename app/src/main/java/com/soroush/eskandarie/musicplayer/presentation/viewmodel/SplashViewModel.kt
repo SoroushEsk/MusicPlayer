@@ -1,10 +1,12 @@
 package com.soroush.eskandarie.musicplayer.presentation.viewmodel
 
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.soroush.eskandarie.musicplayer.domain.model.Playlist
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.SavingDeviceMusicToLocalDBUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -13,9 +15,11 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
-    private val saveDeviceMusicToLocalDB : SavingDeviceMusicToLocalDBUseCase
+    private val saveDeviceMusicToLocalDB : SavingDeviceMusicToLocalDBUseCase,
+    private val createANewPlaylistUseCase: CreateANewPlaylistUseCase,
+    private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase
 ): ViewModel() {
-    fun firstTimeLauchActions(){
+    fun firstTimeLaunchActions(){
 
 
         if(sharedPreferences.getBoolean(
@@ -24,6 +28,7 @@ class SplashViewModel @Inject constructor(
         )){
             viewModelScope.launch {
                 saveDeviceMusicToLocalDB()
+
             }
             with(sharedPreferences.edit()) {
                 putBoolean(

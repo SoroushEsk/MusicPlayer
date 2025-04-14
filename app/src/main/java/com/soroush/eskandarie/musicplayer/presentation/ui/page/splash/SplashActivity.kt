@@ -3,7 +3,6 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.splash
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -16,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
 import androidx.media3.common.util.UnstableApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -29,7 +29,6 @@ import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @AndroidEntryPoint
 @SuppressLint("CustomSplashScreen")
@@ -45,7 +44,7 @@ class SplashActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         checkPermissions()
         if (PERMISSIONS.any { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
-            viewModel.firstTimeLauchActions()
+            viewModel.firstTimeLaunchActions()
         }
         enableEdgeToEdge()
         startActivityWithDelay()
@@ -59,7 +58,7 @@ class SplashActivity : ComponentActivity() {
                 if(
                     readExternalStoragePermissionState.status.isGranted
                 ){
-                    viewModel.firstTimeLauchActions()
+                    viewModel.firstTimeLaunchActions()
                 }
             }
             MusicPlayerTheme {

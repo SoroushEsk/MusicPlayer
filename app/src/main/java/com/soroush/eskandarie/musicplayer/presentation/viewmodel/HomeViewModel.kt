@@ -9,7 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.session.MediaSession
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
+import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
@@ -28,7 +30,8 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val mediaSession: MediaSession,
-    private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase
+    private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
+    private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase
 ): ViewModel() {
     //region Viewmodel States
     private val _homeState = MutableStateFlow(
@@ -47,6 +50,10 @@ class HomeViewModel @Inject constructor(
 
     private val _musicList: MutableStateFlow<List<MusicFile>> = MutableStateFlow(emptyList())
     val musicList: StateFlow<List<MusicFile>> = _musicList.asStateFlow()
+
+    private val _playlistItems: MutableStateFlow<List<Playlist>> = MutableStateFlow(emptyList())
+    val playlistItems: StateFlow<List<Playlist>>
+        get() = _playlistItems.asStateFlow()
 
     private val _lazyListState = MutableStateFlow(LazyListState())
     val lazyListState: StateFlow<LazyListState> = _lazyListState.asStateFlow()
@@ -77,10 +84,14 @@ class HomeViewModel @Inject constructor(
             _musicList.value = getAllMusicFromDatabaseUseCase()
         }
     }
+    fun getAllPlaylists(){
+        viewModelScope.launch {
+            _playlistItems.value = getAllPlaylistItemsUseCase()
+        }
+    }
     private fun handleSetActions(){
         viewModelScope.launch {
             setActionChannel.receiveAsFlow().collect{ action ->
-                Log.e("viewmodel action", homeState.value.searchFieldState.searchText)
                 when( action ){
                     is HomeSetAction.SetSearchText -> setSearchText(action.searchText)
                     else -> {}
