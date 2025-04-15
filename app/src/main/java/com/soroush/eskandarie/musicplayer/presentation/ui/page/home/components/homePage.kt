@@ -107,7 +107,7 @@ fun HomePage(
             PlaylistItem(
                 playlistId = playlistList[index].id,
                 title = playlistList[index].name,
-                posterBitmap = getAlbumArtBitmap( playlistList[index].poster, LocalContext.current),
+                posterBitmap = MusicFile.getAlbumArtBitmap( playlistList[index].poster, LocalContext.current),
                 posterShape = RoundedCornerShape(12.dp),
                 onIcon1Click = { },
                 onIcon2Click = { },
@@ -226,21 +226,5 @@ fun FourTopPlaylist(
                 }
             }
         }
-    }
-}
-private fun getAlbumArtBitmap(path: String, context: Context): Bitmap {
-    val retriever = MediaMetadataRetriever()
-    return try {
-        retriever.setDataSource(path)
-        val art = retriever.embeddedPicture
-        if (art != null) {
-            BitmapFactory.decodeByteArray(art, 0, art.size)
-        } else {
-            BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
-        }
-    } catch (e: Exception) {
-        BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
-    } finally {
-        retriever.release()
     }
 }

@@ -67,9 +67,14 @@ class HomeActivity  : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
+
+
         enableEdgeToEdge()
 
         viewmodel.getAllMusicFiles()
+        viewmodel.getAllPlaylists()
         //checkPermissions()
         setContent {
             val navController = rememberNavController()
@@ -77,9 +82,6 @@ class HomeActivity  : ComponentActivity() {
 
                 while(true) {
                     viewmodel.setSongPercent()
-                    if( viewmodel.playlistItems.value.isEmpty()) {
-                        viewmodel.getAllPlaylists()
-                    }
                     delay(1000)
                 }
             }
@@ -132,6 +134,9 @@ class HomeActivity  : ComponentActivity() {
                             viewmodel.setNewPlaylistLazyListState(playlistName)
                         }
                     ){
+                        viewmodel.musicList.value.forEach {
+                            Log.e("123", it.toString())
+                        }
                         viewmodel.musicList.value
                     }
                 }

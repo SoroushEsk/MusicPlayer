@@ -37,13 +37,12 @@ fun HomeActivityNavHost(
             HomePage(
                 modifier = Modifier
                     .padding(horizontal = (Dimens.Padding.HomeActivity)),
-                loadPlaylist = getPlaylist
-                ,
+                loadPlaylist = getPlaylist,
                 navController = navController
             )
         }
         composable(route = Destination.AllMusicScreen.route) {
-            LaunchedEffect (Unit){
+            LaunchedEffect(Unit) {
                 setLazyState(Destination.AllMusicScreen.route)
             }
             PlaylistPage(
@@ -54,8 +53,6 @@ fun HomeActivityNavHost(
             )
         }
     }
-
-
 }
 
 

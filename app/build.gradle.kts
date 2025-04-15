@@ -67,7 +67,10 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+    implementation (libs.androidx.media)
+//    implementation(libs.androidx.media3.session.v161)
 
+    implementation (libs.androidx.media3.session.v131)
     // Coil
     implementation(libs.coil.compose)
 
@@ -101,7 +104,7 @@ dependencies {
 
 
     // Accompanist Permissions
-    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+    implementation(libs.accompanist.permissions)
 
     implementation(libs.hilt.navigation.compose)
     implementation(libs.material)

@@ -1,26 +1,29 @@
 package com.soroush.eskandarie.musicplayer.framework.service
 
-import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import androidx.media3.session.MediaSession
 import android.util.Log
-import androidx.annotation.OptIn
-import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.MediaStyleNotificationHelper
-import com.google.common.util.concurrent.ListenableFuture
+import androidx.media3.session.legacy.MediaMetadataCompat
+import androidx.media3.ui.PlayerNotificationManager
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.framework.notification.MusicNotificationManager
@@ -30,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 import javax.inject.Inject
 @AndroidEntryPoint
 @UnstableApi
@@ -40,10 +44,10 @@ class MusicPlaybackService: Service() {
     @Inject lateinit var getAllMusicOfQueueUseCase: GetAllMusicOfQueueUseCase
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
-    private lateinit var notificationManager: NotificationManager
+    private lateinit var notificationManager: PlayerNotificationManager
     private lateinit var musicNotificationManager: MusicNotificationManager
     companion object {
-        private const val NOTIFICATION_ID = 1
+        private const val NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "MediaPlaybackChannel"
     }
 
@@ -51,11 +55,51 @@ class MusicPlaybackService: Service() {
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
-        notificationManager = getSystemService(NotificationManager::class.java)
+
+        notificationManager = PlayerNotificationManager.Builder(
+            this,
+            NOTIFICATION_ID,
+            CHANNEL_ID
+        )
+
+            .setMediaDescriptionAdapter(object : PlayerNotificationManager.MediaDescriptionAdapter {
+            override fun getCurrentContentTitle(player: Player): CharSequence {
+                return player.mediaMetadata.title ?: "Unknown Title"
+            }
+
+            override fun createCurrentContentIntent(player: Player): PendingIntent? {
+                return null // or your activity intent
+            }
+
+            override fun getCurrentContentText(player: Player): CharSequence? {
+                return player.mediaMetadata.artist
+            }
+
+            override fun getCurrentLargeIcon(
+                player: Player,
+                callback: PlayerNotificationManager.BitmapCallback
+            ): Bitmap? {
+                val artworkUri = player.mediaMetadata.artworkUri
+                if (artworkUri != null) {
+                    val bitmap = MusicFile.getAlbumArtBitmap(artworkUri.toString(), this@MusicPlaybackService)
+                    callback.onBitmap(bitmap)
+                    return bitmap
+                }
+                return null
+            }
+        })
+            .setChannelImportance(NotificationManager.IMPORTANCE_LOW)
+            .setSmallIconResourceId(R.mipmap.ic_launcher)
+            .build()
+        notificationManager.setUseRewindAction(false)
+        notificationManager.setUseFastForwardAction(false)
+        notificationManager.setMediaSessionToken(mediaSession.sessionCompatToken)
+        notificationManager.setPlayer(mediaSession.player)
         musicNotificationManager = MusicNotificationManager(this)
-        createNotificationChannel()
+//        createNotificationChannel()
         val notification = createNotification()
         startForeground(NOTIFICATION_ID, notification)
+
 
     }
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -63,7 +107,19 @@ class MusicPlaybackService: Service() {
         serviceScope.launch {
             val mutableList = mutableListOf<MediaItem>()
             val music = getAllMusicOfQueueUseCase().forEach {
-                val mediaItem = it.path.let { MediaItem.fromUri(it) }
+//                val mediaItem = it.path.let { MediaItem.fromUri(it) }
+                val mediaItem = MediaItem.Builder()
+                    .setMediaId(it.id.toString())
+                    .setUri(it.path)
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(MusicFile.getMusicTitle(it.path))
+                            .setArtist(MusicFile.getMusicArtist(it.path))
+                            .setArtworkUri(Uri.parse(it.path))
+                            .build()
+                    )
+
+                    .build()
                 mutableList.add(mediaItem)
             }
             withContext(Dispatchers.Main) {
@@ -111,21 +167,34 @@ class MusicPlaybackService: Service() {
             ).apply {
                 description = "Music playback controls"
             }
-            notificationManager.createNotificationChannel(channel)
         }
     }
 
     private fun createNotification(): Notification {
-        // You can use your MusicNotificationManager or create a basic notification here
-        // For simplicity, I'm creating a basic notification
+        val compatToken = mediaSession.sessionCompatToken
+
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setSmallIcon(R.drawable.shaj)
-            .setStyle(MediaStyleNotificationHelper.MediaStyle(mediaSession))
-            .setContentTitle("Wonderful music")
-            .setContentText("My Awesome Band")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentTitle(mediaSession.player.currentMediaItem?.mediaMetadata?.title ?: "Unknown Title")
+            .setContentText(mediaSession.player.currentMediaItem?.mediaMetadata?.artist ?: "Unknown Artist")
+            .setLargeIcon(
+                MusicFile.getAlbumArtBitmap(
+                    mediaSession.player.currentMediaItem?.mediaMetadata?.artworkUri?.toString() ?: "",
+                    this
+                )
+            )
+            .setStyle(
+                androidx.media.app.NotificationCompat.MediaStyle()
+                    .setMediaSession(compatToken) // 🔥 This enables lock screen!
+                    .setShowActionsInCompactView(0, 1, 2) // play, pause, etc.
+            )
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setOnlyAlertOnce(true)
+            .setOngoing(true)
             .build()
     }
+
     //endregion
 }
 

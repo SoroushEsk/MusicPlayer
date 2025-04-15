@@ -8,10 +8,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.session.MediaSession
+import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
@@ -31,7 +33,8 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val mediaSession: MediaSession,
     private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
-    private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase
+    private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
+    private val refreshQueueUseCase: RefreshQueueUseCase
 ): ViewModel() {
     //region Viewmodel States
     private val _homeState = MutableStateFlow(
@@ -82,6 +85,7 @@ class HomeViewModel @Inject constructor(
     fun getAllMusicFiles(){
         viewModelScope.launch {
             _musicList.value = getAllMusicFromDatabaseUseCase()
+
         }
     }
     fun getAllPlaylists(){
