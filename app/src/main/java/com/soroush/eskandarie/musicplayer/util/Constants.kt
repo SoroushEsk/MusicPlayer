@@ -39,6 +39,7 @@ object Constants {
         const val SplashScreenAppName           : String = "Music Player"
     }
     object HomePageValues{
+        const val AddPlaylistIconDescription    : String = "add_new_playlist"
         const val PlaylistSectionTitle          : String = "Playlists"
         const val MusicPageMotionLayoutId       : String = "music_bar_motion_layout"
     }

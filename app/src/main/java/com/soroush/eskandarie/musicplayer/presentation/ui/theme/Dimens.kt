@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 
 object Dimens {
     object Size{
+        val HomePagePlaylistTitleContainerHeight            : Dp        =  40.dp
         val MusicItemShadowBorder                           : Dp        =   2.dp
         val MusicItemHeight                                 : Dp        =  80.dp
         val MusicItemPlayStatusIcon                         : Float     =  0.5f
@@ -36,6 +37,7 @@ object Dimens {
     }
     object Padding{
         val Zero                                            : Dp        =   0.dp
+
         val MusicItemArtistTextEndPadding                   : Dp        =  20.dp
         val MusicItemTextContainerHorizontal                : Dp        =  10.dp
         val MusicItemTextContainerVertical                  : Dp        =  16.dp
@@ -49,6 +51,7 @@ object Dimens {
         val PlaylistItemIcon                                : Dp        =   2.dp
         val HomePagePadding                                 : Dp        =   8.dp
         val HomePageTopPlaylistItem                         : Dp        =  10.dp
+        val HomePageAddPlaylistIcon                         : Dp        =   8.dp
         val MusicBarMusicPoster                             : Dp        =   6.dp
         val MusicBarMotionLayoutTextContainer               : Int       =   4
         val MusicBarMotionLayoutControlIcon                 : Int       =   5
@@ -73,7 +76,7 @@ object Dimens {
         val MusicItemDefault                                : Dp        =  26.dp
     }
     object Spacing{
-        val HomePageSpaceBetween                            : Dp        =   4.dp
+        val HomePageSpaceBetween                            : Dp        =   8.dp
         val PlaylistItemDropdownSpace                       : Dp        =   2.dp
         val MusicPageSpaceBetween                           : Dp        =  12.dp
     }
@@ -109,6 +112,7 @@ object Dimens {
         val MusicPageNeedle                                 : Float     = 0.6f
         val SplashIcon                                      : Float     = 1f
         val MusicItemPoster                                 : Float     = 1f
+        val AddNewPlaylistButton                            : Float     = 1f
     }
     object Offset{
         val MusicPageNeedleXOffset                          : Dp        = -16.dp

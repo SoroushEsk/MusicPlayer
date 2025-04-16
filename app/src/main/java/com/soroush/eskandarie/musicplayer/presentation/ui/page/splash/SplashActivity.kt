@@ -3,6 +3,7 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.splash
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -20,6 +21,7 @@ import androidx.media3.common.util.UnstableApi
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.soroush.eskandarie.musicplayer.framework.receiver.LockScreenReceiver
 import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen.HomeActivity
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.splash.screen.SplashScreen
@@ -38,11 +40,19 @@ class SplashActivity : ComponentActivity() {
         Manifest.permission.READ_EXTERNAL_STORAGE,
         Manifest.permission.READ_MEDIA_AUDIO
     )
+
     //region Lifecycle Methods
     @kotlin.OptIn(ExperimentalPermissionsApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkPermissions()
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_OFF)
+            addAction(Intent.ACTION_SCREEN_ON)
+        addAction(Intent.ACTION_USER_PRESENT)
+        }
+        val receiver = LockScreenReceiver()
+        registerReceiver(receiver, filter)
         if (PERMISSIONS.any { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
             viewModel.firstTimeLaunchActions()
         }

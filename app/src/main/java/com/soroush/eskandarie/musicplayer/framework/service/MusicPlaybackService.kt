@@ -27,6 +27,7 @@ import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.framework.notification.MusicNotificationManager
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.lockscreen.LockScreenActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,17 +36,24 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 import javax.inject.Inject
+
 @AndroidEntryPoint
 @UnstableApi
-class MusicPlaybackService: Service() {
+class MusicPlaybackService : Service() {
     //region Fields
-    @Inject lateinit var mediaSession: MediaSession
-    @Inject lateinit var getMusicByIdUseCase: GetMusicFromQueueUseCase
-    @Inject lateinit var getAllMusicOfQueueUseCase: GetAllMusicOfQueueUseCase
+    @Inject
+    lateinit var mediaSession: MediaSession
+
+    @Inject
+    lateinit var getMusicByIdUseCase: GetMusicFromQueueUseCase
+
+    @Inject
+    lateinit var getAllMusicOfQueueUseCase: GetAllMusicOfQueueUseCase
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     private lateinit var notificationManager: PlayerNotificationManager
     private lateinit var musicNotificationManager: MusicNotificationManager
+
     companion object {
         private const val NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "MediaPlaybackChannel"
@@ -61,47 +69,51 @@ class MusicPlaybackService: Service() {
             NOTIFICATION_ID,
             CHANNEL_ID
         )
-
             .setMediaDescriptionAdapter(object : PlayerNotificationManager.MediaDescriptionAdapter {
-            override fun getCurrentContentTitle(player: Player): CharSequence {
-                return player.mediaMetadata.title ?: "Unknown Title"
-            }
-
-            override fun createCurrentContentIntent(player: Player): PendingIntent? {
-                return null // or your activity intent
-            }
-
-            override fun getCurrentContentText(player: Player): CharSequence? {
-                return player.mediaMetadata.artist
-            }
-
-            override fun getCurrentLargeIcon(
-                player: Player,
-                callback: PlayerNotificationManager.BitmapCallback
-            ): Bitmap? {
-                val artworkUri = player.mediaMetadata.artworkUri
-                if (artworkUri != null) {
-                    val bitmap = MusicFile.getAlbumArtBitmap(artworkUri.toString(), this@MusicPlaybackService)
-                    callback.onBitmap(bitmap)
-                    return bitmap
+                override fun getCurrentContentTitle(player: Player): CharSequence {
+                    return player.mediaMetadata.title ?: "Unknown Title"
                 }
-                return null
-            }
-        })
+
+                override fun createCurrentContentIntent(player: Player): PendingIntent? {
+                    return null
+                }
+
+                override fun getCurrentContentText(player: Player): CharSequence? {
+                    return player.mediaMetadata.artist
+                }
+
+                override fun getCurrentLargeIcon(
+                    player: Player,
+                    callback: PlayerNotificationManager.BitmapCallback
+                ): Bitmap? {
+                    val artworkUri = player.mediaMetadata.artworkUri
+                    if (artworkUri != null) {
+                        val bitmap = MusicFile.getAlbumArtBitmap(
+                            artworkUri.toString(),
+                            this@MusicPlaybackService
+                        )
+                        callback.onBitmap(bitmap)
+                        return bitmap
+                    }
+                    return null
+                }
+            })
             .setChannelImportance(NotificationManager.IMPORTANCE_LOW)
             .setSmallIconResourceId(R.mipmap.ic_launcher)
             .build()
-        notificationManager.setUseRewindAction(false)
-        notificationManager.setUseFastForwardAction(false)
+        notificationManager.setUseRewindAction(true)
+        notificationManager.setUseFastForwardAction(true)
         notificationManager.setMediaSessionToken(mediaSession.sessionCompatToken)
         notificationManager.setPlayer(mediaSession.player)
-        musicNotificationManager = MusicNotificationManager(this)
+//        musicNotificationManager = MusicNotificationManager(this)
 //        createNotificationChannel()
         val notification = createNotification()
         startForeground(NOTIFICATION_ID, notification)
 
 
+
     }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
 
         serviceScope.launch {
@@ -130,32 +142,38 @@ class MusicPlaybackService: Service() {
         }
         return START_STICKY
     }
+
     override fun onDestroy() {
         mediaSession.run {
-        player.release()
-        release()
+            player.release()
+            release()
         }
         super.onDestroy()
     }
+
     override fun onBind(intent: Intent?): IBinder? {
         return null
     }
+
     //endregion
     //region Init Function
     //endregion
     //region Player Control
-    private fun pausePlayback(){
+    private fun pausePlayback() {
         Log.e("song playback service", "pause")
     }
-    private fun resumePlayback(){
+
+    private fun resumePlayback() {
         Log.e("song playback service", "resume")
     }
+
     private fun playMusic(mediaItems: List<MediaItem>) {
         val player = mediaSession.player // Get ExoPlayer from MediaSession
         player.setMediaItems(mediaItems)
         player.prepare()
         player.play()
     }
+
     //endregion
     //region Notification
     private fun createNotificationChannel() {
@@ -176,11 +194,16 @@ class MusicPlaybackService: Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(mediaSession.player.currentMediaItem?.mediaMetadata?.title ?: "Unknown Title")
-            .setContentText(mediaSession.player.currentMediaItem?.mediaMetadata?.artist ?: "Unknown Artist")
+            .setContentTitle(
+                mediaSession.player.currentMediaItem?.mediaMetadata?.title ?: "Unknown Title"
+            )
+            .setContentText(
+                mediaSession.player.currentMediaItem?.mediaMetadata?.artist ?: "Unknown Artist"
+            )
             .setLargeIcon(
                 MusicFile.getAlbumArtBitmap(
-                    mediaSession.player.currentMediaItem?.mediaMetadata?.artworkUri?.toString() ?: "",
+                    mediaSession.player.currentMediaItem?.mediaMetadata?.artworkUri?.toString()
+                        ?: "",
                     this
                 )
             )

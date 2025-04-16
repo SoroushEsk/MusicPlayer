@@ -1,21 +1,16 @@
 package com.soroush.eskandarie.musicplayer.presentation.viewmodel
 
-import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.session.MediaSession
-import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
-import com.soroush.eskandarie.musicplayer.presentation.action.HomeGetStateAction
-import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +18,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -60,35 +54,49 @@ class HomeViewModel @Inject constructor(
 
     private val _lazyListState = MutableStateFlow(LazyListState())
     val lazyListState: StateFlow<LazyListState> = _lazyListState.asStateFlow()
+
     private val _playlistName = MutableStateFlow("")
     val playlistName: StateFlow<String> = _playlistName.asStateFlow()
     //endregion
     //region Viewmodel Action Channels
-    private val setActionChannel = Channel<HomeSetAction> ( Channel.UNLIMITED )
+    private val setActionChannel = Channel<HomeViewModelSetStateAction> ( Channel.UNLIMITED )
     //endregion
     //region Main Methods
     init{
         handleSetActions()
     }
-    fun getHomeSetAction(action: HomeSetAction){
+    fun viewModelSetAction(action: HomeViewModelSetStateAction){
         viewModelScope.launch {
             setActionChannel.send(action)
         }
+    }
+    //endregion
+    //region Get State Function
+    fun viewModelGetStateActions(action: HomeViewModelGetStateAction): StateFlow<*>{
+        return when(action){
+            is HomeViewModelGetStateAction.GetPlaylists         -> playlistItems
+            is HomeViewModelGetStateAction.GetMusicStatus       -> songPercent
+            is HomeViewModelGetStateAction.GetMusicFiles        -> musicList
+            is HomeViewModelGetStateAction.GetSearchTextState   -> homeState
+            is HomeViewModelGetStateAction.GetLazyListState     -> lazyListState
+        }
+    }
+    //endregion
+    //region Make A Change Functions
+    private fun backToHomeScreen(){
+        _playlistName.value = ""
     }
     fun setNewPlaylistLazyListState(playlistName: String) {
         _lazyListState.value = LazyListState()
         _playlistName.value = playlistName
     }
-    fun backToHomeScreen(){
-        _playlistName.value = ""
-    }
-    fun getAllMusicFiles(){
+    private fun getAllMusicFiles(){
         viewModelScope.launch {
             _musicList.value = getAllMusicFromDatabaseUseCase()
 
         }
     }
-    fun getAllPlaylists(){
+    private fun getAllPlaylists(){
         viewModelScope.launch {
             _playlistItems.value = getAllPlaylistItemsUseCase()
         }
@@ -97,11 +105,22 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             setActionChannel.receiveAsFlow().collect{ action ->
                 when( action ){
-                    is HomeSetAction.SetSearchText -> setSearchText(action.searchText)
-                    else -> {}
+                    is HomeViewModelSetStateAction.SetStateSearchTextHome   -> setSearchText(action.searchText)
+                    is HomeViewModelSetStateAction.GetAllMusicFiles         -> getAllMusicFiles()
+                    is HomeViewModelSetStateAction.GetAllPlaylists          -> getAllPlaylists()
+                    is HomeViewModelSetStateAction.SetStateSongPercentHome  -> setSongPercent()
+                    is HomeViewModelSetStateAction.SetCurrentPlaylistName   -> setNewPlaylistLazyListState(action.playlistName)
                 }
             }
         }
+    }
+    private fun setSongPercent(){
+        val currentDuration = mediaSession.player.currentPosition.toFloat()
+        val totalDuration = mediaSession.player.contentDuration
+        updateSongPercent(currentDuration / totalDuration)
+    }
+    private fun updateSongPercent(newPercent: Float) {
+        _songPercent.value = newPercent
     }
     private fun setSearchText(searchText: String){
         _homeState.update {
@@ -111,14 +130,6 @@ class HomeViewModel @Inject constructor(
                 )
             )
         }
-    }
-    fun setSongPercent(){
-        val currentDuration = mediaSession.player.currentPosition.toFloat()
-        val totalDuration = mediaSession.player.contentDuration
-        updateSongPercent(currentDuration / totalDuration)
-    }
-    private fun updateSongPercent(newPercent: Float) {
-        _songPercent.value = newPercent
     }
     //endregion
     //region Override Methods

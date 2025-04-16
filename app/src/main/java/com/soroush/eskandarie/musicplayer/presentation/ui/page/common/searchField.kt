@@ -32,8 +32,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.soroush.eskandarie.musicplayer.presentation.action.HomeSetAction
-import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
@@ -48,7 +47,7 @@ fun SearchField(
     shape: RoundedCornerShape = RoundedCornerShape(Dimens.CornerRadius.AppTextField),
     themeColors: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     modifier: Modifier = Modifier,
-    setState: (HomeSetAction) -> Unit,
+    setState: (HomeViewModelSetStateAction) -> Unit,
     getState: State<String>,
     onChange: (String) -> Unit
 ) {
@@ -78,7 +77,7 @@ fun SearchField(
         TextField(
             value = searchText,
             onValueChange = { newText ->
-                setState(HomeSetAction.SetSearchText(newText))
+                setState(HomeViewModelSetStateAction.SetStateSearchTextHome(newText))
 //                searchText = newText
             },
             singleLine = true,

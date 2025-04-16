@@ -23,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,6 +39,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -86,15 +89,30 @@ fun HomePage(
             )
         }
         item{
-            Text(
-                modifier = Modifier,
-                fontWeight = FontWeight.Bold,
-                text = Constants.HomePageValues.PlaylistSectionTitle,
-                color = themeColor.Text,
-                style = MaterialTheme
-                    .typography
-                    .headlineSmall
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .height(Dimens.Size.HomePagePlaylistTitleContainerHeight)
+            ) {
+                Text(
+                    modifier = Modifier,
+                    fontWeight = FontWeight.Bold,
+                    text = Constants.HomePageValues.PlaylistSectionTitle,
+                    color = themeColor.Text,
+                    style = MaterialTheme
+                        .typography
+                        .headlineSmall
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    modifier = Modifier
+                        .padding(Dimens.Padding.HomePageAddPlaylistIcon)
+                        .aspectRatio(Dimens.AspectRatio.AddNewPlaylistButton).fillMaxHeight(),
+                    painter = painterResource(id = R.drawable.add_to_playlist),
+                    contentDescription = Constants.HomePageValues.AddPlaylistIconDescription,
+                    tint = themeColor.Text
+                )
+            }
         }
         item{
             Spacer(

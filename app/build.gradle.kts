@@ -81,6 +81,7 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.window)
     implementation(libs.androidx.media3.session)
+    implementation(libs.androidx.activity)
     ksp(libs.hilt.compiler)
     ksp(libs.hilt.android.compiler)
 

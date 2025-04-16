@@ -34,6 +34,7 @@ import androidx.media3.session.MediaController
 import androidx.navigation.compose.rememberNavController
 import com.google.common.util.concurrent.ListenableFuture
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.HomeActivityNavHost
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
@@ -73,15 +74,15 @@ class HomeActivity  : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        viewmodel.getAllMusicFiles()
-        viewmodel.getAllPlaylists()
+        viewmodel.viewModelSetAction(HomeViewModelSetStateAction.GetAllMusicFiles)
+        viewmodel.viewModelSetAction(HomeViewModelSetStateAction.GetAllPlaylists)
         //checkPermissions()
         setContent {
             val navController = rememberNavController()
             LaunchedEffect(Unit) {
 
                 while(true) {
-                    viewmodel.setSongPercent()
+                    viewmodel.viewModelSetAction(HomeViewModelSetStateAction.SetStateSongPercentHome)
                     delay(1000)
                 }
             }
@@ -114,7 +115,7 @@ class HomeActivity  : ComponentActivity() {
                         SearchField(
                             modifier = Modifier
                                 .padding(horizontal = Dimens.Padding.HomeActivity),
-                            setState = viewmodel::getHomeSetAction,
+                            setState = viewmodel::viewModelSetAction,
                             getState = viewmodel.homeState
                                 .map { it.searchFieldState.searchText }
                                 .collectAsState(initial = "")
@@ -126,19 +127,10 @@ class HomeActivity  : ComponentActivity() {
                         navController = navController,
                         modifier = Modifier
                             .padding(bottom = 68.dp),
-                        getLazyListState = {
-                            viewmodel.lazyListState.collectAsState()
-                        },
-                        getPlaylist = viewmodel.playlistItems.collectAsState(),
-                        setLazyState = {playlistName: String->
-                            viewmodel.setNewPlaylistLazyListState(playlistName)
-                        }
-                    ){
-                        viewmodel.musicList.value.forEach {
-                            Log.e("123", it.toString())
-                        }
-                        viewmodel.musicList.value
-                    }
+                        getState = viewmodel::viewModelGetStateActions,
+                        setState = viewmodel::viewModelSetAction,
+                        navControllerAction = {}
+                    )
                 }
                     MusicPage(
                         modifier = Modifier,

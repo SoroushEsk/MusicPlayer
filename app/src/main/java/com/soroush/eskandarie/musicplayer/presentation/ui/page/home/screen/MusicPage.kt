@@ -580,9 +580,9 @@ fun SongPoster(
     var posterGradianSize by remember { mutableStateOf(Size.Zero) }
     var needleConnecterSize by remember { mutableStateOf(Size.Zero) }
     var mainContainerSize by remember {mutableStateOf(Size.Zero)}
-    LaunchedEffect(key1 = rotation.value) {
-        Log.e("Rotation", "${rotation.value} ${isAnimation} ${resetRotation} \n ${currentRotation}")
-    }
+//    LaunchedEffect(key1 = rotation.value) {
+//        Log.e("Rotation", "${rotation.value} ${isAnimation} ${resetRotation} \n ${currentRotation}")
+//    }
 
     Box(
         modifier = modifier
