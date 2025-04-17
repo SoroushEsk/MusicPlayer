@@ -20,6 +20,7 @@ import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.DeleteAPlaylistUseCase
@@ -161,6 +162,11 @@ object MediaModule{
     @Singleton
     fun provideGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabaseUseCase{
         return GetAllMusicFromDatabaseUseCase(musicRepository)
+    }
+    @Provides
+    @Singleton
+    fun provideGetMusicFileByIdFromDatabaseUseCase(musicRepository: MusicRepository): GetMusicFileByIdFromDatabaseUseCase{
+        return GetMusicFileByIdFromDatabaseUseCase(musicRepository)
     }
     //endregion
 }

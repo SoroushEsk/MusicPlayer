@@ -114,9 +114,9 @@ fun MusicPage(
 
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
-    var progress by rememberSaveable { mutableStateOf(0.0f) }
+    var progress by rememberSaveable { mutableStateOf(1.0f) }
     var scrollStatus by remember { mutableStateOf(MusicPageScrollState.NoScroll) }
-    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.shaj)
+    val bitmap = playbackState.bitmapBitmap
     val palette = Palette.from(bitmap).generate()
 
     var posterCoordinates by remember {
@@ -264,7 +264,7 @@ fun MusicPage(
             horizontalAlignment = if(progress == 0f) Alignment.Start else Alignment.CenterHorizontally
         ) {
             Text(
-                text = playbackState.currentMusicFile.title,
+                text = playbackState.title,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
                 color = colorTheme.Text,
@@ -275,7 +275,7 @@ fun MusicPage(
                 }
             )
             Text(
-                text = playbackState.currentMusicFile.artist,
+                text = playbackState.artist,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
                 color = colorTheme.Text.copy(alpha = 0.70f),
@@ -292,7 +292,7 @@ fun MusicPage(
             setState = setState
         )
         Image(
-            bitmap = MusicFile.getAlbumArtBitmap(playbackState.currentMusicFile.path, context = LocalContext.current).asImageBitmap(),
+            bitmap = playbackState.bitmapBitmap.asImageBitmap(),
             contentDescription = Constants.MusicPageValues.MusicPosterDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -319,7 +319,7 @@ fun MusicPage(
                         isTheSameSize = false
                     } else isTheSameSize = true
                 },
-            poster = MusicFile.getAlbumArtBitmap(playbackState.currentMusicFile.path, context = LocalContext.current),
+            poster = playbackState.bitmapBitmap,
             discImage = if(isSystemInDarkTheme())R.drawable.gramaphone_disc else R.drawable.disk_light,
             needleImage = if(isSystemInDarkTheme()) R.drawable.needle else R.drawable.needle_light ,
             isAnimation = progress == 1f,
@@ -333,7 +333,7 @@ fun MusicPage(
             leftIcon  =  R.drawable.playlist,
             colorTheme = colorTheme,
             setState = setState,
-            isColorTint = playbackState.currentMusicFile.isFavorite
+            isColorTint = playbackState.isFavorite
 
         )
         ProgressBar(
@@ -343,7 +343,7 @@ fun MusicPage(
                 .fillMaxHeight(0.05f),
             colorTheme = colorTheme,
             currentPosition = playbackState.currentDuration,
-            totalDuration = playbackState.currentMusicFile.duration,
+            totalDuration = playbackState.totalDuration,
             songPercent = playbackState.musicPercent
         )
         PLayControlShadow(
@@ -570,7 +570,7 @@ fun IconsAtEndsRow(
                 modifier = Modifier
                     .aspectRatio(1f),
                 iconPainter = rightIcon,
-                tint = if(isColorTint) colorTheme.Primary else colorTheme.Tint,
+                tint = if(isColorTint) colorTheme.FavoriteTint else colorTheme.Tint,
                 colorTheme = colorTheme
             ){
                 if(isColorTint) setState(HomeViewModelSetStateAction.ChangeFavoriteState(false))
@@ -728,7 +728,7 @@ fun IconShadowed(
     colorTheme: ColorTheme,
     shape: Shape = RoundedCornerShape(Dimens.CornerRadius.MusicPageShadowedIconDefault),
     aspectRatio: Float = 1f,
-    backgroundColor: Color = Color.Transparent,
+    backgroundColor: Color = colorTheme.Background.copy(alpha = Dimens.Alpha.MusicPageShadowedIconBackground),
     tint: Color = colorTheme.Tint,
     padding: Dp = Dimens.Padding.MusicPageShadowedIconDefault,
     layoutId: String = "" ,//********************,

@@ -27,13 +27,13 @@ object Dimens {
         val MusicPageMotionLayoutTextContainerWidthRatio    : String    = "60%"
         val MusicPageMotionLayoutPlayResumeHeightRatio      : String    = "8%"
         val MusicPageMotionLayoutForwardBackHeightRatio     : String    = "6%"
-        val MusicPageMotionLayoutIconsHeight                : Int       =  72
+        val MusicPageMotionLayoutIconsHeight                : Int       =  76
         val MusicPageMotionPosterMaxSize                    : Int       = 100
         val MusicPageShadowedIconLightBorder                : Dp        =   2.dp
         val MusicPageShadowedIconDarkBorder                 : Dp        =   1.dp
         val MusicPageDiskSizeRatio                          : Float     = 0.8f
         val MusicPageNeedleHeightRatio                      : Float     = 0.4f
-        val MusicPageProgressBarStrokeWidth                 : Dp        =   8.dp
+        val MusicPageProgressBarStrokeWidth                 : Dp        =  10.dp
     }
     object Padding{
         val Zero                                            : Dp        =   0.dp
@@ -62,7 +62,7 @@ object Dimens {
         val MusicPageIconsAtEndRowDefault                   : Dp        =  16.dp
         val MusicPageProgressBarDefaultHorizontal           : Dp        =  16.dp
         val MusicPageProgressBarDefaultVertical             : Dp        =   0.dp
-        val MusicPageProgressBarCanvasHorizontal            : Dp        =  12.dp
+        val MusicPageProgressBarCanvasHorizontal            : Dp        =  16.dp
         val MusicPagePlayControlShadowDefault               : Dp        =  10.dp
 
     }
@@ -88,10 +88,11 @@ object Dimens {
     }
     object Alpha {
         val MusicPageDiskPoster                             : Float     = 0.8f
-        val DomainColor1Alpha                               : Float     = 0.9f
-        val DomainColor2Alpha                               : Float     = 0.57f
-        val VibrantColor1Alpha                              : Float     = 0.5f
-        val VibrantColor2Alpha                              : Float     = 0.3f
+        val MusicPageShadowedIconBackground                 : Float     =0.15f
+        val DomainColor1Alpha                               : Float     = 0.6f
+        val DomainColor2Alpha                               : Float     = 0.5f
+        val VibrantColor1Alpha                              : Float     = 0.4f
+        val VibrantColor2Alpha                              : Float     = 0.2f
         val MutedColorAlpha                                 : Float     = 0.1f
         val MusicItemPlayStatusIcon                         : Float     = 0.8f
         val MusicItemFadeText                               : Float     = 0.6f

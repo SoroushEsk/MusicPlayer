@@ -7,4 +7,5 @@ interface MusicRepository {
     suspend fun saveDeviceMusicFile( )
     suspend fun getAllMusicFiles(): List<MusicFile>
     suspend fun updateMusic(musicEntity: MusicEntity)
+    suspend fun getMusicFileById(musicId: Long): MusicFile?
 }

@@ -23,6 +23,9 @@ interface MusicDao {
     @Query("SELECT * FROM ${Constants.Database.MusicTableName}")
     fun getAllMusic(): MutableList<MusicEntity>
 
+    @Query("SELECT * FROM ${Constants.Database.MusicTableName} WHERE ${Constants.Database.MusicIdColumn}=:musicId")
+    fun getMusicById(musicId: Long): MusicEntity?
+
     @Query("SELECT * FROM ${Constants.Database.MusicTableName} ORDER BY :columnName DESC LIMIT :limitAmount")
     fun getOrdered(columnName: String, limitAmount: Int): MutableList<MusicEntity>
 

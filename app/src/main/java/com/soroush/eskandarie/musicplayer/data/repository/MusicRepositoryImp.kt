@@ -14,11 +14,11 @@ import javax.inject.Inject
 class MusicRepositoryImp @Inject constructor(
     private val getAllMusicFromDeviceUseCase: GetAllMusicFromDeviceUseCase,
     private val musicTableDao: MusicDao
-): MusicRepository{
+) : MusicRepository {
     override suspend fun saveDeviceMusicFile() {
-        withContext(Dispatchers.IO){
-            getAllMusicFromDeviceUseCase().collect{ musicList ->
-                musicList.forEach{ musicFile ->
+        withContext(Dispatchers.IO) {
+            getAllMusicFromDeviceUseCase().collect { musicList ->
+                musicList.forEach { musicFile ->
                     val musicEntity = MusicEntity(
                         id = musicFile.id,
                         artist = musicFile.artist,
@@ -37,14 +37,18 @@ class MusicRepositoryImp @Inject constructor(
         }
     }
 
-    override suspend fun getAllMusicFiles(): List<MusicFile> = withContext(Dispatchers.IO){
+    override suspend fun getAllMusicFiles(): List<MusicFile> = withContext(Dispatchers.IO) {
         val musicListFromDatabase = musicTableDao.getAllMusic()
         musicListFromDatabase.map { musicEntity: MusicEntity ->
             musicEntity.toMusicFile()
         }
     }
 
-    override suspend fun updateMusic(musicEntity: MusicEntity) = withContext(Dispatchers.IO){
+    override suspend fun updateMusic(musicEntity: MusicEntity) = withContext(Dispatchers.IO) {
         musicTableDao.updateMusic(musicEntity)
+    }
+
+    override suspend fun getMusicFileById(musicId: Long): MusicFile? = withContext(Dispatchers.IO) {
+        musicTableDao.getMusicById(musicId)?.toMusicFile()
     }
 }

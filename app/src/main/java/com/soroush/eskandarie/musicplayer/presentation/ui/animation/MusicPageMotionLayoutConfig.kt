@@ -95,7 +95,7 @@ val musicPageMotionLayoutConfig = """
         "height": "${Dimens.Size.MusicPageMotionLayoutTextContainerHeightRatio}",
         "end": ["parent", "end", 0],
         "start": ["parent", "start", 0],
-        "top": ["motion_container", "top", 10]
+        "top": ["motion_container", "top", 28]
       },
       "down_option_icon_container": {
         "height": ${Dimens.Size.MusicPageMotionLayoutIconsHeight},

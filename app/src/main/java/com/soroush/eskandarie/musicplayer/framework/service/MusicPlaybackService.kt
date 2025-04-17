@@ -85,6 +85,7 @@ class MusicPlaybackService : MediaSessionService() {
                     .setMediaMetadata(
                         MediaMetadata.Builder()
                             .setTitle(MusicFile.getMusicTitle(it.path))
+                            .setDescription("${it.isFavorite}")
                             .setArtist(MusicFile.getMusicArtist(it.path))
                             .setArtworkUri(getArtworkUri(this@MusicPlaybackService, it.path))
                             .build()

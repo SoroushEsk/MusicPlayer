@@ -1,5 +1,10 @@
 package com.soroush.eskandarie.musicplayer.presentation.viewmodel
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,9 +12,11 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
 import androidx.media3.session.legacy.MediaControllerCompat
+import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
@@ -20,6 +27,7 @@ import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,11 +39,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationContext private val applicationContext: Context,
     private val mediaSession: MediaSession,
     private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
-    private val modifyMusicStatusUseCase: ModifyMusicStatusUseCase
+    private val modifyMusicStatusUseCase: ModifyMusicStatusUseCase,
+    private val getMusicFileByIdUseCase: GetMusicFileByIdFromDatabaseUseCase
 ): ViewModel() {
     //region Viewmodel States
     private val _homeState = MutableStateFlow(
@@ -49,7 +59,11 @@ class HomeViewModel @Inject constructor(
      val homeState : StateFlow<HomeViewModelState>
         get() = _homeState
 
-    private val _playbackState: MutableStateFlow<PlaybackStates> = MutableStateFlow(PlaybackStates())
+    private val _playbackState: MutableStateFlow<PlaybackStates> = MutableStateFlow(PlaybackStates(
+        artist = mediaSession.player.currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown_Artist",
+        title = mediaSession.player.currentMediaItem?.mediaMetadata?.title?.toString() ?: "Unknown_Title",
+        bitmapBitmap = uriToBitmap(applicationContext, mediaSession.player.currentMediaItem?.mediaMetadata?.artworkUri)
+    ))
     val playbackState: StateFlow<PlaybackStates> = _playbackState.asStateFlow()
 
     private val _musicList: MutableStateFlow<List<MusicFile>> = MutableStateFlow(emptyList())
@@ -95,8 +109,26 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.UpdateDatePlayed         -> updateDatePlayed()
                     is HomeViewModelSetStateAction.SetCurrentPlaylistName   -> setNewPlaylistLazyListState(action.playlistName)
                     is HomeViewModelSetStateAction.UpdatePlayCount          -> {}
+                    is HomeViewModelSetStateAction.UpdateMusicDetails       -> setMusicDetails()
+                    is HomeViewModelSetStateAction.UpdateTitle              -> setTitle(action.title)
+                    is HomeViewModelSetStateAction.UpdateArtist             -> setArtist(action.artist)
+                    is HomeViewModelSetStateAction.UpdateArtWork            -> setArtWork(action.artWork)
                 }
             }
+        }
+    }
+    private fun uriToBitmap(context: Context, uri: Uri?): Bitmap {
+        return try {
+            if (uri == null) {
+                BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
+            } else {
+                context.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    BitmapFactory.decodeStream(inputStream)
+                } ?: BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
+            }
+        } catch (e: Exception) {
+            Log.e("UriToBitmap", "Error converting URI to bitmap: ${e.message}")
+            BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         }
     }
     //endregion
@@ -134,6 +166,7 @@ class HomeViewModel @Inject constructor(
         val currentDuration = mediaSession.player.currentPosition.toFloat()
         setCurrentDuration(currentDuration.toLong())
         val totalDuration = mediaSession.player.contentDuration
+        updateTotalDuration(totalDuration)
         updateSongPercent(currentDuration / totalDuration)
     }
     private fun setPlayState(isMusicPlaying: Boolean){
@@ -168,36 +201,39 @@ class HomeViewModel @Inject constructor(
 //        viewModelScope.launch {
 //            modifyMusicStatusUseCase(_playbackState.value.currentMusicFile)
 //        }
-//        _playbackState.update {
-//            it.copy(
-//                currentMusicFile = nextMusicFile
-//            )
+//        viewModelScope.launch {
+//            val nextMusicFile = getMusicFileByIdUseCase(nextMusicFileId)
+//            if (nextMusicFile != null) {
+//                _playbackState.update {
+//                    it.copy(
+//                    )
+//                }
+//            }
 //        }
     }
     private fun updatePlayCount(){
-        _playbackState.update {
-            it.copy(
-                currentMusicFile = it.currentMusicFile.copy(
-                    playCount = it.currentMusicFile.playCount + 1
-                )
-            )
-        }
+//        Todo("playCoutn")
+//        _playbackState.update {
+//            it.copy(
+//                currentMusicFile = it.currentMusicFile.copy(
+//                    playCount = it.currentMusicFile.playCount + 1
+//                )
+//            )
+//        }
     }
     private fun updateDatePlayed(){
-        _playbackState.update {
-            it.copy(
-                currentMusicFile = it.currentMusicFile.copy(
-                    datePlayed = System.currentTimeMillis()
-                )
-            )
-        }
+//        _playbackState.update {
+//            it.copy(
+//                currentMusicFile = it.currentMusicFile.copy(
+//                    datePlayed = System.currentTimeMillis()
+//                )
+//            )
+//        }Todo("dataplayed")
     }
     private fun setFavoriteState(isFavorite: Boolean){
         _playbackState.update {
             it.copy(
-                currentMusicFile = it.currentMusicFile.copy(
-                    isFavorite = isFavorite
-                )
+                isFavorite = isFavorite
             )
         }
     }
@@ -205,6 +241,13 @@ class HomeViewModel @Inject constructor(
         _playbackState.update {
             it.copy(
                 musicPercent = newPercent
+            )
+        }
+    }
+    private fun updateTotalDuration(newDuration: Long){
+        _playbackState.update {
+            it.copy(
+                totalDuration = newDuration
             )
         }
     }
@@ -217,6 +260,37 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+    private fun setArtist(artist: String) {
+        _playbackState.update {
+            it.copy(
+                artist = artist
+            )
+        }
+    }
+    private fun setTitle(title: String){
+        _playbackState.update {
+            it.copy(
+                title = title
+            )
+        }
+    }
+    private fun setArtWork(artwork: Bitmap){
+        _playbackState.update {
+            it.copy(
+                bitmapBitmap = artwork
+            )
+        }
+    }
+    private fun setMusicDetails(){
+        _playbackState.update {
+            it.copy(
+                artist = mediaSession.player.currentMediaItem?.mediaMetadata?.artist.toString(),
+                title = mediaSession.player.currentMediaItem?.mediaMetadata?.title.toString(),
+                bitmapBitmap = uriToBitmap(applicationContext, mediaSession.player.currentMediaItem?.mediaMetadata?.artworkUri)
+            )
+        }
+    }
+
     //endregion
     //region Override Methods
     override fun onCleared() {
