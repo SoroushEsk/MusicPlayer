@@ -43,4 +43,8 @@ class MusicRepositoryImp @Inject constructor(
             musicEntity.toMusicFile()
         }
     }
+
+    override suspend fun updateMusic(musicEntity: MusicEntity) = withContext(Dispatchers.IO){
+        musicTableDao.updateMusic(musicEntity)
+    }
 }

@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
 
 data class MusicFile(
     val id: Long,
@@ -15,7 +16,10 @@ data class MusicFile(
     val recordingDate: String? = null,
     val genre: String? = null,
     val size: Long = 0,
-    val path: String
+    val path: String,
+    val isFavorite: Boolean,
+    val playCount: Long,
+    val datePlayed: Long
 ){
     companion object{
         fun getAlbumArtBitmap(path: String, context: Context): Bitmap {
@@ -64,6 +68,17 @@ data class MusicFile(
             }
         }
     }
+    fun toMusicEntity(): MusicEntity = MusicEntity(
+        id = id,
+        title = title,
+        artist = artist,
+        path = path,
+        posterPath = "",
+        isFavorite = isFavorite,
+        playCount = playCount,
+        duration = duration,
+        datePlayed = datePlayed
+    )
 }
 fun MusicFile.getAlbumArtBitmap(path: String = this.path): Bitmap? {
     val retriever = MediaMetadataRetriever()
@@ -71,7 +86,7 @@ fun MusicFile.getAlbumArtBitmap(path: String = this.path): Bitmap? {
         retriever.setDataSource(path)
         val art = retriever.embeddedPicture
         art?.let {
-            android.graphics.BitmapFactory.decodeByteArray(art, 0, art.size)
+            BitmapFactory.decodeByteArray(art, 0, art.size)
         }
     } catch (e: Exception) {
         null

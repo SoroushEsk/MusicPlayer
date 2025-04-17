@@ -18,6 +18,7 @@ import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.DeleteAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
@@ -129,11 +130,6 @@ object MediaModule{
     }
     //endregion
     //region Content Resolver Use Case
-    @Provides
-    @Singleton
-    fun provideGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabaseUseCase{
-        return GetAllMusicFromDatabaseUseCase(musicRepository)
-    }
     //endregion
     //region Playlist Use Cases
     @Provides
@@ -152,5 +148,16 @@ object MediaModule{
     @Singleton
     fun provideDeleteAPlaylistUseCase(playlistRepository: PlaylistRepository): DeleteAPlaylistUseCase =
         DeleteAPlaylistUseCase(playlistRepository)
+    //endregion
+    //region Music Use Cases
+    @Provides
+    @Singleton
+    fun provideModifyMusicStatusUseCase(musicRepository: MusicRepository): ModifyMusicStatusUseCase =
+        ModifyMusicStatusUseCase(musicRepository)
+    @Provides
+    @Singleton
+    fun provideGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabaseUseCase{
+        return GetAllMusicFromDatabaseUseCase(musicRepository)
+    }
     //endregion
 }

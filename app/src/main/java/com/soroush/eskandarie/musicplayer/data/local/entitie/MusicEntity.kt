@@ -35,7 +35,10 @@ data class MusicEntity(
             artist = artist,
             album = "",
             duration = duration,
-            path = path
+            path = path,
+            datePlayed = datePlayed,
+            playCount = playCount,
+            isFavorite = isFavorite
         )
     }
 }
