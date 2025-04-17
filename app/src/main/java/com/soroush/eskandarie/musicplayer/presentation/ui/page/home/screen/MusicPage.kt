@@ -264,7 +264,7 @@ fun MusicPage(
             horizontalAlignment = if(progress == 0f) Alignment.Start else Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Tasnife Saze Khamoosh I have many more to say",
+                text = playbackState.currentMusicFile.title,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
                 color = colorTheme.Text,
@@ -275,7 +275,7 @@ fun MusicPage(
                 }
             )
             Text(
-                text = "Mohammadreza Shajarian",
+                text = playbackState.currentMusicFile.artist,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
                 color = colorTheme.Text.copy(alpha = 0.70f),
@@ -562,19 +562,19 @@ fun IconsAtEndsRow(
                 modifier = Modifier
                     .aspectRatio(1f),
                 iconPainter = leftIcon,
-                tint = if(isColorTint) colorTheme.Primary else colorTheme.Tint,
                 colorTheme = colorTheme
             ){
-                if(isColorTint) setState(HomeViewModelSetStateAction.ChangeFavoriteState(false))
-                else setState(HomeViewModelSetStateAction.ChangeFavoriteState(true))
+                //Todo("adding navController")
             }
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
                 iconPainter = rightIcon,
+                tint = if(isColorTint) colorTheme.Primary else colorTheme.Tint,
                 colorTheme = colorTheme
             ){
-                //Todo("adding navController")
+                if(isColorTint) setState(HomeViewModelSetStateAction.ChangeFavoriteState(false))
+                else setState(HomeViewModelSetStateAction.ChangeFavoriteState(true))
             }
         }
     }
