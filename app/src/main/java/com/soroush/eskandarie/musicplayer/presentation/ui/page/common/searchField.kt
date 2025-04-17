@@ -77,7 +77,7 @@ fun SearchField(
         TextField(
             value = searchText,
             onValueChange = { newText ->
-                setState(HomeViewModelSetStateAction.SetStateSearchTextHome(newText))
+                setState(HomeViewModelSetStateAction.SetStateSearchText(newText))
 //                searchText = newText
             },
             singleLine = true,

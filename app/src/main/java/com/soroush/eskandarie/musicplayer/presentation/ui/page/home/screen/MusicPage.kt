@@ -1,5 +1,6 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
 import androidx.compose.animation.core.Animatable
@@ -39,6 +40,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +61,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PointMode
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
@@ -81,7 +84,13 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.PlaybackState
+import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
+import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
+import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.ui.MusicPageScrollState
 import com.soroush.eskandarie.musicplayer.presentation.ui.animation.musicPageMotionLayoutConfig
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
@@ -89,16 +98,19 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.util.Constants
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMotionApi::class)
 @Composable
 fun MusicPage(
     modifier: Modifier = Modifier,
-    songPercent: State<Float>,
+    setState: (action: HomeViewModelSetStateAction)->Unit,
+    getState: (action: HomeViewModelGetStateAction)->StateFlow<*>,
     colorTheme: ColorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme,
     posterShape: Shape = RoundedCornerShape(Dimens.CornerRadius.General),
     onClick: (playbackState: PlaybackState) -> Unit
 ) {
+    val playbackState by (getState(HomeViewModelGetStateAction.GetMusicStatus)as StateFlow<PlaybackStates>).collectAsState()
 
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
@@ -195,9 +207,6 @@ fun MusicPage(
         }
     }
 
-    var playbackState by remember{
-        mutableStateOf(PlaybackState.PAUSED)
-    }
     MotionLayout(
         motionScene = MotionScene(content = musicPageMotionLayoutConfig),
         progress = animatedProgress,
@@ -279,10 +288,11 @@ fun MusicPage(
                 .layoutId(Constants.MusicPageValues.DownOptionIconContainerId),
             rightIcon =  R.drawable.options_list,
             leftIcon  =  R.drawable.down_arrow,
-            colorTheme = colorTheme
+            colorTheme = colorTheme,
+            setState = setState
         )
         Image(
-            painter = painterResource(id = R.drawable.shaj),
+            bitmap = MusicFile.getAlbumArtBitmap(playbackState.currentMusicFile.path, context = LocalContext.current).asImageBitmap(),
             contentDescription = Constants.MusicPageValues.MusicPosterDescription,
             contentScale = ContentScale.Crop,
             modifier = Modifier
@@ -309,7 +319,7 @@ fun MusicPage(
                         isTheSameSize = false
                     } else isTheSameSize = true
                 },
-            poster = R.drawable.shaj,
+            poster = MusicFile.getAlbumArtBitmap(playbackState.currentMusicFile.path, context = LocalContext.current),
             discImage = if(isSystemInDarkTheme())R.drawable.gramaphone_disc else R.drawable.disk_light,
             needleImage = if(isSystemInDarkTheme()) R.drawable.needle else R.drawable.needle_light ,
             isAnimation = progress == 1f,
@@ -321,7 +331,10 @@ fun MusicPage(
                 .layoutId(Constants.MusicPageValues.AboveProgressBarContainerId),
             rightIcon =  R.drawable.filled_heart,
             leftIcon  =  R.drawable.playlist,
-            colorTheme = colorTheme
+            colorTheme = colorTheme,
+            setState = setState,
+            isColorTint = playbackState.currentMusicFile.isFavorite
+
         )
         ProgressBar(
             modifier = Modifier
@@ -329,9 +342,9 @@ fun MusicPage(
                 .fillMaxWidth()
                 .fillMaxHeight(0.05f),
             colorTheme = colorTheme,
-            currentPosition = "01:31",
-            totalDuration = "03:13",
-            songPercent = songPercent.value
+            currentPosition = playbackState.currentDuration,
+            totalDuration = playbackState.currentMusicFile.duration,
+            songPercent = playbackState.musicPercent
         )
         PLayControlShadow(
             modifier = modifier.rotate(90f),
@@ -345,15 +358,14 @@ fun MusicPage(
         PLayControlShadow(
             modifier = Modifier,
             tint = colorTheme.Background,
-            iconPainter = if (playbackState == PlaybackState.PLAYING) R.drawable.play_button else R.drawable.pause,
+            iconPainter = if (playbackState.isPlaying.not()) R.drawable.play_button else R.drawable.pause,
             shape = CircleShape,
             backgroundColor = colorTheme.Icon,
             padding = 10.dp + (progress * 10.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutPlayIconId
         ){
-            onClick(playbackState)
-            if(playbackState == PlaybackState.PLAYING) playbackState = PlaybackState.PAUSED
-            else playbackState = PlaybackState.PLAYING
+            if(playbackState.isPlaying) setState(HomeViewModelSetStateAction.SetPlayState(false))
+            else setState(HomeViewModelSetStateAction.SetPlayState(true))
         }
         PLayControlShadow(
             modifier = modifier,
@@ -369,7 +381,8 @@ fun MusicPage(
                 .layoutId(Constants.MusicPageValues.ShuffleRepeatContainerId),
             rightIcon =  R.drawable.repeat_disable,
             leftIcon  =  R.drawable.shuffle,
-            colorTheme = colorTheme
+            colorTheme = colorTheme,
+            setState = setState
         )
         Icon(
             painter = painterResource(id = R.drawable.playlist),
@@ -435,14 +448,39 @@ fun PLayControlShadow(
 fun ProgressBar(
     modifier: Modifier = Modifier,
     colorTheme: ColorTheme,
-    currentPosition: String,
-    totalDuration: String,
+    currentPosition: Long,
+    totalDuration: Long,
     songPercent: Float,
     padding: PaddingValues = PaddingValues(
         horizontal = Dimens.Padding.MusicPageProgressBarDefaultHorizontal,
         vertical = Dimens.Padding.MusicPageProgressBarDefaultVertical
     )
 ) {
+    val currentPositionMin = (currentPosition/1000)/60
+    val currentPositionSecond = (currentPosition/1000)%60
+    val totalDurationMin = (totalDuration/1000)/60
+    val totalDurationSecond = (totalDuration/1000)%60
+
+    val currentPositionString =
+        if (currentPositionMin < 10) {
+            "0$currentPositionMin"
+        }else {
+            "$currentPositionMin"
+        } + ":" +
+        if(currentPositionSecond < 10 ) {
+            "0$currentPositionSecond"
+        }else {
+            "$currentPositionSecond"
+        }
+    val totalDurationString =
+        if (totalDurationMin < 10) {
+            "0$totalDurationMin"
+        }  else{ "$totalDurationMin" } + ":" +
+        if(totalDurationSecond < 10 ) {
+            "0$totalDurationSecond"
+        } else {
+            "$totalDurationSecond"
+        }
 
     Row(
         modifier = modifier
@@ -450,7 +488,7 @@ fun ProgressBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = currentPosition,
+            text = currentPositionString,
             color = colorTheme.Text,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
@@ -491,7 +529,7 @@ fun ProgressBar(
             }
         }
         Text(
-            text = totalDuration,
+            text = totalDurationString,
             color = colorTheme.Text
         )
     }
@@ -502,6 +540,8 @@ fun IconsAtEndsRow(
     colorTheme: ColorTheme,
     rightIcon: Int,
     leftIcon: Int,
+    isColorTint: Boolean = false,
+    setState: (action: HomeViewModelSetStateAction) -> Unit,
     extraPadding: Dp = Dimens.Padding.MusicPageIconsAtEndRowDefault
 ) {
     var size by remember {
@@ -522,21 +562,27 @@ fun IconsAtEndsRow(
                 modifier = Modifier
                     .aspectRatio(1f),
                 iconPainter = leftIcon,
+                tint = if(isColorTint) colorTheme.Primary else colorTheme.Tint,
                 colorTheme = colorTheme
-            )
+            ){
+                if(isColorTint) setState(HomeViewModelSetStateAction.ChangeFavoriteState(false))
+                else setState(HomeViewModelSetStateAction.ChangeFavoriteState(true))
+            }
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
                 iconPainter = rightIcon,
                 colorTheme = colorTheme
-            )
+            ){
+                //Todo("adding navController")
+            }
         }
     }
 }
 @Composable
 fun SongPoster(
     modifier: Modifier,
-    poster: Int,
+    poster: Bitmap,
     discImage: Int,
     needleImage: Int,
     isAnimation: Boolean,
@@ -604,7 +650,7 @@ fun SongPoster(
                 contentAlignment = Alignment.Center
             ) {
                 Image(
-                    painter = painterResource(id = poster),
+                    bitmap = poster.asImageBitmap(),
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
@@ -685,7 +731,8 @@ fun IconShadowed(
     backgroundColor: Color = Color.Transparent,
     tint: Color = colorTheme.Tint,
     padding: Dp = Dimens.Padding.MusicPageShadowedIconDefault,
-    layoutId: String = "" //********************
+    layoutId: String = "" ,//********************,
+    onClick: () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -707,7 +754,8 @@ fun IconShadowed(
                 shape = shape
             )
             .aspectRatio(aspectRatio)
-            .background(backgroundColor),
+            .background(backgroundColor)
+            .clickable { onClick() },
         contentAlignment = Alignment.Center
     ) {
 

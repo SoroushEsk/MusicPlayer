@@ -164,15 +164,15 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
-    private fun onMusicChange(nextMusicFile: MusicFile){
+    private fun onMusicChange(nextMusicFileId: Long){
 //        viewModelScope.launch {
 //            modifyMusicStatusUseCase(_playbackState.value.currentMusicFile)
 //        }
-        _playbackState.update {
-            it.copy(
-                currentMusicFile = nextMusicFile
-            )
-        }
+//        _playbackState.update {
+//            it.copy(
+//                currentMusicFile = nextMusicFile
+//            )
+//        }
     }
     private fun updatePlayCount(){
         _playbackState.update {

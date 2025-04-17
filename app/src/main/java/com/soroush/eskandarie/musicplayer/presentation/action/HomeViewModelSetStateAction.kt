@@ -10,7 +10,7 @@ sealed class HomeViewModelSetStateAction {
     data class SetShuffleState(val isShuffle: Boolean)          : HomeViewModelSetStateAction()
     data class SetRepeatMode(val repeatMode: RepeatMode)        : HomeViewModelSetStateAction()
     data class SetCurrentDuration(val currentDuration: Long)    : HomeViewModelSetStateAction()
-    data class OnNextMusic(val nextMusic: MusicFile)            : HomeViewModelSetStateAction()
+    data class OnNextMusic(val nextMusic: Long)            : HomeViewModelSetStateAction()
     data class ChangeFavoriteState(val isFavorite: Boolean)     : HomeViewModelSetStateAction()
     data object UpdatePlayCount                                 : HomeViewModelSetStateAction()
     data object UpdateDatePlayed                                : HomeViewModelSetStateAction()

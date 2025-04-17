@@ -22,6 +22,9 @@ data class DeviceMusicEntity(
         recordingDate = recordingDate,
         genre = genre,
         size = size,
-        path = path
+        path = path,
+        isFavorite = false,
+        datePlayed = 0,
+        playCount = 0
     )
 }

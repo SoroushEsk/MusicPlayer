@@ -1,6 +1,8 @@
 package com.soroush.eskandarie.musicplayer.di
 
 import android.content.Context
+import android.graphics.Bitmap
+import androidx.media3.common.MediaMetadata
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.room.Room
@@ -49,6 +51,7 @@ object MediaModule{
     )!!
     //endregion
     //region MediaSession
+
     @Provides
     @Singleton
     fun provideMediaSession(@ApplicationContext context: Context): MediaSession {

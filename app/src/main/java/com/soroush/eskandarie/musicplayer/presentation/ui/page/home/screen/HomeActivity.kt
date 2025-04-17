@@ -30,6 +30,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
@@ -51,12 +52,15 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class HomeActivity : ComponentActivity() {
     //region Fields
     private val viewmodel: HomeViewModel by viewModels()
+
     @Inject
     lateinit var refreshQueueUseCase: RefreshQueueUseCase
     lateinit var mediaFuture: ListenableFuture<MediaController>
@@ -85,7 +89,7 @@ class HomeActivity : ComponentActivity() {
             LaunchedEffect(Unit) {
 
                 while (true) {
-                    viewmodel.viewModelSetAction(HomeViewModelSetStateAction.SetStateSongPercentHome)
+                    viewmodel.viewModelSetAction(HomeViewModelSetStateAction.SetMusicPercent)
                     delay(1000)
                 }
             }
@@ -140,7 +144,8 @@ class HomeActivity : ComponentActivity() {
                 }
                 MusicPage(
                     modifier = Modifier,
-                    songPercent = viewmodel.songPercent.collectAsState()
+                    setState = viewmodel::viewModelSetAction,
+                    getState = viewmodel::viewModelGetStateActions
                 ) { playbackState ->
 
                 }
@@ -165,11 +170,21 @@ class HomeActivity : ComponentActivity() {
 ////        MediaController.releaseFuture(mediaFuture)
 //    }
     //region Init Methods
+    @OptIn(UnstableApi::class)
     private fun initialMediaController() {
         val sessionToken =
-            SessionToken(this, ComponentName(this@HomeActivity, MusicPlaybackService::class.java))
+            SessionToken(
+                this@HomeActivity,
+                ComponentName(this@HomeActivity, MusicPlaybackService::class.java)
+            )
         mediaControllerObserver =
-            MediaControllerObserver(this@HomeActivity, sessionToken, lifecycle)
+            MediaControllerObserver(
+                this@HomeActivity,
+                sessionToken,
+                lifecycle,
+                viewmodel::viewModelSetAction
+            )
+
     }
 
     private fun checkPermissions() {
