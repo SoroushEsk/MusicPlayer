@@ -199,6 +199,7 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun setShuffleStatus(isShuffle: Boolean){
+        mediaController.shuffleModeEnabled = isShuffle
         _playbackState.update {
             it.copy(
                 isShuffle = isShuffle

@@ -288,7 +288,9 @@ fun MusicPage(
             rightIcon =  R.drawable.options_list,
             leftIcon  =  R.drawable.down_arrow,
             colorTheme = colorTheme,
-            setState = setState
+            onClickLeft = {
+                scrollStatus = MusicPageScrollState.ScrollDown
+            }
         )
         Image(
             bitmap = playbackState.bitmapBitmap.asImageBitmap(),
@@ -330,10 +332,13 @@ fun MusicPage(
                 .layoutId(Constants.MusicPageValues.AboveProgressBarContainerId),
             rightIcon =  R.drawable.filled_heart,
             leftIcon  =  R.drawable.playlist,
+            lightTint = colorTheme.FavoriteTint,
             colorTheme = colorTheme,
-            setState = setState,
-            isColorTint = playbackState.isFavorite
-
+            isColorTint = playbackState.isFavorite,
+            onClickRight = {
+                if(playbackState.isFavorite) setState(HomeViewModelSetStateAction.ChangeFavoriteState(false))
+                else setState(HomeViewModelSetStateAction.ChangeFavoriteState(true))
+            }
         )
         ProgressBar(
             modifier = Modifier
@@ -384,8 +389,12 @@ fun MusicPage(
                 .layoutId(Constants.MusicPageValues.ShuffleRepeatContainerId),
             rightIcon =  R.drawable.repeat_disable,
             leftIcon  =  R.drawable.shuffle,
+            isColorTint = playbackState.isShuffle,
             colorTheme = colorTheme,
-            setState = setState
+            onClickRight = {
+                if(playbackState.isShuffle) setState(HomeViewModelSetStateAction.SetShuffleState(false))
+                else setState(HomeViewModelSetStateAction.SetShuffleState(true))
+            }
         )
         Icon(
             painter = painterResource(id = R.drawable.playlist),
@@ -543,9 +552,11 @@ fun IconsAtEndsRow(
     colorTheme: ColorTheme,
     rightIcon: Int,
     leftIcon: Int,
+    lightTint: Color = colorTheme.Secondary,
     isColorTint: Boolean = false,
-    setState: (action: HomeViewModelSetStateAction) -> Unit,
-    extraPadding: Dp = Dimens.Padding.MusicPageIconsAtEndRowDefault
+    extraPadding: Dp = Dimens.Padding.MusicPageIconsAtEndRowDefault,
+    onClickRight: () -> Unit = {},
+    onClickLeft: () -> Unit = {}
 ) {
     var size by remember {
         mutableStateOf(Size.Zero)
@@ -565,20 +576,17 @@ fun IconsAtEndsRow(
                 modifier = Modifier
                     .aspectRatio(1f),
                 iconPainter = leftIcon,
-                colorTheme = colorTheme
-            ){
-                //Todo("adding navController")
-            }
+                colorTheme = colorTheme,
+                onClick = onClickLeft
+            )
             IconShadowed(
                 modifier = Modifier
                     .aspectRatio(1f),
                 iconPainter = rightIcon,
-                tint = if(isColorTint) colorTheme.FavoriteTint else colorTheme.Tint,
-                colorTheme = colorTheme
-            ){
-                if(isColorTint) setState(HomeViewModelSetStateAction.ChangeFavoriteState(false))
-                else setState(HomeViewModelSetStateAction.ChangeFavoriteState(true))
-            }
+                tint = if(isColorTint) lightTint else colorTheme.Tint,
+                colorTheme = colorTheme,
+                onClick = onClickRight
+            )
         }
     }
 }
