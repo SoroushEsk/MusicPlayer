@@ -9,9 +9,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.session.MediaController
-import androidx.media3.session.MediaSession
-import androidx.media3.session.SessionToken
-import androidx.media3.session.legacy.MediaControllerCompat
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
@@ -40,7 +37,6 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
-    private val mediaSession: MediaSession,
     private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
@@ -48,6 +44,8 @@ class HomeViewModel @Inject constructor(
     private val getMusicFileByIdUseCase: GetMusicFileByIdFromDatabaseUseCase
 ): ViewModel() {
     //region Viewmodel States
+    private lateinit var mediaController: MediaController
+    private var isMediaControllerInitialized: Boolean = false
     private val _homeState = MutableStateFlow(
         HomeViewModelState(
             SearchFieldState(
@@ -60,9 +58,9 @@ class HomeViewModel @Inject constructor(
         get() = _homeState
 
     private val _playbackState: MutableStateFlow<PlaybackStates> = MutableStateFlow(PlaybackStates(
-        artist = mediaSession.player.currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown_Artist",
-        title = mediaSession.player.currentMediaItem?.mediaMetadata?.title?.toString() ?: "Unknown_Title",
-        bitmapBitmap = uriToBitmap(applicationContext, mediaSession.player.currentMediaItem?.mediaMetadata?.artworkUri)
+        artist =  "Unknown_Artist",
+        title = "Unknown_Title",
+        bitmapBitmap = uriToBitmap(applicationContext, null)
     ))
     val playbackState: StateFlow<PlaybackStates> = _playbackState.asStateFlow()
 
@@ -96,23 +94,28 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             setActionChannel.receiveAsFlow().collect{ action ->
                 when( action ){
-                    is HomeViewModelSetStateAction.SetStateSearchText       -> setSearchText(action.searchText)
-                    is HomeViewModelSetStateAction.GetAllMusicFiles         -> getAllMusicFiles()
-                    is HomeViewModelSetStateAction.GetAllPlaylists          -> getAllPlaylists()
-                    is HomeViewModelSetStateAction.SetMusicPercent          -> setSongPercent()
-                    is HomeViewModelSetStateAction.SetPlayState             -> setPlayState(action.isMusicPlaying)
-                    is HomeViewModelSetStateAction.SetShuffleState          -> setShuffleStatus(action.isShuffle)
-                    is HomeViewModelSetStateAction.SetRepeatMode            -> setRepeatMode(action.repeatMode)
-                    is HomeViewModelSetStateAction.SetCurrentDuration       -> setCurrentDuration(action.currentDuration)
-                    is HomeViewModelSetStateAction.OnNextMusic              -> onMusicChange(action.nextMusic)
-                    is HomeViewModelSetStateAction.ChangeFavoriteState      -> setFavoriteState(action.isFavorite)
-                    is HomeViewModelSetStateAction.UpdateDatePlayed         -> updateDatePlayed()
-                    is HomeViewModelSetStateAction.SetCurrentPlaylistName   -> setNewPlaylistLazyListState(action.playlistName)
-                    is HomeViewModelSetStateAction.UpdatePlayCount          -> {}
-                    is HomeViewModelSetStateAction.UpdateMusicDetails       -> setMusicDetails()
-                    is HomeViewModelSetStateAction.UpdateTitle              -> setTitle(action.title)
-                    is HomeViewModelSetStateAction.UpdateArtist             -> setArtist(action.artist)
-                    is HomeViewModelSetStateAction.UpdateArtWork            -> setArtWork(action.artWork)
+                    is HomeViewModelSetStateAction.OnNextMusic                  -> onMusicChange(action.nextMusic)
+                    is HomeViewModelSetStateAction.UpdateTitle                  -> setTitle(action.title)
+                    is HomeViewModelSetStateAction.SetPlayState                 -> setPlayState(action.isMusicPlaying)
+                    is HomeViewModelSetStateAction.UpdateArtist                 -> setArtist(action.artist)
+                    is HomeViewModelSetStateAction.PausePlayback                -> pausePlayback()
+                    is HomeViewModelSetStateAction.SetRepeatMode                -> setRepeatMode(action.repeatMode)
+                    is HomeViewModelSetStateAction.UpdateArtWork                -> setArtWork(action.artWork)
+                    is HomeViewModelSetStateAction.ResumePlayback               -> resumePlayback()
+                    is HomeViewModelSetStateAction.UpdatePlayCount              -> {}
+                    is HomeViewModelSetStateAction.SetShuffleState              -> setShuffleStatus(action.isShuffle)
+                    is HomeViewModelSetStateAction.ForwardPlayback              -> forwardPlayback()
+                    is HomeViewModelSetStateAction.SetMusicPercent              -> setSongPercent()
+                    is HomeViewModelSetStateAction.GetAllPlaylists              -> getAllPlaylists()
+                    is HomeViewModelSetStateAction.BackwardPlayback             -> backwardPlayback()
+                    is HomeViewModelSetStateAction.GetAllMusicFiles             -> getAllMusicFiles()
+                    is HomeViewModelSetStateAction.UpdateDatePlayed             -> updateDatePlayed()
+                    is HomeViewModelSetStateAction.SetStateSearchText           -> setSearchText(action.searchText)
+                    is HomeViewModelSetStateAction.SetCurrentDuration           -> setCurrentDuration(action.currentDuration)
+                    is HomeViewModelSetStateAction.UpdateMusicDetails           -> setMusicDetails()
+                    is HomeViewModelSetStateAction.ChangeFavoriteState          -> setFavoriteState(action.isFavorite)
+                    is HomeViewModelSetStateAction.SetCurrentPlaylistName       -> setNewPlaylistLazyListState(action.playlistName)
+                    is HomeViewModelSetStateAction.SetMediaControllerObserver   -> setMediaController(action.mediaController)
                 }
             }
         }
@@ -132,6 +135,20 @@ class HomeViewModel @Inject constructor(
         }
     }
     //endregion
+    //region Change PlayBack Methods
+    private fun pausePlayback(){
+        mediaController.pause()
+    }
+    private fun resumePlayback(){
+        mediaController.play()
+    }
+    private fun forwardPlayback(){
+        mediaController.seekToNext()
+    }
+    private fun backwardPlayback() {
+        mediaController.seekToPrevious()
+    }
+    //endregion
     //region Get State Function
     fun viewModelGetStateActions(action: HomeViewModelGetStateAction): StateFlow<*>{
         return when(action){
@@ -143,7 +160,12 @@ class HomeViewModel @Inject constructor(
         }
     }
     //endregion
-    //region Make A Change Functions
+    //region Set State Functions
+    private fun setMediaController(newMediaController: MediaController){
+        mediaController = newMediaController
+        isMediaControllerInitialized = true
+        setMusicDetails()
+    }
     private fun backToHomeScreen(){
         _playlistName.value = ""
     }
@@ -154,7 +176,6 @@ class HomeViewModel @Inject constructor(
     private fun getAllMusicFiles(){
         viewModelScope.launch {
             _musicList.value = getAllMusicFromDatabaseUseCase()
-
         }
     }
     private fun getAllPlaylists(){
@@ -163,10 +184,11 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun setSongPercent(){
-        val currentDuration = mediaSession.player.currentPosition.toFloat()
+        if( isMediaControllerInitialized.not() ) return
+        val currentDuration = mediaController.currentPosition.toFloat()
         setCurrentDuration(currentDuration.toLong())
-        val totalDuration = mediaSession.player.contentDuration
-        updateTotalDuration(totalDuration)
+        val totalDuration = mediaController.contentDuration.toFloat()
+        updateTotalDuration(totalDuration.toLong())
         updateSongPercent(currentDuration / totalDuration)
     }
     private fun setPlayState(isMusicPlaying: Boolean){
@@ -245,10 +267,12 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun updateTotalDuration(newDuration: Long){
-        _playbackState.update {
-            it.copy(
-                totalDuration = newDuration
-            )
+        if(newDuration>=0) {
+            _playbackState.update {
+                it.copy(
+                    totalDuration = newDuration
+                )
+            }
         }
     }
     private fun setSearchText(searchText: String){
@@ -281,12 +305,12 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
-    private fun setMusicDetails(){
+    private fun setMusicDetails() {
         _playbackState.update {
             it.copy(
-                artist = mediaSession.player.currentMediaItem?.mediaMetadata?.artist.toString(),
-                title = mediaSession.player.currentMediaItem?.mediaMetadata?.title.toString(),
-                bitmapBitmap = uriToBitmap(applicationContext, mediaSession.player.currentMediaItem?.mediaMetadata?.artworkUri)
+                artist = mediaController.currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown_Artist",
+                title = mediaController.currentMediaItem?.mediaMetadata?.title?.toString() ?: "Unknown_Title",
+                bitmapBitmap = uriToBitmap(applicationContext, mediaController.currentMediaItem?.mediaMetadata?.artworkUri)
             )
         }
     }

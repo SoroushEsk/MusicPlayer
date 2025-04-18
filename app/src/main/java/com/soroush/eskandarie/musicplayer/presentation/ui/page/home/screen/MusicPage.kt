@@ -111,7 +111,6 @@ fun MusicPage(
     onClick: (playbackState: PlaybackState) -> Unit
 ) {
     val playbackState by (getState(HomeViewModelGetStateAction.GetMusicStatus)as StateFlow<PlaybackStates>).collectAsState()
-
     val configuration = LocalConfiguration.current
     val resources = LocalContext.current.resources
     var progress by rememberSaveable { mutableStateOf(1.0f) }
@@ -354,7 +353,9 @@ fun MusicPage(
             backgroundColor = colorTheme.Icon,
             padding = 5.dp + (progress * 7.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutBackIconId
-        )
+        ){
+            setState(HomeViewModelSetStateAction.BackwardPlayback)
+        }
         PLayControlShadow(
             modifier = Modifier,
             tint = colorTheme.Background,
@@ -364,8 +365,8 @@ fun MusicPage(
             padding = 10.dp + (progress * 10.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutPlayIconId
         ){
-            if(playbackState.isPlaying) setState(HomeViewModelSetStateAction.SetPlayState(false))
-            else setState(HomeViewModelSetStateAction.SetPlayState(true))
+            if(playbackState.isPlaying) setState(HomeViewModelSetStateAction.PausePlayback)
+            else  setState(HomeViewModelSetStateAction.ResumePlayback)
         }
         PLayControlShadow(
             modifier = modifier,
@@ -375,7 +376,9 @@ fun MusicPage(
             backgroundColor = colorTheme.Icon,
             padding = 5.dp + (progress * 7.dp.value).dp,
             layoutId = Constants.MusicBarValues.MotionLayoutForwardIconId
-        )
+        ){
+            setState(HomeViewModelSetStateAction.ForwardPlayback)
+        }
         IconsAtEndsRow(
             modifier  = Modifier
                 .layoutId(Constants.MusicPageValues.ShuffleRepeatContainerId),

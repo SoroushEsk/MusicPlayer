@@ -1,10 +1,14 @@
 package com.soroush.eskandarie.musicplayer.di
 
+import android.content.ComponentName
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.annotation.OptIn
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionToken
 import androidx.room.Room
 import com.soroush.eskandarie.musicplayer.data.local.MusicPlayerDatabase
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
@@ -29,6 +33,7 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.ModifyAPlaylis
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
+import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
 import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -52,7 +57,6 @@ object MediaModule{
     )!!
     //endregion
     //region MediaSession
-
     @Provides
     @Singleton
     fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
@@ -64,6 +68,7 @@ object MediaModule{
             .build()
         return mediaSession
     }
+
     //endregion
     //region Database + Dao
     @Provides

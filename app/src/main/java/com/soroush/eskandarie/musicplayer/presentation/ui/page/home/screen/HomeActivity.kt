@@ -79,7 +79,6 @@ class HomeActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initialMediaController()
         enableEdgeToEdge()
         viewmodel.viewModelSetAction(HomeViewModelSetStateAction.GetAllMusicFiles)
         viewmodel.viewModelSetAction(HomeViewModelSetStateAction.GetAllPlaylists)
@@ -153,22 +152,13 @@ class HomeActivity : ComponentActivity() {
         }
     }
 
-    //    @OptIn(UnstableApi::class)
-//    override fun onStart() {
-//        super.onStart()
-//        val sessionToken =
-//            SessionToken(this@HomeActivity, ComponentName( this@HomeActivity, MusicPlaybackService::class.java))
-//        mediaFuture =
-//            MediaController.Builder(this@HomeActivity, sessionToken).buildAsync()
-//
-//        mediaFuture.addListener({
-//            try {
-//            }catch (e: Exception){
-//            }
-//
-//        }, MoreExecutors.directExecutor())
-////        MediaController.releaseFuture(mediaFuture)
-//    }
+    @OptIn(UnstableApi::class)
+    override fun onStart() {
+        super.onStart()
+        initialMediaController()
+
+
+    }
     //region Init Methods
     @OptIn(UnstableApi::class)
     private fun initialMediaController() {

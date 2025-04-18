@@ -1,11 +1,13 @@
 package com.soroush.eskandarie.musicplayer.presentation.action
 
 import android.graphics.Bitmap
-import android.net.Uri
-import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
+import androidx.media3.session.MediaController
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 
 sealed class HomeViewModelSetStateAction {
+    data class SetMediaControllerObserver(
+        val mediaController : MediaController
+    )                                                           : HomeViewModelSetStateAction()
     data class SetStateSearchText(val searchText: String)       : HomeViewModelSetStateAction()
     data class SetCurrentPlaylistName(val playlistName: String) : HomeViewModelSetStateAction()
     data class SetPlayState(val isMusicPlaying: Boolean)        : HomeViewModelSetStateAction()
@@ -23,4 +25,8 @@ sealed class HomeViewModelSetStateAction {
     data object SetMusicPercent                                 : HomeViewModelSetStateAction()
     data object GetAllMusicFiles                                : HomeViewModelSetStateAction()
     data object GetAllPlaylists                                 : HomeViewModelSetStateAction()
+    data object PausePlayback                                   : HomeViewModelSetStateAction()
+    data object ResumePlayback                                  : HomeViewModelSetStateAction()
+    data object ForwardPlayback                             : HomeViewModelSetStateAction()
+    data object BackwardPlayback                                  : HomeViewModelSetStateAction()
 }

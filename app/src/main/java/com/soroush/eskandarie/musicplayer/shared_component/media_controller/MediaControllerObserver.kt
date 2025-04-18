@@ -30,7 +30,8 @@ class MediaControllerObserver(
     private val lifecycle: Lifecycle,
     private val changeViewModelState: (action: HomeViewModelSetStateAction)->Unit
 ) : LifecycleObserver {
-    private lateinit var mediaController: MediaController
+    lateinit var mediaController: MediaController
+        private set
 
     init {
         lifecycle.addObserver(this)
@@ -44,6 +45,9 @@ class MediaControllerObserver(
                     val controller = MediaController.Builder(context, sessionToken)
                         .buildAsync()
                     mediaController = controller.get()
+                    changeViewModelState(
+                        HomeViewModelSetStateAction.SetMediaControllerObserver(mediaController)
+                    )
                     withContext(Dispatchers.Main) {
                         registerListener()
                     }
@@ -79,5 +83,4 @@ class MediaControllerObserver(
         mediaController.release()
         lifecycle.removeObserver(this)
     }
-
 }
