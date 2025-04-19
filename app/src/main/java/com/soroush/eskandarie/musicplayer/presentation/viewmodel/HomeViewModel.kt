@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.session.MediaController
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.soroush.eskandarie.musicplayer.R
@@ -16,6 +18,7 @@ import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
@@ -27,6 +30,7 @@ import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
+import com.soroush.eskandarie.musicplayer.shared_component.paging.ListPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +52,7 @@ class HomeViewModel @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
     private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
+    private val getPlaylistWithAllMusic: GetPlaylistWithAllMusicFileByIdUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
     private val modifyMusicStatusUseCase: ModifyMusicStatusUseCase,
     private val getMusicFileByIdUseCase: GetMusicFileByIdFromDatabaseUseCase
@@ -178,7 +183,13 @@ class HomeViewModel @Inject constructor(
                     Destination.AllMusicScreen.route -> getAllMusicFromDatabaseUseCase()
                     else -> getAllMusicFromDatabaseUseCase()
                 }
-            } else getAllMusicFromDatabaseUseCase()
+            } else {
+                val playlistWithMusic = getPlaylistWithAllMusic(id)
+                val pager = Pager(PagingConfig(pageSize = 30)){
+                    ListPagingSource<MusicFile>(playlistWithMusic.musicList.map { it.toMusicFile() })
+                }
+                pager.flow
+            }
         }
     }
     private fun setMediaController(newMediaController: MediaController){
