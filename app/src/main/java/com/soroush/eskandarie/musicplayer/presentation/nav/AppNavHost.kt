@@ -13,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.paging.compose.LazyPagingItems
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
@@ -28,7 +29,8 @@ fun  HomeActivityNavHost(
     modifier: Modifier = Modifier,
     getState: (action: HomeViewModelGetStateAction) -> StateFlow<*>,
     setState: (action: HomeViewModelSetStateAction) -> Unit,
-    navControllerAction: ()->Unit
+    navControllerAction: ()->Unit,
+    musicLazyPaging: LazyPagingItems<MusicFile>
 ) {
     val startDestination: String = Destination.HomeScreen.route
     val localContext = LocalContext.current
@@ -46,12 +48,14 @@ fun  HomeActivityNavHost(
             )
         }
         composable(route = Destination.AllMusicScreen.route) {
-            val lazyListState by (getState(HomeViewModelGetStateAction.GetLazyListState)).collectAsState()
+            val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
             PlaylistPage(
                 lazyListState = lazyListState as LazyListState,
                 loadMoreItems = { _, _1 ->
-                    (getState(HomeViewModelGetStateAction.GetMusicFiles).value as List<MusicFile>).shuffled()
-                }
+                    //(getState(HomeViewModelGetStateAction.GetMusicFiles).value as List<MusicFile>).shuffled()
+                    emptyList()
+                },
+                pageDataItem = musicLazyPaging
             )
         }
     }

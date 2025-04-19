@@ -36,6 +36,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.SessionToken
 import androidx.media3.session.legacy.MediaControllerCompat
 import androidx.navigation.compose.rememberNavController
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.google.common.util.concurrent.ListenableFuture
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
 import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
@@ -138,7 +139,8 @@ class HomeActivity : ComponentActivity() {
                             .padding(bottom = 68.dp),
                         getState = viewmodel::viewModelGetStateActions,
                         setState = viewmodel::viewModelSetAction,
-                        navControllerAction = {}
+                        navControllerAction = {},
+                        musicLazyPaging = viewmodel.musicList.collectAsLazyPagingItems()
                     )
                 }
                 MusicPage(

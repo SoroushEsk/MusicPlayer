@@ -100,6 +100,13 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     annotationProcessor(libs.androidx.room.room.compiler)
+
+
+    // Paging + Room
+    implementation (libs.androidx.paging.runtime)
+    implementation (libs.room.paging)
+    implementation (libs.androidx.paging.compose)
+
     // Nav Host
     implementation(libs.navigation.compose)
 

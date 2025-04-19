@@ -1,5 +1,6 @@
 package com.soroush.eskandarie.musicplayer.data.local.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -20,8 +21,8 @@ interface MusicDao {
     @Delete
     fun deleteMusic(musicEntity: MusicEntity)
 
-    @Query("SELECT * FROM ${Constants.Database.MusicTableName}")
-    fun getAllMusic(): MutableList<MusicEntity>
+    @Query("SELECT * FROM ${Constants.Database.MusicTableName} ORDER BY ${Constants.Database.MusicIdColumn} ASC")
+    fun getAllMusic(): PagingSource<Int, MusicEntity>
 
     @Query("SELECT * FROM ${Constants.Database.MusicTableName} WHERE ${Constants.Database.MusicIdColumn}=:musicId")
     fun getMusicById(musicId: Long): MusicEntity?

@@ -9,7 +9,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.session.MediaController
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
@@ -25,10 +28,14 @@ import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -64,8 +71,10 @@ class HomeViewModel @Inject constructor(
     ))
     val playbackState: StateFlow<PlaybackStates> = _playbackState.asStateFlow()
 
-    private val _musicList: MutableStateFlow<List<MusicFile>> = MutableStateFlow(emptyList())
-    val musicList: StateFlow<List<MusicFile>> = _musicList.asStateFlow()
+    private val _musicList = MutableStateFlow<PagingData<MusicFile>>(PagingData.empty())
+    val musicList: Flow<PagingData<MusicFile>> = getAllMusicFromDatabaseUseCase()
+        .cachedIn(viewModelScope)
+
 
     private val _playlistItems: MutableStateFlow<List<Playlist>> = MutableStateFlow(emptyList())
     val playlistItems: StateFlow<List<Playlist>>
@@ -154,7 +163,7 @@ class HomeViewModel @Inject constructor(
         return when(action){
             is HomeViewModelGetStateAction.GetPlaylists         -> playlistItems
             is HomeViewModelGetStateAction.GetMusicStatus       -> playbackState
-            is HomeViewModelGetStateAction.GetMusicFiles        -> musicList
+            is HomeViewModelGetStateAction.GetMusicFiles        -> playbackState
             is HomeViewModelGetStateAction.GetSearchTextState   -> homeState
             is HomeViewModelGetStateAction.GetLazyListState     -> lazyListState
         }
@@ -175,7 +184,11 @@ class HomeViewModel @Inject constructor(
     }
     private fun getAllMusicFiles(){
         viewModelScope.launch {
-            _musicList.value = getAllMusicFromDatabaseUseCase()
+            getAllMusicFromDatabaseUseCase()
+                .cachedIn(viewModelScope)
+                .collectLatest { pagingData ->
+                    _musicList.value = pagingData
+                }
         }
     }
     private fun getAllPlaylists(){

@@ -41,6 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.compose.LazyPagingItems
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
@@ -73,28 +74,22 @@ import kotlin.math.abs
 //        }
 //    )
 //}
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PlaylistPage(
     modifier: Modifier = Modifier,
-    loadMoreItems: (count: Int, start: Int)->List<MusicFile>,
     colorTheme: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
+    pageDataItem: LazyPagingItems<MusicFile>
 ) {
     val lazyState = remember{
         lazyListState
     }
-    var musicList by remember {
-        mutableStateOf(
-            listOf<MusicFile>()
-        )
-    }
     val context = LocalContext.current
-    val playlistImage = remember(musicList) {
-        if (musicList.isEmpty()) {
+    val playlistImage = remember(pageDataItem) {
+        if (pageDataItem.itemCount == 0) {
             BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         } else {
-            musicList[0].getAlbumArtBitmap()?:BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
+            pageDataItem[0]?.getAlbumArtBitmap()?:BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         }
     }
     val layoutInfo = lazyState.layoutInfo
@@ -122,8 +117,8 @@ fun PlaylistPage(
                 playlistImage = playlistImage
             )
         }
-        items(musicList.size, key = { index: Int ->
-            musicList[index].hashCode()
+        items(pageDataItem.itemCount, key = { index: Int ->
+            pageDataItem[index].hashCode()
         }){ index ->
 //            MusicItem(
 //                modifier = Modifier
@@ -139,20 +134,19 @@ fun PlaylistPage(
 //                music = musicList[index],
 //                isPlaying = false
 //            )
-            AnimatedMusicItem(
-                music = musicList[index],
-                isPlaying = false,
-                modifier = Modifier.padding(horizontal = 10.dp)
-                    .animateItem(
-                        placementSpec = tween(1200)
-                    )
-            )
+            pageDataItem[index]?.let {
+                AnimatedMusicItem(
+                    music = it,
+                    isPlaying = false,
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                        .animateItem(
+                            placementSpec = tween(1200)
+                        )
+                )
+            }
+
         }
 
-    }
-    InfiniteListHandler(listState = lazyState) {
-        val newItems = loadMoreItems(50, 0)
-        musicList += newItems
     }
 
 }
