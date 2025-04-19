@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MusicRepository {
     suspend fun saveDeviceMusicFile( )
-     fun getAllMusicFiles(): Flow<PagingData<MusicFile>>
+    suspend fun getAllMusicFiles(): Flow<PagingData<MusicFile>>
     suspend fun updateMusic(musicEntity: MusicEntity)
     suspend fun getMusicFileById(musicId: Long): MusicFile?
 }

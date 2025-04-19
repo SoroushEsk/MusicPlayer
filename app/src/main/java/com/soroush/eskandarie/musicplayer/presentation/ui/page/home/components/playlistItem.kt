@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -82,7 +83,10 @@ fun PlaylistItem(
             .fillMaxWidth()
             .height(Dimens.Size.GeneralItemHeight)
             .clip(posterShape)
-            .background(themeColor.DarkSurface),
+            .background(themeColor.DarkSurface)
+            .clickable{
+                onClick()
+        },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(

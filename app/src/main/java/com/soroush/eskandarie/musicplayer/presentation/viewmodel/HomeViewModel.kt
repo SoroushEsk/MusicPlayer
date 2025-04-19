@@ -22,6 +22,7 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylist
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
+import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -71,10 +73,7 @@ class HomeViewModel @Inject constructor(
     ))
     val playbackState: StateFlow<PlaybackStates> = _playbackState.asStateFlow()
 
-    private val _musicList = MutableStateFlow<PagingData<MusicFile>>(PagingData.empty())
-    val musicList: Flow<PagingData<MusicFile>> = getAllMusicFromDatabaseUseCase()
-        .cachedIn(viewModelScope)
-
+    var musicList: Flow<PagingData<MusicFile>> = flowOf(PagingData.empty())
 
     private val _playlistItems: MutableStateFlow<List<Playlist>> = MutableStateFlow(emptyList())
     val playlistItems: StateFlow<List<Playlist>>
@@ -110,6 +109,7 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.PausePlayback                -> pausePlayback()
                     is HomeViewModelSetStateAction.SetRepeatMode                -> setRepeatMode(action.repeatMode)
                     is HomeViewModelSetStateAction.UpdateArtWork                -> setArtWork(action.artWork)
+                    is HomeViewModelSetStateAction.SetUpMusicList               -> setupMusicList(action.id, action.route)
                     is HomeViewModelSetStateAction.ResumePlayback               -> resumePlayback()
                     is HomeViewModelSetStateAction.UpdatePlayCount              -> {}
                     is HomeViewModelSetStateAction.SetShuffleState              -> setShuffleStatus(action.isShuffle)
@@ -117,8 +117,9 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.SetMusicPercent              -> setSongPercent()
                     is HomeViewModelSetStateAction.GetAllPlaylists              -> getAllPlaylists()
                     is HomeViewModelSetStateAction.BackwardPlayback             -> backwardPlayback()
-                    is HomeViewModelSetStateAction.GetAllMusicFiles             -> getAllMusicFiles()
+                    is HomeViewModelSetStateAction.GetAllMusicFiles             -> {}
                     is HomeViewModelSetStateAction.UpdateDatePlayed             -> updateDatePlayed()
+                    is HomeViewModelSetStateAction.ResetLazyListState           -> resetLazyListState()
                     is HomeViewModelSetStateAction.SetStateSearchText           -> setSearchText(action.searchText)
                     is HomeViewModelSetStateAction.SetCurrentDuration           -> setCurrentDuration(action.currentDuration)
                     is HomeViewModelSetStateAction.UpdateMusicDetails           -> setMusicDetails()
@@ -139,7 +140,6 @@ class HomeViewModel @Inject constructor(
                 } ?: BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
             }
         } catch (e: Exception) {
-            Log.e("UriToBitmap", "Error converting URI to bitmap: ${e.message}")
             BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         }
     }
@@ -168,8 +168,19 @@ class HomeViewModel @Inject constructor(
             is HomeViewModelGetStateAction.GetLazyListState     -> lazyListState
         }
     }
+    fun getMusicPageList(): Flow<PagingData<MusicFile>> = musicList
     //endregion
     //region Set State Functions
+    private fun setupMusicList(id: Long, route: String){
+        viewModelScope.launch {
+            musicList = if(id == -1L){
+                when(route){
+                    Destination.AllMusicScreen.route -> getAllMusicFromDatabaseUseCase()
+                    else -> getAllMusicFromDatabaseUseCase()
+                }
+            } else getAllMusicFromDatabaseUseCase()
+        }
+    }
     private fun setMediaController(newMediaController: MediaController){
         mediaController = newMediaController
         isMediaControllerInitialized = true
@@ -182,15 +193,15 @@ class HomeViewModel @Inject constructor(
         _lazyListState.value = LazyListState()
         _playlistName.value = playlistName
     }
-    private fun getAllMusicFiles(){
-        viewModelScope.launch {
-            getAllMusicFromDatabaseUseCase()
-                .cachedIn(viewModelScope)
-                .collectLatest { pagingData ->
-                    _musicList.value = pagingData
-                }
-        }
-    }
+//    private fun getAllMusicFiles(){
+//        viewModelScope.launch {
+//            getAllMusicFromDatabaseUseCase()
+//                .cachedIn(viewModelScope)
+//                .collectLatest { pagingData ->
+//                    _musicList.value = pagingData
+//                }
+//        }
+//    }
     private fun getAllPlaylists(){
         viewModelScope.launch {
             _playlistItems.value = getAllPlaylistItemsUseCase()
@@ -232,6 +243,9 @@ class HomeViewModel @Inject constructor(
                 currentDuration = currentDuration
             )
         }
+    }
+    private fun resetLazyListState(){
+        _lazyListState.value = LazyListState()
     }
     private fun onMusicChange(nextMusicFileId: Long){
 //        viewModelScope.launch {

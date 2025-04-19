@@ -2,10 +2,8 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -17,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
@@ -38,48 +34,27 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.MusicItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlin.math.abs
-//
-//@Preview
-//@Composable
-//fun start(){
-//    PlaylistPage(
-//        loadMoreItems = { count, start ->
-//            List(50) {
-//                MusicFile(
-//                    id = System.currentTimeMillis() + it,
-//                    title = "Z - The warning",
-//                    artist = "The warning",
-//                    album = "",
-//                    duration = 213443,
-//                    recordingDate = null,
-//                    genre = null,
-//                    size = 234,
-//                    path = "/storage/emulated/0/Download/NeginKt - Paiz   Saraabe Toe.mp3"
-//                )
-//            }
-//        }
-//    )
-//}
+
 @Composable
 fun PlaylistPage(
     modifier: Modifier = Modifier,
     colorTheme: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
     lazyListState: LazyListState,
-    pageDataItem: LazyPagingItems<MusicFile>
+    pageDataItem: LazyPagingItems<MusicFile>,
+    setState: (action: HomeViewModelSetStateAction)->Unit
 ) {
     val lazyState = remember{
         lazyListState
@@ -109,8 +84,7 @@ fun PlaylistPage(
             PlaylistPoster(
                 modifier = Modifier
                     .animateItem(
-                        fadeInSpec = tween(1500),
-                        placementSpec = tween(1500)
+                        placementSpec = tween(1000)
                     ),
                 colorTheme = colorTheme,
                 playlistName = "Rock and Roll baby!!",
@@ -159,7 +133,7 @@ fun AnimatedMusicItem(
     var startAnimation by remember { mutableStateOf(false) }
 
     val rotation by animateFloatAsState(
-        targetValue = if (startAnimation) 0f else -90f,
+        targetValue = if (startAnimation) 0f else -45f,
         animationSpec = tween(durationMillis = 600),
         label = "rotationZ"
     )

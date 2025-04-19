@@ -19,6 +19,8 @@ sealed class HomeViewModelSetStateAction {
     data class UpdateArtist(val artist: String)                 : HomeViewModelSetStateAction()
     data class UpdateTitle(val title: String)                   : HomeViewModelSetStateAction()
     data class UpdateArtWork(val artWork: Bitmap)               : HomeViewModelSetStateAction()
+    data class SetUpMusicList(val id: Long = -1, val route: String)  : HomeViewModelSetStateAction()
+    data object ResetLazyListState                              : HomeViewModelSetStateAction()
     data object UpdateMusicDetails                              : HomeViewModelSetStateAction()
     data object UpdatePlayCount                                 : HomeViewModelSetStateAction()
     data object UpdateDatePlayed                                : HomeViewModelSetStateAction()
@@ -27,6 +29,6 @@ sealed class HomeViewModelSetStateAction {
     data object GetAllPlaylists                                 : HomeViewModelSetStateAction()
     data object PausePlayback                                   : HomeViewModelSetStateAction()
     data object ResumePlayback                                  : HomeViewModelSetStateAction()
-    data object ForwardPlayback                             : HomeViewModelSetStateAction()
-    data object BackwardPlayback                                  : HomeViewModelSetStateAction()
+    data object ForwardPlayback                                 : HomeViewModelSetStateAction()
+    data object BackwardPlayback                                : HomeViewModelSetStateAction()
 }

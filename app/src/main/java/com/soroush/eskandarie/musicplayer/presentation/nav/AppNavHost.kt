@@ -11,9 +11,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import androidx.paging.PagingData
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
@@ -21,16 +25,18 @@ import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetSt
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen.PlaylistPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
+import com.soroush.eskandarie.musicplayer.util.Constants
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
+@JvmOverloads
 @Composable
 fun  HomeActivityNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
     getState: (action: HomeViewModelGetStateAction) -> StateFlow<*>,
     setState: (action: HomeViewModelSetStateAction) -> Unit,
-    navControllerAction: ()->Unit,
-    musicLazyPaging: LazyPagingItems<MusicFile>
+    musicLazyPaging: ()-> Flow<PagingData<MusicFile>>
 ) {
     val startDestination: String = Destination.HomeScreen.route
     val localContext = LocalContext.current
@@ -44,18 +50,28 @@ fun  HomeActivityNavHost(
                 modifier = Modifier
                     .padding(horizontal = (Dimens.Padding.HomeActivity)),
                 loadPlaylist = (getState(HomeViewModelGetStateAction.GetPlaylists)as StateFlow<List<Playlist>>).collectAsState() ,
-                navController = navController
+                navigate = navController.navigateActionSetUp(setState=setState),
+                setState = setState
             )
         }
-        composable(route = Destination.AllMusicScreen.route) {
+        composable(
+            route = Destination.AllMusicScreen.route
+        ) {
             val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
             PlaylistPage(
                 lazyListState = lazyListState as LazyListState,
-                loadMoreItems = { _, _1 ->
-                    //(getState(HomeViewModelGetStateAction.GetMusicFiles).value as List<MusicFile>).shuffled()
-                    emptyList()
-                },
-                pageDataItem = musicLazyPaging
+                pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
+                setState = setState
+            )
+        }
+        composable(
+            route = Destination.PlaylistScreen.route,
+        ) {
+            val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
+            PlaylistPage(
+                lazyListState = lazyListState as LazyListState,
+                pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
+                setState = setState
             )
         }
     }

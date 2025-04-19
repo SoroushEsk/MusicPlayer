@@ -139,8 +139,7 @@ class HomeActivity : ComponentActivity() {
                             .padding(bottom = 68.dp),
                         getState = viewmodel::viewModelGetStateActions,
                         setState = viewmodel::viewModelSetAction,
-                        navControllerAction = {},
-                        musicLazyPaging = viewmodel.musicList.collectAsLazyPagingItems()
+                        musicLazyPaging = viewmodel::getMusicPageList
                     )
                 }
                 MusicPage(

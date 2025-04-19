@@ -43,7 +43,7 @@ class MusicRepositoryImp @Inject constructor(
         }
     }
 
-    override  fun getAllMusicFiles(): Flow<PagingData<MusicFile>> = Pager(
+    override suspend fun getAllMusicFiles(): Flow<PagingData<MusicFile>> = Pager(
         config = PagingConfig(
             pageSize = 50,
             enablePlaceholders = false

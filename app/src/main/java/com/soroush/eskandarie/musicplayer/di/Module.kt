@@ -14,16 +14,20 @@ import com.soroush.eskandarie.musicplayer.data.local.MusicPlayerDatabase
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicQueueDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.PlaylistDao
+import com.soroush.eskandarie.musicplayer.data.local.dao.PlaylistWithMusicDao
 import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
 import com.soroush.eskandarie.musicplayer.data.repository.MusicQueueRepositoryImpl
 import com.soroush.eskandarie.musicplayer.data.repository.MusicRepositoryImp
 import com.soroush.eskandarie.musicplayer.data.repository.PlaylistRepositoryImp
+import com.soroush.eskandarie.musicplayer.data.repository.PlaylistWithMusicRepositoryImp
 import com.soroush.eskandarie.musicplayer.domain.repository.DeviceMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
+import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistWithMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
@@ -120,6 +124,10 @@ object MediaModule{
     @Singleton
     fun providePlaylistRepository(playlistDao: PlaylistDao): PlaylistRepository =
         PlaylistRepositoryImp(playlistDao)
+    @Provides
+    @Singleton
+    fun providePlaylistWithMusicRepository(playlistWithMusicDao: PlaylistWithMusicDao): PlaylistWithMusicRepository =
+        PlaylistWithMusicRepositoryImp(playlistWithMusicDao)
     //endregion
     //region Music Queue Use Cases
     @Provides
@@ -173,5 +181,11 @@ object MediaModule{
     fun provideGetMusicFileByIdFromDatabaseUseCase(musicRepository: MusicRepository): GetMusicFileByIdFromDatabaseUseCase{
         return GetMusicFileByIdFromDatabaseUseCase(musicRepository)
     }
+    //endregion
+    //region PlayList-Music UseCase
+    @Provides
+    @Singleton
+    fun provideGetPlaylistWithAllMusicFileByIdUseCase(playlistWithMusicRepository: PlaylistWithMusicRepository): GetPlaylistWithAllMusicFileByIdUseCase =
+        GetPlaylistWithAllMusicFileByIdUseCase(playlistWithMusicRepository)
     //endregion
 }
