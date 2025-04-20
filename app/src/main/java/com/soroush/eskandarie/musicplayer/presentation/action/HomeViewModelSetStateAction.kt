@@ -20,6 +20,7 @@ sealed class HomeViewModelSetStateAction {
     data class UpdateTitle(val title: String)                   : HomeViewModelSetStateAction()
     data class UpdateArtWork(val artWork: Bitmap)               : HomeViewModelSetStateAction()
     data class SetUpMusicList(val id: Long = -1, val route: String)  : HomeViewModelSetStateAction()
+    data class AddMusicToPlaylist(val musicId: Long): HomeViewModelSetStateAction()
     data object ResetLazyListState                              : HomeViewModelSetStateAction()
     data object UpdateMusicDetails                              : HomeViewModelSetStateAction()
     data object UpdatePlayCount                                 : HomeViewModelSetStateAction()

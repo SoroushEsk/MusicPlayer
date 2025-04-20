@@ -6,5 +6,5 @@ import javax.inject.Inject
 class GetAllMusicFromDatabaseUseCase @Inject constructor(
     private val musicRepository : MusicRepository
 ) {
-     operator fun invoke() = musicRepository.getAllMusicFiles()
+    suspend operator fun invoke() = musicRepository.getAllMusicFiles()
 }

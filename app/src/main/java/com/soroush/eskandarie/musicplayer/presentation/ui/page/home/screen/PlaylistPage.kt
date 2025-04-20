@@ -60,11 +60,12 @@ fun PlaylistPage(
         lazyListState
     }
     val context = LocalContext.current
-    val playlistImage = remember(pageDataItem) {
-        if (pageDataItem.itemCount == 0) {
-            BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
-        } else {
-            pageDataItem[0]?.getAlbumArtBitmap()?:BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
+    var playlistImage by remember {
+        mutableStateOf(BitmapFactory.decodeResource(context.resources, R.drawable.empty_album))
+    }
+    LaunchedEffect(pageDataItem.itemCount) {
+        if(pageDataItem.itemCount != 0){
+            playlistImage = pageDataItem[0]?.getAlbumArtBitmap()?:BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         }
     }
     val layoutInfo = lazyState.layoutInfo
@@ -112,7 +113,8 @@ fun PlaylistPage(
                 AnimatedMusicItem(
                     music = it,
                     isPlaying = false,
-                    modifier = Modifier.padding(horizontal = 10.dp)
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp)
                         .animateItem(
                             placementSpec = tween(1200)
                         )

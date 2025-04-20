@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,16 +11,17 @@ import androidx.media3.session.MediaController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.soroush.eskandarie.musicplayer.R
-import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
+import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistMusicRelationEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetPlaylistWithAllMusicFileByIdUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddAMusicToPlaylistUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddListOfMusicToAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
@@ -33,15 +33,12 @@ import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import com.soroush.eskandarie.musicplayer.shared_component.paging.ListPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -53,6 +50,8 @@ class HomeViewModel @Inject constructor(
     private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
     private val getPlaylistWithAllMusic: GetPlaylistWithAllMusicFileByIdUseCase,
+    private val addMusicListToPlaylist: AddListOfMusicToAPlaylistUseCase,
+    private val addAMusicToPlaylist: AddAMusicToPlaylistUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
     private val modifyMusicStatusUseCase: ModifyMusicStatusUseCase,
     private val getMusicFileByIdUseCase: GetMusicFileByIdFromDatabaseUseCase
@@ -123,6 +122,7 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.GetAllPlaylists              -> getAllPlaylists()
                     is HomeViewModelSetStateAction.BackwardPlayback             -> backwardPlayback()
                     is HomeViewModelSetStateAction.GetAllMusicFiles             -> {}
+                    is HomeViewModelSetStateAction.AddMusicToPlaylist           -> addSongToAPlaylist(action.musicId)
                     is HomeViewModelSetStateAction.UpdateDatePlayed             -> updateDatePlayed()
                     is HomeViewModelSetStateAction.ResetLazyListState           -> resetLazyListState()
                     is HomeViewModelSetStateAction.SetStateSearchText           -> setSearchText(action.searchText)
@@ -216,6 +216,11 @@ class HomeViewModel @Inject constructor(
     private fun getAllPlaylists(){
         viewModelScope.launch {
             _playlistItems.value = getAllPlaylistItemsUseCase()
+        }
+    }
+    private fun addSongToAPlaylist(musicId: Long){
+        viewModelScope.launch {
+            addAMusicToPlaylist(PlaylistMusicRelationEntity(3L, musicId))
         }
     }
     private fun setSongPercent(){

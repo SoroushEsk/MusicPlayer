@@ -1,4 +1,4 @@
-package com.soroush.eskandarie.musicplayer.domain.usecase
+package com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music
 
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistWithMusicRepository
 import javax.inject.Inject

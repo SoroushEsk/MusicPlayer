@@ -1,43 +1,41 @@
 package com.soroush.eskandarie.musicplayer.di
 
-import android.content.ComponentName
 import android.content.Context
-import android.graphics.Bitmap
-import androidx.annotation.OptIn
-import androidx.media3.common.MediaMetadata
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
-import androidx.media3.session.SessionToken
 import androidx.room.Room
 import com.soroush.eskandarie.musicplayer.data.local.MusicPlayerDatabase
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicQueueDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.PlaylistDao
+import com.soroush.eskandarie.musicplayer.data.local.dao.PlaylistMusicRelationDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.PlaylistWithMusicDao
 import com.soroush.eskandarie.musicplayer.data.repository.DeviceMusicRepositoryImpl
+import com.soroush.eskandarie.musicplayer.data.repository.MusicPlaylistRelationRepositoryImp
 import com.soroush.eskandarie.musicplayer.data.repository.MusicQueueRepositoryImpl
 import com.soroush.eskandarie.musicplayer.data.repository.MusicRepositoryImp
 import com.soroush.eskandarie.musicplayer.data.repository.PlaylistRepositoryImp
 import com.soroush.eskandarie.musicplayer.data.repository.PlaylistWithMusicRepositoryImp
 import com.soroush.eskandarie.musicplayer.domain.repository.DeviceMusicRepository
+import com.soroush.eskandarie.musicplayer.domain.repository.MusicPlaylistRelationRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistWithMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetPlaylistWithAllMusicFileByIdUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.DeleteAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.ModifyAPlaylistUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddAMusicToPlaylistUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddListOfMusicToAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
-import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
 import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -128,6 +126,10 @@ object MediaModule{
     @Singleton
     fun providePlaylistWithMusicRepository(playlistWithMusicDao: PlaylistWithMusicDao): PlaylistWithMusicRepository =
         PlaylistWithMusicRepositoryImp(playlistWithMusicDao)
+    @Provides
+    @Singleton
+    fun provideMusicPlaylistRelationRepository(playlistMusicRelationDao: PlaylistMusicRelationDao): MusicPlaylistRelationRepository =
+        MusicPlaylistRelationRepositoryImp(playlistMusicRelationDao)
     //endregion
     //region Music Queue Use Cases
     @Provides
@@ -187,5 +189,13 @@ object MediaModule{
     @Singleton
     fun provideGetPlaylistWithAllMusicFileByIdUseCase(playlistWithMusicRepository: PlaylistWithMusicRepository): GetPlaylistWithAllMusicFileByIdUseCase =
         GetPlaylistWithAllMusicFileByIdUseCase(playlistWithMusicRepository)
+    @Provides
+    @Singleton
+    fun proviceAddListOfMusicToAPlaylistUseCase(musicPlaylistRelationRepository: MusicPlaylistRelationRepository): AddListOfMusicToAPlaylistUseCase =
+        AddListOfMusicToAPlaylistUseCase(musicPlaylistRelationRepository)
+    @Provides
+    @Singleton
+    fun provideAddAMusicToPlaylistUseCase(musicPlaylistRelationRepository: MusicPlaylistRelationRepository): AddAMusicToPlaylistUseCase =
+        AddAMusicToPlaylistUseCase(musicPlaylistRelationRepository)
     //endregion
 }
