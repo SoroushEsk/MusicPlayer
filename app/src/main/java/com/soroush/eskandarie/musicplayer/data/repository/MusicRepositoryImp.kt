@@ -65,4 +65,13 @@ class MusicRepositoryImp @Inject constructor(
     override suspend fun getMusicFileById(musicId: Long): MusicFile? = withContext(Dispatchers.IO) {
         musicTableDao.getMusicById(musicId)?.toMusicFile()
     }
+
+    override suspend fun getOrderedMusicList(
+        columnName: String,
+        limitAmount: Int
+    ): List<MusicFile> = withContext(Dispatchers.IO){
+        musicTableDao.getOrdered(columnName, limitAmount).map{
+            it.toMusicFile()
+        }
+    }
 }

@@ -183,7 +183,7 @@ fun FourTopPlaylist(
 
                     TopPlaylistItem(
                         modifier = Modifier.clickable {
-                            navigate(NavControllerAction.NavitateToAllMusic(Destination.AllMusicScreen.route))
+                            navigate(NavControllerAction.NavigateToAllMusic(Destination.AllMusicScreen.route))
                         },
                         title = "All Songs",
                         uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.sandi),
@@ -202,6 +202,9 @@ fun FourTopPlaylist(
                         .weight(1f)
                 ){
                     TopPlaylistItem(
+                        modifier = Modifier.clickable {
+                            navigate(NavControllerAction.NavigateToRecentlyPlayed(Destination.RecentlyPlayedScreen.route))
+                        },
                         title = "Recently Played",
                         uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.simint),
                         uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.ghader),
@@ -221,6 +224,9 @@ fun FourTopPlaylist(
                 ){
 
                     TopPlaylistItem(
+                        modifier = Modifier.clickable {
+                            navigate(NavControllerAction.NavigateToMostPlayed(Destination.MostPlayedScreen.route))
+                        },
                         title = "Most Played",
                         uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.shaj),
                         uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.mahasti),

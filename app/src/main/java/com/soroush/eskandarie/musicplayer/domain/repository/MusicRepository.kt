@@ -11,4 +11,5 @@ interface MusicRepository {
     suspend fun getAllMusicFiles(): Flow<PagingData<MusicFile>>
     suspend fun updateMusic(musicEntity: MusicEntity)
     suspend fun getMusicFileById(musicId: Long): MusicFile?
+    suspend fun getOrderedMusicList(columnName: String, limitAmount: Int): List<MusicFile>
 }

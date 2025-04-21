@@ -19,7 +19,15 @@ fun NavController.navigateActionSetUp(
                 )
                 navigate(navAction.route)
             }
-            is NavitateToAllMusic -> {
+            is NavigateToAllMusic -> {
+                setState(HomeViewModelSetStateAction.SetUpMusicList( route = navAction.route))
+                navigate(navAction.route)
+            }
+            is NavigateToMostPlayed ->{
+                setState(HomeViewModelSetStateAction.SetUpMusicList( route = navAction.route))
+                navigate(navAction.route)
+            }
+            is NavigateToRecentlyPlayed -> {
                 setState(HomeViewModelSetStateAction.SetUpMusicList( route = navAction.route))
                 navigate(navAction.route)
             }

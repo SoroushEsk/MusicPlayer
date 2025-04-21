@@ -24,6 +24,8 @@ import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistWithMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
@@ -47,9 +49,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object MediaModule{
-    //region ViewModels
-
-    //endregion
     //region SharedPreference
     @Provides
     @Singleton
@@ -183,6 +182,14 @@ object MediaModule{
     fun provideGetMusicFileByIdFromDatabaseUseCase(musicRepository: MusicRepository): GetMusicFileByIdFromDatabaseUseCase{
         return GetMusicFileByIdFromDatabaseUseCase(musicRepository)
     }
+    @Provides
+    @Singleton
+    fun provideGet100MostPlayedMusicsUseCase(musicRepository: MusicRepository): Get100MostPlayedMusicsUseCase =
+        Get100MostPlayedMusicsUseCase(musicRepository)
+    @Provides
+    @Singleton
+    fun provideGet100RecentlyPlayedMusicListUseCase(musicRepository: MusicRepository): Get100RecentlyPlayedMusicListUseCase =
+        Get100RecentlyPlayedMusicListUseCase(musicRepository)
     //endregion
     //region PlayList-Music UseCase
     @Provides

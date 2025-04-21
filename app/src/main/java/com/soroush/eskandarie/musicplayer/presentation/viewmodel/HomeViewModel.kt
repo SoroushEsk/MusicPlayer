@@ -16,6 +16,8 @@ import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistMusicRelati
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
@@ -51,6 +53,8 @@ class HomeViewModel @Inject constructor(
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
     private val getPlaylistWithAllMusic: GetPlaylistWithAllMusicFileByIdUseCase,
     private val addMusicListToPlaylist: AddListOfMusicToAPlaylistUseCase,
+    private val get100MostPlayed: Get100MostPlayedMusicsUseCase,
+    private val get100RecentlyPlayed: Get100RecentlyPlayedMusicListUseCase,
     private val addAMusicToPlaylist: AddAMusicToPlaylistUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
     private val modifyMusicStatusUseCase: ModifyMusicStatusUseCase,
@@ -181,6 +185,20 @@ class HomeViewModel @Inject constructor(
             musicList = if(id == -1L){
                 when(route){
                     Destination.AllMusicScreen.route -> getAllMusicFromDatabaseUseCase()
+                    Destination.MostPlayedScreen.route -> {
+                        val mostPlayedMusics = get100MostPlayed()
+                        val pager = Pager(PagingConfig(pageSize = 100)){
+                            ListPagingSource<MusicFile>(mostPlayedMusics)
+                        }
+                        pager.flow
+                    }
+                    Destination.RecentlyPlayedScreen.route -> {
+                        val recentlyPlayed = get100RecentlyPlayed()
+                        val pager = Pager(PagingConfig(pageSize = 100)){
+                            ListPagingSource<MusicFile>(recentlyPlayed)
+                        }
+                        pager.flow
+                    }
                     else -> getAllMusicFromDatabaseUseCase()
                 }
             } else {

@@ -65,6 +65,26 @@ fun  HomeActivityNavHost(
             )
         }
         composable(
+            route = Destination.MostPlayedScreen.route
+        ) {
+            val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
+            PlaylistPage(
+                lazyListState = lazyListState as LazyListState,
+                pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
+                setState = setState
+            )
+        }
+        composable(
+            route = Destination.RecentlyPlayedScreen.route
+        ) {
+            val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
+            PlaylistPage(
+                lazyListState = lazyListState as LazyListState,
+                pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
+                setState = setState
+            )
+        }
+        composable(
             route = Destination.PlaylistScreen.route,
         ) {
             val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
