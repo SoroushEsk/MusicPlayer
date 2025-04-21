@@ -1,6 +1,7 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
-import android.net.Uri
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,15 +24,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
@@ -42,9 +42,9 @@ import androidx.compose.runtime.LaunchedEffect as LaunchedEffect1
 @Composable
 fun TopPlaylistItem(
     title: String,
-    uriFront: Uri,
-    uriBack1: Uri,
-    uriBack2: Uri,
+    bitmapFront: Bitmap,
+    bitmapBack1: Bitmap,
+    bitmapBack2: Bitmap,
     modifier: Modifier = Modifier,
     themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
     extraPadding: Dp = Dimens.Padding.TopPlaylistItemDefault,
@@ -96,7 +96,7 @@ fun TopPlaylistItem(
                 fillSize = Dimens.Size.TopPlaylistItemBackWeight,
                 frontImageSize = frontImageSize,
                 direction = Direction.Right,
-                uri = uriBack2,
+                bitmap = bitmapBack2,
                 description = "Playlist back poster image right",
                 erroResource = errorResource
             )
@@ -105,7 +105,7 @@ fun TopPlaylistItem(
                 fillSize = Dimens.Size.TopPlaylistItemBackWeight,
                 frontImageSize = frontImageSize,
                 direction = Direction.Left,
-                uri = uriBack1,
+                bitmap = bitmapBack1,
                 description = "Playlist back poster image left",
                 erroResource = errorResource
             )
@@ -121,12 +121,11 @@ fun TopPlaylistItem(
                     },
                 contentAlignment = Alignment.TopCenter
             ) {
-                AsyncImage(
-                    model = uriFront,
+                Image(
+                    bitmap = bitmapFront.asImageBitmap(),
                     contentDescription = "Playlist poster front image",
                     modifier = Modifier
                         .fillMaxSize(),
-                    error = painterResource(errorResource),
                     contentScale = ContentScale.Crop
                 )
             }
@@ -155,7 +154,7 @@ private fun BackPosters(
     fillSize: Float,
     frontImageSize: Size,
     direction: Direction,
-    uri: Uri,
+    bitmap: Bitmap,
     description: String? = null,
     erroResource: Int
 
@@ -175,11 +174,10 @@ private fun BackPosters(
             .clip(shape),
         contentAlignment = Alignment.TopCenter
     ) {
-        AsyncImage(
-            model = uri,
+        Image(
+            bitmap = bitmap.asImageBitmap(),
             contentDescription = description,
             modifier = Modifier.fillMaxSize(),
-            error = painterResource(erroResource),
             contentScale = ContentScale.Crop
         )
     }

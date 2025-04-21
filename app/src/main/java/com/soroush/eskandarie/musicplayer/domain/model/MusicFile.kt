@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.res.imageResource
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
 
@@ -22,6 +24,7 @@ data class MusicFile(
     val datePlayed: Long
 ){
     companion object{
+
         fun getAlbumArtBitmap(path: String, context: Context): Bitmap {
             val retriever = MediaMetadataRetriever()
             return try {

@@ -1,5 +1,6 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -23,26 +24,32 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
+import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.NavControllerAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
+import com.soroush.eskandarie.musicplayer.presentation.state.FourTopPlaylistImageState
 import com.soroush.eskandarie.musicplayer.presentation.ui.model.PlaylistDropdownItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.util.Constants
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun HomePage(
@@ -51,7 +58,10 @@ fun HomePage(
     loadPlaylist: State<List<Playlist>>,
     navigate: (action: NavControllerAction)->Unit,
     setState: (action: HomeViewModelSetStateAction) -> Unit,
+    getState: (action: HomeViewModelGetStateAction) -> StateFlow<*>
 ) {
+    setState(HomeViewModelSetStateAction.UpdateTopPlaylistState)
+    val topPlaylistState by (getState(HomeViewModelGetStateAction.GetTopPlaylistState).collectAsState() as State<FourTopPlaylistImageState>)
     val playlistList by loadPlaylist
     val lazyListState = rememberLazyListState()
     LazyColumn(
@@ -64,7 +74,8 @@ fun HomePage(
             FourTopPlaylist(
                 modifier = Modifier,
                 themeColor = themeColor,
-                navigate = navigate
+                navigate = navigate,
+                state = topPlaylistState
             )
         }
         item{
@@ -93,7 +104,8 @@ fun HomePage(
                 Icon(
                     modifier = Modifier
                         .padding(Dimens.Padding.HomePageAddPlaylistIcon)
-                        .aspectRatio(Dimens.AspectRatio.AddNewPlaylistButton).fillMaxHeight(),
+                        .aspectRatio(Dimens.AspectRatio.AddNewPlaylistButton)
+                        .fillMaxHeight(),
                     painter = painterResource(id = R.drawable.add_to_playlist),
                     contentDescription = Constants.HomePageValues.AddPlaylistIconDescription,
                     tint = themeColor.Text
@@ -139,7 +151,9 @@ fun FourTopPlaylist(
     modifier: Modifier = Modifier,
     themeColor : ColorTheme,
     navigate: (action: NavControllerAction)->Unit,
+    state: FourTopPlaylistImageState
 ) {
+    val defaultBitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.empty_album)
     Box(modifier = modifier
         .fillMaxWidth()
         .aspectRatio(1f)
@@ -164,10 +178,10 @@ fun FourTopPlaylist(
                         .weight(1f)
                 ){
                     TopPlaylistItem(
-                        title = "Folders",
-                        uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.ed),
-                        uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.mahasti),
-                        uriBack2 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.sandi),
+                        title = state.Folders.name,
+                        bitmapFront = state.Folders.front ?: defaultBitmap,
+                        bitmapBack1 = state.Folders.back_right ?: defaultBitmap,
+                        bitmapBack2 = state.Folders.back_left ?: defaultBitmap,
                         extraPadding = 12.dp
                     )
                 }
@@ -185,10 +199,10 @@ fun FourTopPlaylist(
                         modifier = Modifier.clickable {
                             navigate(NavControllerAction.NavigateToAllMusic(Destination.AllMusicScreen.route))
                         },
-                        title = "All Songs",
-                        uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.sandi),
-                        uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.mahasti),
-                        uriBack2 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.simint),
+                        title = state.AllMusic.name,
+                        bitmapFront = state.AllMusic.front ?: defaultBitmap,
+                        bitmapBack1 = state.AllMusic.back_right ?: defaultBitmap,
+                        bitmapBack2 = state.AllMusic.back_left ?: defaultBitmap,
                         extraPadding = 12.dp
                     )
                 }
@@ -205,10 +219,10 @@ fun FourTopPlaylist(
                         modifier = Modifier.clickable {
                             navigate(NavControllerAction.NavigateToRecentlyPlayed(Destination.RecentlyPlayedScreen.route))
                         },
-                        title = "Recently Played",
-                        uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.simint),
-                        uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.ghader),
-                        uriBack2 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.sandi),
+                        title = state.RecentrlyPlayed.name,
+                        bitmapFront = state.RecentrlyPlayed.front ?: defaultBitmap,
+                        bitmapBack1 = state.RecentrlyPlayed.back_right ?: defaultBitmap,
+                        bitmapBack2 = state.RecentrlyPlayed.back_left  ?: defaultBitmap,
                         extraPadding = 12.dp
                     )
 
@@ -227,10 +241,10 @@ fun FourTopPlaylist(
                         modifier = Modifier.clickable {
                             navigate(NavControllerAction.NavigateToMostPlayed(Destination.MostPlayedScreen.route))
                         },
-                        title = "Most Played",
-                        uriFront = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.shaj),
-                        uriBack1 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.mahasti),
-                        uriBack2 = Uri.parse("android.resource://${LocalContext.current.packageName}/" + R.drawable.sharhram),
+                        title = state.MostPlayed.name,
+                        bitmapFront = state.MostPlayed.front ?: defaultBitmap,
+                        bitmapBack1 = state.MostPlayed.back_left ?: defaultBitmap,
+                        bitmapBack2 = state.MostPlayed.back_right ?: defaultBitmap,
                         extraPadding = 12.dp
                     )
                 }

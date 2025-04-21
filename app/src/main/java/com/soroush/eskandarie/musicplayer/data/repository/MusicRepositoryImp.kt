@@ -6,6 +6,8 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
+import androidx.room.util.query
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
@@ -67,10 +69,9 @@ class MusicRepositoryImp @Inject constructor(
     }
 
     override suspend fun getOrderedMusicList(
-        columnName: String,
-        limitAmount: Int
+        query: SupportSQLiteQuery
     ): List<MusicFile> = withContext(Dispatchers.IO){
-        musicTableDao.getOrdered(columnName, limitAmount).map{
+        musicTableDao.getOrderedLimited(query).map{
             it.toMusicFile()
         }
     }

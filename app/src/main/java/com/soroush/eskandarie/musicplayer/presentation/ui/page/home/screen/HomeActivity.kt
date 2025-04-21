@@ -121,18 +121,18 @@ class HomeActivity : ComponentActivity() {
                         .nestedScroll(nestedScrollConnection)
                 ) {
 //                    Log.e("12345", "${isTopBarVisible.value} $isAtStart $isScrollingUp")
-                    if (scrollDirection.value == "up") {
-                        SearchField(
-                            modifier = Modifier
-                                .padding(horizontal = Dimens.Padding.HomeActivity),
-                            setState = viewmodel::viewModelSetAction,
-                            getState = viewmodel.homeState
-                                .map { it.searchFieldState.searchText }
-                                .collectAsState(initial = "")
-                        ) {}
-
-
-                    }
+//                    if (scrollDirection.value == "up") {
+//                        SearchField(
+//                            modifier = Modifier
+//                                .padding(horizontal = Dimens.Padding.HomeActivity),
+//                            setState = viewmodel::viewModelSetAction,
+//                            getState = viewmodel.homeState
+//                                .map { it.searchFieldState.searchText }
+//                                .collectAsState(initial = "")
+//                        ) {}
+//
+//
+//                    }
                     HomeActivityNavHost(
                         navController = navController,
                         modifier = Modifier

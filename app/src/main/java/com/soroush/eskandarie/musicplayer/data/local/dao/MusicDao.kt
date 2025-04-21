@@ -6,7 +6,9 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
 import com.soroush.eskandarie.musicplayer.util.Constants
 
@@ -27,7 +29,7 @@ interface MusicDao {
     @Query("SELECT * FROM ${Constants.Database.MusicTableName} WHERE ${Constants.Database.MusicIdColumn}=:musicId")
     fun getMusicById(musicId: Long): MusicEntity?
 
-    @Query("SELECT * FROM ${Constants.Database.MusicTableName} ORDER BY :columnName DESC LIMIT :limitAmount")
-    fun getOrdered(columnName: String, limitAmount: Int): MutableList<MusicEntity>
+    @RawQuery
+    fun getOrderedLimited(query: SupportSQLiteQuery): MutableList<MusicEntity>
 
 }

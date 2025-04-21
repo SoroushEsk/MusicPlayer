@@ -2,6 +2,7 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -109,6 +110,7 @@ fun PlaylistPage(
 //                music = musicList[index],
 //                isPlaying = false
 //            )
+
             pageDataItem[index]?.let {
                 AnimatedMusicItem(
                     music = it,

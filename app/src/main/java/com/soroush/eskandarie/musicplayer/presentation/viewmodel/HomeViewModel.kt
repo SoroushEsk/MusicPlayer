@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -15,11 +16,13 @@ import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistMusicRelationEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
+import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddAMusicToPlaylistUseCase
@@ -28,10 +31,12 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCa
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
+import com.soroush.eskandarie.musicplayer.presentation.state.FourTopPlaylistImageState
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
+import com.soroush.eskandarie.musicplayer.presentation.state.TopPlaylistState
 import com.soroush.eskandarie.musicplayer.shared_component.paging.ListPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -55,12 +60,14 @@ class HomeViewModel @Inject constructor(
     private val addMusicListToPlaylist: AddListOfMusicToAPlaylistUseCase,
     private val get100MostPlayed: Get100MostPlayedMusicsUseCase,
     private val get100RecentlyPlayed: Get100RecentlyPlayedMusicListUseCase,
+    private val getMusicIdOrdered: GetTracksWithUsualOrderLimitedUseCase,
     private val addAMusicToPlaylist: AddAMusicToPlaylistUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
     private val modifyMusicStatusUseCase: ModifyMusicStatusUseCase,
     private val getMusicFileByIdUseCase: GetMusicFileByIdFromDatabaseUseCase
 ): ViewModel() {
     //region Viewmodel States
+
     private lateinit var mediaController: MediaController
     private var isMediaControllerInitialized: Boolean = false
     private val _homeState = MutableStateFlow(
@@ -73,6 +80,10 @@ class HomeViewModel @Inject constructor(
     )
      val homeState : StateFlow<HomeViewModelState>
         get() = _homeState
+
+    private val _isTopPlaylistState = MutableStateFlow(false)
+    private val _topPlaylistState = MutableStateFlow(FourTopPlaylistImageState())
+    val topPlaylistState: StateFlow<FourTopPlaylistImageState> = _topPlaylistState.asStateFlow()
 
     private val _playbackState: MutableStateFlow<PlaybackStates> = MutableStateFlow(PlaybackStates(
         artist =  "Unknown_Artist",
@@ -134,6 +145,7 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.UpdateMusicDetails           -> setMusicDetails()
                     is HomeViewModelSetStateAction.ChangeFavoriteState          -> setFavoriteState(action.isFavorite)
                     is HomeViewModelSetStateAction.SetCurrentPlaylistName       -> setNewPlaylistLazyListState(action.playlistName)
+                    is HomeViewModelSetStateAction.UpdateTopPlaylistState       -> setTopPlaylistState()
                     is HomeViewModelSetStateAction.SetMediaControllerObserver   -> setMediaController(action.mediaController)
                 }
             }
@@ -174,12 +186,49 @@ class HomeViewModel @Inject constructor(
             is HomeViewModelGetStateAction.GetMusicStatus       -> playbackState
             is HomeViewModelGetStateAction.GetMusicFiles        -> playbackState
             is HomeViewModelGetStateAction.GetSearchTextState   -> homeState
+            is HomeViewModelGetStateAction.GetTopPlaylistState  -> topPlaylistState
             is HomeViewModelGetStateAction.GetLazyListState     -> lazyListState
         }
     }
     fun getMusicPageList(): Flow<PagingData<MusicFile>> = musicList
     //endregion
     //region Set State Functions
+    private fun setTopPlaylistState(){
+        if(_isTopPlaylistState.value) return
+        viewModelScope.launch {
+            try {
+                _topPlaylistState.update {
+                    val idOrdered = getMusicIdOrdered(3)
+                    val recentlyPlayed = get100RecentlyPlayed(3)
+                    val mostPlayed = get100MostPlayed(3)
+                    it.copy(
+                        MostPlayed = it.MostPlayed.copy(
+                            name = "Most Played",
+                            front = mostPlayed.get(0).getAlbumArtBitmap() ?: it.MostPlayed.front,
+                            back_left = mostPlayed.get(1).getAlbumArtBitmap() ?: it.MostPlayed.back_left,
+                            back_right = mostPlayed.get(2).getAlbumArtBitmap() ?: it.MostPlayed.back_right
+                        ),
+                        AllMusic = it.MostPlayed.copy(
+                            name = "All Tracks",
+                            front = idOrdered.get(0).getAlbumArtBitmap() ?: it.MostPlayed.front,
+                            back_left = idOrdered.get(1).getAlbumArtBitmap() ?: it.MostPlayed.back_left,
+                            back_right = idOrdered.get(2).getAlbumArtBitmap() ?: it.MostPlayed.back_right
+                        ),
+                        RecentrlyPlayed = it.MostPlayed.copy(
+                            name = "Recently Played",
+                            front = recentlyPlayed.get(0).getAlbumArtBitmap() ?: it.MostPlayed.front,
+                            back_left = recentlyPlayed.get(1).getAlbumArtBitmap() ?: it.MostPlayed.back_left,
+                            back_right = recentlyPlayed.get(2).getAlbumArtBitmap() ?: it.MostPlayed.back_right
+                        )
+                    )
+                }
+                _isTopPlaylistState.value = true
+            } catch (e : Exception){
+                e.printStackTrace()
+            }
+
+        }
+    }
     private fun setupMusicList(id: Long, route: String){
         viewModelScope.launch {
             musicList = if(id == -1L){
@@ -187,6 +236,11 @@ class HomeViewModel @Inject constructor(
                     Destination.AllMusicScreen.route -> getAllMusicFromDatabaseUseCase()
                     Destination.MostPlayedScreen.route -> {
                         val mostPlayedMusics = get100MostPlayed()
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(4).copy(playCount = 3))
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(3).copy(playCount = 2))
+
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(6).copy(datePlayed = System.currentTimeMillis()))
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(7).copy(datePlayed = System.currentTimeMillis()))
                         val pager = Pager(PagingConfig(pageSize = 100)){
                             ListPagingSource<MusicFile>(mostPlayedMusics)
                         }

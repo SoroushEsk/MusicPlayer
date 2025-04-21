@@ -28,6 +28,7 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedM
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.DeleteAPlaylistUseCase
@@ -190,6 +191,10 @@ object MediaModule{
     @Singleton
     fun provideGet100RecentlyPlayedMusicListUseCase(musicRepository: MusicRepository): Get100RecentlyPlayedMusicListUseCase =
         Get100RecentlyPlayedMusicListUseCase(musicRepository)
+    @Provides
+    @Singleton
+    fun provideGetTracksWithUsualOrderLimitedUseCase(musicRepository: MusicRepository): GetTracksWithUsualOrderLimitedUseCase =
+        GetTracksWithUsualOrderLimitedUseCase(musicRepository)
     //endregion
     //region PlayList-Music UseCase
     @Provides

@@ -51,7 +51,8 @@ fun  HomeActivityNavHost(
                     .padding(horizontal = (Dimens.Padding.HomeActivity)),
                 loadPlaylist = (getState(HomeViewModelGetStateAction.GetPlaylists)as StateFlow<List<Playlist>>).collectAsState() ,
                 navigate = navController.navigateActionSetUp(setState=setState),
-                setState = setState
+                setState = setState,
+                getState = getState
             )
         }
         composable(
