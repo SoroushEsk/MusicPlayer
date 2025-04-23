@@ -135,10 +135,11 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.ForwardPlayback              -> forwardPlayback()
                     is HomeViewModelSetStateAction.SetMusicPercent              -> setSongPercent()
                     is HomeViewModelSetStateAction.GetAllPlaylists              -> getAllPlaylists()
+                    is HomeViewModelSetStateAction.AddANewPlaylist              -> addNewPlaylist(action.name)
                     is HomeViewModelSetStateAction.BackwardPlayback             -> backwardPlayback()
                     is HomeViewModelSetStateAction.GetAllMusicFiles             -> {}
-                    is HomeViewModelSetStateAction.AddMusicToPlaylist           -> addSongToAPlaylist(action.musicId)
                     is HomeViewModelSetStateAction.UpdateDatePlayed             -> updateDatePlayed()
+                    is HomeViewModelSetStateAction.AddMusicToPlaylist           -> addSongToAPlaylist(action.musicId)
                     is HomeViewModelSetStateAction.ResetLazyListState           -> resetLazyListState()
                     is HomeViewModelSetStateAction.SetStateSearchText           -> setSearchText(action.searchText)
                     is HomeViewModelSetStateAction.SetCurrentDuration           -> setCurrentDuration(action.currentDuration)
@@ -193,6 +194,11 @@ class HomeViewModel @Inject constructor(
     fun getMusicPageList(): Flow<PagingData<MusicFile>> = musicList
     //endregion
     //region Set State Functions
+    private fun addNewPlaylist(
+        playlistName: String
+    ){
+
+    }
     private fun setTopPlaylistState(){
         if(_isTopPlaylistState.value) return
         viewModelScope.launch {

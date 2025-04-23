@@ -159,6 +159,7 @@ fun HomePage(
             }
         }
         if (showDialog){
+            //Todo("add persian support")
             AlertDialog(
                 onDismissRequest = { showDialog = false },
                 title = {
@@ -171,8 +172,10 @@ fun HomePage(
                     )
                 },
                 confirmButton = { TextButton(onClick = {
-                    //Todo(add new playlist to the view model")
-                    showDialog = false }
+                    setState(HomeViewModelSetStateAction.AddANewPlaylist(textEditInput))
+                    showDialog = false
+                    textEditInput = ""
+                }
                 ) {
                     Text(text = "Submit")
                     
@@ -180,6 +183,7 @@ fun HomePage(
                 dismissButton = {
                     TextButton(onClick = {
                         showDialog = false
+                        textEditInput = ""
                     }) {
                         Text(text = "Cancel")
                     }
