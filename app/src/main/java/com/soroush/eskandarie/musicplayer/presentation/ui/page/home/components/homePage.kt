@@ -19,13 +19,19 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,82 +70,120 @@ fun HomePage(
     val topPlaylistState by (getState(HomeViewModelGetStateAction.GetTopPlaylistState).collectAsState() as State<FourTopPlaylistImageState>)
     val playlistList by loadPlaylist
     val lazyListState = rememberLazyListState()
-    LazyColumn(
+    var textEditInput by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false)}
+    Box(
         modifier = modifier
-            .fillMaxSize(),
-        horizontalAlignment = Alignment.Start,
-        state = lazyListState
+            .fillMaxSize()
     ) {
-        item{
-            FourTopPlaylist(
-                modifier = Modifier,
-                themeColor = themeColor,
-                navigate = navigate,
-                state = topPlaylistState
-            )
-        }
-        item{
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.Spacing.HomePageSpaceBetween)
-            )
-        }
-        item{
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .height(Dimens.Size.HomePagePlaylistTitleContainerHeight)
-            ) {
-                Text(
+        LazyColumn(
+            modifier = modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.Start,
+            state = lazyListState
+        ) {
+            item{
+                FourTopPlaylist(
                     modifier = Modifier,
-                    fontWeight = FontWeight.Bold,
-                    text = Constants.HomePageValues.PlaylistSectionTitle,
-                    color = themeColor.Text,
-                    style = MaterialTheme
-                        .typography
-                        .headlineSmall
+                    themeColor = themeColor,
+                    navigate = navigate,
+                    state = topPlaylistState
                 )
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
+            }
+            item{
+                Spacer(
                     modifier = Modifier
-                        .padding(Dimens.Padding.HomePageAddPlaylistIcon)
-                        .aspectRatio(Dimens.AspectRatio.AddNewPlaylistButton)
-                        .fillMaxHeight(),
-                    painter = painterResource(id = R.drawable.add_to_playlist),
-                    contentDescription = Constants.HomePageValues.AddPlaylistIconDescription,
-                    tint = themeColor.Text
+                        .fillMaxWidth()
+                        .height(Dimens.Spacing.HomePageSpaceBetween)
+                )
+            }
+            item{
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .height(Dimens.Size.HomePagePlaylistTitleContainerHeight)
+                ) {
+                    Text(
+                        modifier = Modifier,
+                        fontWeight = FontWeight.Bold,
+                        text = Constants.HomePageValues.PlaylistSectionTitle,
+                        color = themeColor.Text,
+                        style = MaterialTheme
+                            .typography
+                            .headlineSmall
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        modifier = Modifier
+                            .padding(Dimens.Padding.HomePageAddPlaylistIcon)
+                            .aspectRatio(Dimens.AspectRatio.AddNewPlaylistButton)
+                            .fillMaxHeight()
+                            .clickable{
+                                showDialog = true
+                            },
+                        painter = painterResource(id = R.drawable.add_to_playlist),
+                        contentDescription = Constants.HomePageValues.AddPlaylistIconDescription,
+                        tint = themeColor.Text
+                    )
+                }
+            }
+            item{
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(Dimens.Spacing.HomePageSpaceBetween)
+                )
+            }
+            items(playlistList.size){index ->
+                PlaylistItem(
+                    playlistId = playlistList[index].id,
+                    title = playlistList[index].name,
+                    posterBitmap = MusicFile.getAlbumArtBitmap( playlistList[index].poster, LocalContext.current),
+                    posterShape = RoundedCornerShape(12.dp),
+                    onIcon1Click = { },
+                    onIcon2Click = { },
+                    dropdownList = listOf(
+                        PlaylistDropdownItem(0, "Rename"){},
+                        PlaylistDropdownItem(1, "Delete") {},
+                        PlaylistDropdownItem(2, "Share"){},
+                        PlaylistDropdownItem(3,"Add"){}
+                    )
+                ) {
+                    navigate(NavControllerAction.NavigateToPlaylist(playlistList[index].id, Destination.PlaylistScreen.route))
+                }
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(Dimens.Spacing.HomePageSpaceBetween)
                 )
             }
         }
-        item{
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.Spacing.HomePageSpaceBetween)
-            )
-        }
-        items(playlistList.size){index ->
-            PlaylistItem(
-                playlistId = playlistList[index].id,
-                title = playlistList[index].name,
-                posterBitmap = MusicFile.getAlbumArtBitmap( playlistList[index].poster, LocalContext.current),
-                posterShape = RoundedCornerShape(12.dp),
-                onIcon1Click = { },
-                onIcon2Click = { },
-                dropdownList = listOf(
-                    PlaylistDropdownItem(0, "Rename"){},
-                    PlaylistDropdownItem(1, "Delete") {},
-                    PlaylistDropdownItem(2, "Share"){},
-                    PlaylistDropdownItem(3,"Add"){}
-                )
-            ) {
-                navigate(NavControllerAction.NavigateToPlaylist(playlistList[index].id, Destination.PlaylistScreen.route))
-            }
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(Dimens.Spacing.HomePageSpaceBetween)
+        if (showDialog){
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = {
+                    Text(text = "Playlist's name")
+                },
+                text = {
+                    TextField(
+                        value = textEditInput,
+                        onValueChange = {textEditInput = it}
+                    )
+                },
+                confirmButton = { TextButton(onClick = {
+                    //Todo(add new playlist to the view model")
+                    showDialog = false }
+                ) {
+                    Text(text = "Submit")
+                    
+                } },
+                dismissButton = {
+                    TextButton(onClick = {
+                        showDialog = false
+                    }) {
+                        Text(text = "Cancel")
+                    }
+                }
             )
         }
     }
@@ -251,4 +295,5 @@ fun FourTopPlaylist(
             }
         }
     }
+    
 }

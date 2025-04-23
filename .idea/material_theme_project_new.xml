@@ -12,6 +12,7 @@
     <option name="titleBarState">
       <MTProjectTitleBarConfigState>
         <option name="overrideColor" value="false" />
+        <option name="useProjectIcon" value="false" />
       </MTProjectTitleBarConfigState>
     </option>
   </component>
