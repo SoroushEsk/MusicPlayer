@@ -26,5 +26,6 @@ interface PlaylistDao {
     @Query("DELETE FROM ${Constants.Database.PlaylistTableName}")
     fun deleteAllPlaylists()
 
-
+    @Query("SELECT COUNT(*) FROM ${Constants.Database.PlaylistTableName}")
+    fun getTotalPlaylist(): Int
 }

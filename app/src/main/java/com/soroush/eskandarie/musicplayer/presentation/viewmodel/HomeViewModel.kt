@@ -13,6 +13,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistEntity
 import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistMusicRelationEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
@@ -24,7 +25,9 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlayl
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetNumberOfPlaylistsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddAMusicToPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddListOfMusicToAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
@@ -57,6 +60,8 @@ class HomeViewModel @Inject constructor(
     private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
     private val getPlaylistWithAllMusic: GetPlaylistWithAllMusicFileByIdUseCase,
+    private val numberrOfPlaylists: GetNumberOfPlaylistsUseCase,
+    private val createANewPlaylist: CreateANewPlaylistUseCase,
     private val addMusicListToPlaylist: AddListOfMusicToAPlaylistUseCase,
     private val get100MostPlayed: Get100MostPlayedMusicsUseCase,
     private val get100RecentlyPlayed: Get100RecentlyPlayedMusicListUseCase,
@@ -94,7 +99,9 @@ class HomeViewModel @Inject constructor(
 
     var musicList: Flow<PagingData<MusicFile>> = flowOf(PagingData.empty())
 
-    private val _playlistItems: MutableStateFlow<List<Playlist>> = MutableStateFlow(emptyList())
+    private val _playlistItems: MutableStateFlow<List<Playlist>> = MutableStateFlow(
+        emptyList()
+    )
     val playlistItems: StateFlow<List<Playlist>>
         get() = _playlistItems.asStateFlow()
 
@@ -197,7 +204,20 @@ class HomeViewModel @Inject constructor(
     private fun addNewPlaylist(
         playlistName: String
     ){
-
+        viewModelScope.launch {
+            val playlist =
+                Playlist(
+                    id = numberrOfPlaylists().toLong() + 1,
+                    name = playlistName,
+                    poster = ""
+                )
+            _playlistItems.update {
+                it + playlist
+            }
+            createANewPlaylist(
+                playlist
+            )
+        }
     }
     private fun setTopPlaylistState(){
         if(_isTopPlaylistState.value) return
@@ -293,7 +313,7 @@ class HomeViewModel @Inject constructor(
 //    }
     private fun getAllPlaylists(){
         viewModelScope.launch {
-            _playlistItems.value = getAllPlaylistItemsUseCase()
+            _playlistItems.value = getAllPlaylistItemsUseCase().toMutableList()
         }
     }
     private fun addSongToAPlaylist(musicId: Long){

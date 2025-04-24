@@ -135,7 +135,7 @@ class HomeActivity : ComponentActivity() {
 //                    }
                     HomeActivityNavHost(
                         navController = navController,
-                        modifier = Modifier,
+                        modifier = Modifier.padding(bottom = 40.dp),
                         getState = viewmodel::viewModelGetStateActions,
                         setState = viewmodel::viewModelSetAction,
                         musicLazyPaging = viewmodel::getMusicPageList

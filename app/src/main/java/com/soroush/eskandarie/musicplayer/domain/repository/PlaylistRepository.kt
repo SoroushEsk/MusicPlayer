@@ -7,4 +7,5 @@ interface PlaylistRepository {
     suspend fun addPlaylist(playlist: Playlist)
     suspend fun deletePlaylist(playlist: Playlist)
     suspend fun updatePlaylist(playlist: Playlist)
+    suspend fun getNumberOfPlaylist(): Int
 }

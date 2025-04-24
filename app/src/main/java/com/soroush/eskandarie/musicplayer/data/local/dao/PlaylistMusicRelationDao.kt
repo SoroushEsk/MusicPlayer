@@ -22,4 +22,6 @@ interface PlaylistMusicRelationDao {
 
     @Query("DELETE FROM ${Constants.Database.MusicPlaylistRelationTableName} WHERE ${Constants.Database.MusicPlaylistPlaylistIdColumn}=:playlistId")
     fun deletePlaylistById(playlistId: Long)
+
+
 }

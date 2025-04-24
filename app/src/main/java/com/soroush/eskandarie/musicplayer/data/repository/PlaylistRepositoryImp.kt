@@ -37,4 +37,11 @@ class PlaylistRepositoryImp @Inject constructor(
         }
     }
 
+    override suspend fun getNumberOfPlaylist(): Int {
+        return withContext(Dispatchers.IO){
+            playlistDao.getTotalPlaylist()
+        }
+    }
+
+
 }

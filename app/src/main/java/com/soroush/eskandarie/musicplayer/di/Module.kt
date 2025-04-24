@@ -33,6 +33,7 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatus
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.DeleteAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetNumberOfPlaylistsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.ModifyAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddAMusicToPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddListOfMusicToAPlaylistUseCase
@@ -167,6 +168,10 @@ object MediaModule{
     @Singleton
     fun provideDeleteAPlaylistUseCase(playlistRepository: PlaylistRepository): DeleteAPlaylistUseCase =
         DeleteAPlaylistUseCase(playlistRepository)
+    @Provides
+    @Singleton
+    fun provideGetNumberOfPlaylistsUseCase(playlistRepository: PlaylistRepository): GetNumberOfPlaylistsUseCase =
+        GetNumberOfPlaylistsUseCase(playlistRepository)
     //endregion
     //region Music Use Cases
     @Provides
