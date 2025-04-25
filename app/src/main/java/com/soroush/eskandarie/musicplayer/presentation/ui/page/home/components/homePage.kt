@@ -134,6 +134,29 @@ fun HomePage(
                         .height(Dimens.Spacing.HomePageSpaceBetween)
                 )
             }
+            item{
+                PlaylistItem(
+                    playlistId = -1,
+                    title = Constants.HomePageValues.Favorite,
+                    posterBitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.favorite_playlist),
+                    posterShape = RoundedCornerShape(12.dp),
+                    onIcon1Click = { },
+                    onIcon2Click = { },
+                    dropdownList = listOf(
+                        PlaylistDropdownItem(0, "Rename"){},
+                        PlaylistDropdownItem(1, "Delete") {},
+                        PlaylistDropdownItem(2, "Share"){},
+                        PlaylistDropdownItem(3,"Add"){}
+                    )
+                ) {
+                    navigate(NavControllerAction.NavigateToFolders(Destination.FolderScreen.route))
+                }
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(Dimens.Spacing.HomePageSpaceBetween)
+                )
+            }
             items(playlistList.size){index ->
                 PlaylistItem(
                     playlistId = playlistList[index].id,
@@ -202,6 +225,10 @@ fun FourTopPlaylist(
     state: FourTopPlaylistImageState
 ) {
     val defaultBitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.empty_album)
+    val front = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.folder1)
+    val left = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.folder2)
+    val right = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.folder3)
+
     Box(modifier = modifier
         .fillMaxWidth()
         .aspectRatio(1f)
@@ -226,10 +253,13 @@ fun FourTopPlaylist(
                         .weight(1f)
                 ){
                     TopPlaylistItem(
-                        title = state.Folders.name,
-                        bitmapFront = state.Folders.front ?: defaultBitmap,
-                        bitmapBack1 = state.Folders.back_right ?: defaultBitmap,
-                        bitmapBack2 = state.Folders.back_left ?: defaultBitmap,
+                        modifier = Modifier.clickable {
+                            navigate(NavControllerAction.NavigateToAllMusic(Destination.AllMusicScreen.route))
+                        },
+                        title = "Folders",
+                        bitmapFront = front,
+                        bitmapBack1 = left,
+                        bitmapBack2 = right,
                         extraPadding = 12.dp
                     )
                 }

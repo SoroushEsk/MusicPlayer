@@ -31,6 +31,10 @@ fun NavController.navigateActionSetUp(
                 setState(HomeViewModelSetStateAction.SetUpMusicList( route = navAction.route))
                 navigate(navAction.route)
             }
+            is NavigateToFolders ->{
+
+                navigate(navAction.route)
+            }
             else -> {}
         }
     }

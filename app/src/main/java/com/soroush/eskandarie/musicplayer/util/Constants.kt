@@ -41,6 +41,7 @@ object Constants {
     object HomePageValues{
         const val AddPlaylistIconDescription    : String = "add_new_playlist"
         const val PlaylistSectionTitle          : String = "Playlists"
+        const val Favorite                      : String = "Favorite"
         const val MusicPageMotionLayoutId       : String = "music_bar_motion_layout"
     }
     object MusicBarValues{
