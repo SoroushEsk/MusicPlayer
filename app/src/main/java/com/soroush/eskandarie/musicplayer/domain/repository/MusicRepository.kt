@@ -13,4 +13,6 @@ interface MusicRepository {
     suspend fun updateMusic(musicEntity: MusicEntity)
     suspend fun getMusicFileById(musicId: Long): MusicFile?
     suspend fun getOrderedMusicList(query: SupportSQLiteQuery): List<MusicFile>
+    suspend fun getFavoriteMusicFiles(): Flow<PagingData<MusicFile>>
+
 }

@@ -35,6 +35,10 @@ fun NavController.navigateActionSetUp(
 
                 navigate(navAction.route)
             }
+            is NavigateToFavorite ->{
+                setState(HomeViewModelSetStateAction.SetUpMusicList( route = navAction.route))
+                navigate(navAction.route)
+            }
             else -> {}
         }
     }

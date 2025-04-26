@@ -75,4 +75,20 @@ class MusicRepositoryImp @Inject constructor(
             it.toMusicFile()
         }
     }
+
+    override suspend fun getFavoriteMusicFiles(): Flow<PagingData<MusicFile>> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 50,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = {
+                musicTableDao.getFavoriteMusic()
+            }
+        ).flow.map {
+            it.map { entity ->
+                entity.toMusicFile()
+            }
+        }
+    }
 }

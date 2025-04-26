@@ -21,6 +21,7 @@ import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
@@ -62,6 +63,7 @@ class HomeViewModel @Inject constructor(
     private val getPlaylistWithAllMusic: GetPlaylistWithAllMusicFileByIdUseCase,
     private val numberrOfPlaylists: GetNumberOfPlaylistsUseCase,
     private val createANewPlaylist: CreateANewPlaylistUseCase,
+    private val getFavoriteMusicFiles: GetFavoriteMusicFilesUseCase,
     private val addMusicListToPlaylist: AddListOfMusicToAPlaylistUseCase,
     private val get100MostPlayed: Get100MostPlayedMusicsUseCase,
     private val get100RecentlyPlayed: Get100RecentlyPlayedMusicListUseCase,
@@ -262,11 +264,11 @@ class HomeViewModel @Inject constructor(
                     Destination.AllMusicScreen.route -> getAllMusicFromDatabaseUseCase()
                     Destination.MostPlayedScreen.route -> {
                         val mostPlayedMusics = get100MostPlayed()
-                        modifyMusicStatusUseCase(mostPlayedMusics.get(4).copy(playCount = 3))
-                        modifyMusicStatusUseCase(mostPlayedMusics.get(3).copy(playCount = 2))
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(6).copy(isFavorite = true))
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(8).copy(isFavorite = true))
 
-                        modifyMusicStatusUseCase(mostPlayedMusics.get(6).copy(datePlayed = System.currentTimeMillis()))
-                        modifyMusicStatusUseCase(mostPlayedMusics.get(7).copy(datePlayed = System.currentTimeMillis()))
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(2).copy(isFavorite = true))
+                        modifyMusicStatusUseCase(mostPlayedMusics.get(3).copy(isFavorite = true))
                         val pager = Pager(PagingConfig(pageSize = 100)){
                             ListPagingSource<MusicFile>(mostPlayedMusics)
                         }
@@ -279,6 +281,7 @@ class HomeViewModel @Inject constructor(
                         }
                         pager.flow
                     }
+                    Destination.FavoriteMusicScreen.route -> getFavoriteMusicFiles()
                     else -> getAllMusicFromDatabaseUseCase()
                 }
             } else {

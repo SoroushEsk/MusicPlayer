@@ -149,7 +149,7 @@ fun HomePage(
                         PlaylistDropdownItem(3,"Add"){}
                     )
                 ) {
-                    navigate(NavControllerAction.NavigateToFolders(Destination.FolderScreen.route))
+                    navigate(NavControllerAction.NavigateToFavorite(Destination.FavoriteMusicScreen.route))
                 }
                 Spacer(
                     modifier = Modifier

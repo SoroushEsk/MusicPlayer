@@ -29,6 +29,9 @@ interface MusicDao {
     @Query("SELECT * FROM ${Constants.Database.MusicTableName} WHERE ${Constants.Database.MusicIdColumn}=:musicId")
     fun getMusicById(musicId: Long): MusicEntity?
 
+    @Query("SELECT * FROM ${Constants.Database.MusicTableName} WHERE ${Constants.Database.MusicIsFavoriteColumn}=1 ORDER BY ${Constants.Database.MusicDatePlayedColumn} DESC")
+    fun getFavoriteMusic(): PagingSource<Int, MusicEntity>
+
     @RawQuery
     fun getOrderedLimited(query: SupportSQLiteQuery): MutableList<MusicEntity>
 
