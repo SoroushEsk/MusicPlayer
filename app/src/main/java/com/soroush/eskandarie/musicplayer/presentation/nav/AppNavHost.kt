@@ -23,6 +23,7 @@ import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen.FolderPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen.PlaylistPage
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.util.Constants
@@ -38,6 +39,7 @@ fun  HomeActivityNavHost(
     setState: (action: HomeViewModelSetStateAction) -> Unit,
     musicLazyPaging: ()-> Flow<PagingData<MusicFile>>
 ) {
+    val navigate = navController.navigateActionSetUp(setState=setState)
     val startDestination: String = Destination.HomeScreen.route
     val localContext = LocalContext.current
     NavHost(
@@ -50,7 +52,7 @@ fun  HomeActivityNavHost(
                 modifier = Modifier
                     .padding(horizontal = (Dimens.Padding.HomeActivity)),
                 loadPlaylist = (getState(HomeViewModelGetStateAction.GetPlaylists)as StateFlow<List<Playlist>>).collectAsState() ,
-                navigate = navController.navigateActionSetUp(setState=setState),
+                navigate = navigate,
                 setState = setState,
                 getState = getState
             )
@@ -103,6 +105,14 @@ fun  HomeActivityNavHost(
                 lazyListState = lazyListState as LazyListState,
                 pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
                 setState = setState
+            )
+        }
+        composable(
+            route = Destination.FolderScreen.route
+        ){
+            FolderPage(
+                navigate = navigate,
+                getState = getState
             )
         }
     }

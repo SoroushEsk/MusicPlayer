@@ -1,12 +1,14 @@
 package com.soroush.eskandarie.musicplayer.data.repository
 
 
+import android.content.Context
+import android.net.Uri
+import android.provider.MediaStore
 import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.map
-import androidx.room.util.query
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicEntity
@@ -44,14 +46,13 @@ class MusicRepositoryImp @Inject constructor(
             }
         }
     }
-
     override suspend fun getAllMusicFiles(): Flow<PagingData<MusicFile>> = Pager(
         config = PagingConfig(
             pageSize = 50,
             enablePlaceholders = false
         ),
         pagingSourceFactory = {
-            musicTableDao.getAllMusic()
+            musicTableDao.getAllMusicPaging()
         }
     ).flow
         .map { pagingData: PagingData<MusicEntity> ->
@@ -59,15 +60,12 @@ class MusicRepositoryImp @Inject constructor(
                 entity.toMusicFile()
             }
         }
-
     override suspend fun updateMusic(musicEntity: MusicEntity) = withContext(Dispatchers.IO) {
         musicTableDao.updateMusic(musicEntity)
     }
-
     override suspend fun getMusicFileById(musicId: Long): MusicFile? = withContext(Dispatchers.IO) {
         musicTableDao.getMusicById(musicId)?.toMusicFile()
     }
-
     override suspend fun getOrderedMusicList(
         query: SupportSQLiteQuery
     ): List<MusicFile> = withContext(Dispatchers.IO){
@@ -75,7 +73,6 @@ class MusicRepositoryImp @Inject constructor(
             it.toMusicFile()
         }
     }
-
     override suspend fun getFavoriteMusicFiles(): Flow<PagingData<MusicFile>> {
         return Pager(
             config = PagingConfig(
@@ -91,4 +88,20 @@ class MusicRepositoryImp @Inject constructor(
             }
         }
     }
+    override suspend fun getAllMusic(): Map<String, List<MusicFile>> {
+        return withContext(Dispatchers.IO){
+            val map = mutableMapOf<String, List<MusicFile>>()
+            musicTableDao.getAllMusic().forEach{musicEntity ->
+                val parentFolder = getMediaParentFolder(musicEntity.path)
+                map[parentFolder] = map.getOrDefault(parentFolder, emptyList()) + musicEntity.toMusicFile()
+            }
+            map
+        }
+    }
+    private fun getMediaParentFolder(path: String): String {
+        val file = java.io.File(path)
+        return file.parentFile?.name ?: "Unidentified"
+    }
+
+
 }

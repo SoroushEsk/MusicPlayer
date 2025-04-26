@@ -156,7 +156,7 @@ class HomeActivity : ComponentActivity() {
     override fun onStart() {
         super.onStart()
         initialMediaController()
-
+        viewmodel.viewModelSetAction(HomeViewModelSetStateAction.FillFolderRequirements)
 
     }
     //region Init Methods

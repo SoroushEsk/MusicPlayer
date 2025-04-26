@@ -66,19 +66,12 @@ class MusicPlaybackService : MediaSessionService() {
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
-
-
-        getsong()
-
-
+//        getsong()
     }
-
-    fun getsong(): Int {
-
+    private fun getsong(): Int {
         serviceScope.launch {
             val mutableList = mutableListOf<MediaItem>()
             val music = getAllMusicOfQueueUseCase().forEach {
-//                val mediaItem = it.path.let { MediaItem.fromUri(it) }
                 val mediaItem = MediaItem.Builder()
                     .setMediaId(it.id.toString())
                     .setUri(it.path)
@@ -90,7 +83,6 @@ class MusicPlaybackService : MediaSessionService() {
                             .setArtworkUri(getArtworkUri(this@MusicPlaybackService, it.path))
                             .build()
                     )
-
                     .build()
                 mutableList.add(mediaItem)
             }
@@ -98,11 +90,9 @@ class MusicPlaybackService : MediaSessionService() {
                 mediaSession.player.addMediaItems(mutableList)
                 mediaSession.player.prepare()
             }
-
         }
         return START_STICKY
     }
-
     override fun onDestroy() {
         mediaSession.run {
             player.release()
@@ -110,11 +100,9 @@ class MusicPlaybackService : MediaSessionService() {
         }
         super.onDestroy()
     }
-
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }
-
     //endregion
     //region Init Function
     //endregion
@@ -122,18 +110,15 @@ class MusicPlaybackService : MediaSessionService() {
     private fun pausePlayback() {
         Log.e("song playback service", "pause")
     }
-
     private fun resumePlayback() {
         Log.e("song playback service", "resume")
     }
-
     private fun playMusic(mediaItems: List<MediaItem>) {
         val player = mediaSession.player // Get ExoPlayer from MediaSession
         player.setMediaItems(mediaItems)
         player.prepare()
         player.play()
     }
-
     //endregion
     //region Notification
     private fun createNotificationChannel() {

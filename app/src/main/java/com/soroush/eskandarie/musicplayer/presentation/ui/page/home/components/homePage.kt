@@ -254,7 +254,7 @@ fun FourTopPlaylist(
                 ){
                     TopPlaylistItem(
                         modifier = Modifier.clickable {
-                            navigate(NavControllerAction.NavigateToAllMusic(Destination.AllMusicScreen.route))
+                            navigate(NavControllerAction.NavigateToFolders(Destination.FolderScreen.route))
                         },
                         title = "Folders",
                         bitmapFront = front,

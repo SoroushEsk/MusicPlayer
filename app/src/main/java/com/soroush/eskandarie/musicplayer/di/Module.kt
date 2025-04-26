@@ -24,6 +24,7 @@ import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistWithMusicRepository
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.AnalyzeFoldersUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesUseCase
@@ -205,6 +206,10 @@ object MediaModule{
     @Singleton
     fun provideGetFavoriteMusicFilesUseCase(musicRepository: MusicRepository): GetFavoriteMusicFilesUseCase =
         GetFavoriteMusicFilesUseCase(musicRepository)
+    @Provides
+    @Singleton
+    fun provideAnalyzeFoldersUseCase(musicRepository: MusicRepository): AnalyzeFoldersUseCase =
+        AnalyzeFoldersUseCase(musicRepository)
     //endregion
     //region PlayList-Music UseCase
     @Provides

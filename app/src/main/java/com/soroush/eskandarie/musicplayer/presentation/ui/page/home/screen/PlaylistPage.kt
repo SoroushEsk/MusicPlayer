@@ -57,7 +57,7 @@ fun PlaylistPage(
     pageDataItem: LazyPagingItems<MusicFile>,
     setState: (action: HomeViewModelSetStateAction)->Unit
 ) {
-    val lazyState = remember{
+    val lazyState = remember {
         lazyListState
     }
     val context = LocalContext.current
@@ -68,11 +68,6 @@ fun PlaylistPage(
         if(pageDataItem.itemCount != 0){
             playlistImage = pageDataItem[0]?.getAlbumArtBitmap()?:BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         }
-    }
-    val layoutInfo = lazyState.layoutInfo
-    val itemInfo = layoutInfo.visibleItemsInfo.find { it.index == 4 }
-    itemInfo?.let {
-        val centerOffset = it.offset + it.size / 2
     }
     LazyColumn(
         modifier = modifier
