@@ -13,8 +13,8 @@ fun NavController.navigateActionSetUp(
             is NavigateToPlaylist -> {
                 setState(
                     HomeViewModelSetStateAction.SetUpMusicList(
-                        navAction.playlistId,
-                        navAction.route
+                        id = navAction.playlistId,
+                        route = navAction.route
                     )
                 )
                 navigate(navAction.route)
@@ -32,14 +32,19 @@ fun NavController.navigateActionSetUp(
                 navigate(navAction.route)
             }
             is NavigateToFolders ->{
-
                 navigate(navAction.route)
             }
             is NavigateToFavorite ->{
                 setState(HomeViewModelSetStateAction.SetUpMusicList( route = navAction.route))
                 navigate(navAction.route)
             }
-            else -> {}
+            is NavigateToFolderMusic ->{
+                setState(HomeViewModelSetStateAction.SetUpMusicList(
+                    folderName = navAction.folderName,
+                    route = navAction.route
+                ))
+                navigate(navAction.route)
+            }
         }
     }
 }

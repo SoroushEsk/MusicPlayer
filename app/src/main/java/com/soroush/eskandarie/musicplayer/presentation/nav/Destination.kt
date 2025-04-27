@@ -8,4 +8,5 @@ sealed class Destination(val route: String) {
     data object AllMusicScreen: Destination("all_music_screen")
     data object FavoriteMusicScreen: Destination("favorite_music_screen")
     data object PlaylistScreen: Destination("playlist_screen")
+    data object FolderMusicScreen: Destination("folder_music_screen")
 }

@@ -7,4 +7,5 @@ sealed class NavControllerAction(route: String) {
     data class NavigateToMostPlayed(val route: String) : NavControllerAction(route)
     data class NavigateToFolders(val route: String): NavControllerAction(route)
     data class NavigateToFavorite(val route: String): NavControllerAction(route)
+    data class NavigateToFolderMusic(val route: String, val folderName: String): NavControllerAction(route)
 }

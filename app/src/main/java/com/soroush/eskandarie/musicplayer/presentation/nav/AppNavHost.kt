@@ -108,6 +108,16 @@ fun  HomeActivityNavHost(
             )
         }
         composable(
+            route = Destination.FolderMusicScreen.route,
+        ) {
+            val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
+            PlaylistPage(
+                lazyListState = lazyListState as LazyListState,
+                pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
+                setState = setState
+            )
+        }
+        composable(
             route = Destination.FolderScreen.route
         ){
             FolderPage(

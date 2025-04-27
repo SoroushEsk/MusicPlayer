@@ -82,7 +82,6 @@ object Dimens {
         val MusicItemDefault                                : Dp        =  26.dp
     }
     object Spacing{
-
         val MusicBarMotionLayoutContainerHeight             : Dp        =  68.dp
         val FolderItemIconFolderName                        : Dp        =   8.dp
         val HomePageSpaceBetween                            : Dp        =   8.dp

@@ -142,7 +142,7 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.PausePlayback                -> pausePlayback()
                     is HomeViewModelSetStateAction.SetRepeatMode                -> setRepeatMode(action.repeatMode)
                     is HomeViewModelSetStateAction.UpdateArtWork                -> setArtWork(action.artWork)
-                    is HomeViewModelSetStateAction.SetUpMusicList               -> setupMusicList(action.id, action.route)
+                    is HomeViewModelSetStateAction.SetUpMusicList               -> setupMusicList(action.id, action.route, action.folderName)
                     is HomeViewModelSetStateAction.ResumePlayback               -> resumePlayback()
                     is HomeViewModelSetStateAction.UpdatePlayCount              -> {}
                     is HomeViewModelSetStateAction.SetShuffleState              -> setShuffleStatus(action.isShuffle)
@@ -269,7 +269,7 @@ class HomeViewModel @Inject constructor(
 
         }
     }
-    private fun setupMusicList(id: Long, route: String){
+    private fun setupMusicList(id: Long, route: String, folderName: String){
         viewModelScope.launch {
             musicList = if(id == -1L){
                 when(route){
@@ -290,6 +290,13 @@ class HomeViewModel @Inject constructor(
                         val recentlyPlayed = get100RecentlyPlayed()
                         val pager = Pager(PagingConfig(pageSize = 100)){
                             ListPagingSource<MusicFile>(recentlyPlayed)
+                        }
+                        pager.flow
+                    }
+                    Destination.FolderMusicScreen.route ->{
+                        val folderMusicList = folder_music_map.value.getOrDefault(folderName, listOf())
+                        val pager = Pager(PagingConfig(pageSize = 50)){
+                            ListPagingSource<MusicFile>(folderMusicList)
                         }
                         pager.flow
                     }
