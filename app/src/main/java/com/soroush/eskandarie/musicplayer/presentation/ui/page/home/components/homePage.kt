@@ -1,7 +1,6 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components
 
 import android.graphics.BitmapFactory
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -20,11 +19,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -35,9 +36,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -57,10 +58,11 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.util.Constants
 import kotlinx.coroutines.flow.StateFlow
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomePage(
     modifier: Modifier = Modifier,
-    themeColor: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
+    colorTheme: ColorTheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme,
     loadPlaylist: State<List<Playlist>>,
     navigate: (action: NavControllerAction)->Unit,
     setState: (action: HomeViewModelSetStateAction) -> Unit,
@@ -85,7 +87,7 @@ fun HomePage(
             item{
                 FourTopPlaylist(
                     modifier = Modifier,
-                    themeColor = themeColor,
+                    themeColor = colorTheme,
                     navigate = navigate,
                     state = topPlaylistState
                 )
@@ -107,7 +109,7 @@ fun HomePage(
                         modifier = Modifier,
                         fontWeight = FontWeight.Bold,
                         text = Constants.HomePageValues.PlaylistSectionTitle,
-                        color = themeColor.Text,
+                        color = colorTheme.Text,
                         style = MaterialTheme
                             .typography
                             .headlineSmall
@@ -123,7 +125,7 @@ fun HomePage(
                             },
                         painter = painterResource(id = R.drawable.add_to_playlist),
                         contentDescription = Constants.HomePageValues.AddPlaylistIconDescription,
-                        tint = themeColor.Text
+                        tint = colorTheme.Text
                     )
                 }
             }
@@ -180,6 +182,14 @@ fun HomePage(
                         .height(Dimens.Spacing.HomePageSpaceBetween)
                 )
             }
+
+            item {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(Dimens.Spacing.MusicBarMotionLayoutContainerHeight)
+                )
+            }
         }
         if (showDialog){
             //Todo("add persian support")
@@ -190,8 +200,28 @@ fun HomePage(
                 },
                 text = {
                     TextField(
+                        modifier = Modifier
+                            .clip(
+                                RoundedCornerShape(
+                                    topStart = Dimens.CornerRadius.TextFieldAddPlaylist,
+                                    topEnd =   Dimens.CornerRadius.TextFieldAddPlaylist
+                                )
+                            ),
                         value = textEditInput,
-                        onValueChange = {textEditInput = it}
+                        maxLines = 1,
+                        onValueChange = {textEditInput = it},
+                        colors = TextFieldDefaults.colors(
+                            focusedTextColor = colorTheme.Text,
+                            focusedContainerColor = colorTheme.Background,
+                            unfocusedContainerColor = colorTheme.Background,
+                            disabledContainerColor = Color.Transparent,
+                            cursorColor = colorTheme.FocusedField,
+                            focusedIndicatorColor = colorTheme.Primary,
+                            unfocusedIndicatorColor = colorTheme.Background,
+                            focusedLabelColor = colorTheme.FocusedField,
+                            focusedPrefixColor = colorTheme.FocusedField,
+                        ),
+
                     )
                 },
                 confirmButton = { TextButton(onClick = {
@@ -200,7 +230,7 @@ fun HomePage(
                     textEditInput = ""
                 }
                 ) {
-                    Text(text = "Submit")
+                    Text(text = "Submit", color = colorTheme.Text)
                     
                 } },
                 dismissButton = {
@@ -208,9 +238,12 @@ fun HomePage(
                         showDialog = false
                         textEditInput = ""
                     }) {
-                        Text(text = "Cancel")
+                        Text(text = "Cancel", color = colorTheme.Text)
                     }
-                }
+                },
+                containerColor = colorTheme.Surface,
+                textContentColor = colorTheme.Background,
+                titleContentColor = colorTheme.Text
             )
         }
     }

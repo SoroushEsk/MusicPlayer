@@ -2,8 +2,13 @@ package com.soroush.eskandarie.musicplayer.util
 
 import androidx.compose.ui.unit.sp
 import com.google.common.base.Strings
+import com.soroush.eskandarie.musicplayer.R
 
 object Constants {
+    object FolderPage{
+        val FolderItemIconResource              : Int   = R.drawable.folder
+        val FolderItemIconDescription           : String = "folder_item_icon"
+    }
     object SharedPreference{
         const val Name                          : String = "music_player_shared_preference"
         const val IntroductionToken             : String = "introduction_token"

@@ -1,10 +1,13 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.theme
 
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 object Dimens {
     object Size{
+        val FolderItemBorderWidth                           : Dp        =   2.dp
+        val FolderPageFolderItemHieght                      : Dp        =  64.dp
         val HomePagePlaylistTitleContainerHeight            : Dp        =  40.dp
         val MusicItemShadowBorder                           : Dp        =   2.dp
         val MusicItemHeight                                 : Dp        =  80.dp
@@ -37,7 +40,7 @@ object Dimens {
     }
     object Padding{
         val Zero                                            : Dp        =   0.dp
-
+        val FolderPageFolderItemIconPadding                 : Dp        =   8.dp
         val MusicItemArtistTextEndPadding                   : Dp        =  20.dp
         val MusicItemTextContainerHorizontal                : Dp        =  10.dp
         val MusicItemTextContainerVertical                  : Dp        =  16.dp
@@ -46,6 +49,7 @@ object Dimens {
         val HomeActivity                                    : Dp        =  10.dp
         val TopPlaylistItemDefault                          : Dp        =   6.dp
         val PlayListItemIconSize                            : Dp        =  16.dp
+        val FolderPagePadding                               : Dp        = HomeActivity
         val PlayListItemDropdown                            : Dp        =   4.dp
         val PlaylistItemPoster                              : Dp        =   8.dp
         val PlaylistItemIcon                                : Dp        =   2.dp
@@ -67,7 +71,9 @@ object Dimens {
 
     }
     object CornerRadius{
+        val TextFieldAddPlaylist                            : Dp        =  12.dp
         val General                                         : Dp        =  26.dp
+        val FolderItem                                      : Dp        =  26.dp
         val TopPlaylistItem                                 : Dp        =  26.dp
         val AppTextField                                    : Dp        =  26.dp
         val MusicBar                                        : Dp        =  48.dp
@@ -76,6 +82,9 @@ object Dimens {
         val MusicItemDefault                                : Dp        =  26.dp
     }
     object Spacing{
+
+        val MusicBarMotionLayoutContainerHeight             : Dp        =  68.dp
+        val FolderItemIconFolderName                        : Dp        =   8.dp
         val HomePageSpaceBetween                            : Dp        =   8.dp
         val PlaylistItemDropdownSpace                       : Dp        =   2.dp
         val MusicPageSpaceBetween                           : Dp        =  12.dp
@@ -87,6 +96,7 @@ object Dimens {
         val MusicPageNeedleFinal                            : Float     = -15f
     }
     object Alpha {
+        val FolderItemBorderDark                            : Float     = 0.3f
         val MusicPageDiskPoster                             : Float     = 0.8f
         val MusicPageShadowedIconBackground                 : Float     =0.15f
         val DomainColor1Alpha                               : Float     = 0.6f

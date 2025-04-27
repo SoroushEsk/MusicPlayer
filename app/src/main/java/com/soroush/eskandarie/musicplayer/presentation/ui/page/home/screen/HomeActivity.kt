@@ -3,6 +3,7 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 import android.Manifest
 import android.content.ComponentName
 import android.content.pm.PackageManager
+import android.hardware.lights.Light
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -12,6 +13,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.annotation.OptIn
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,7 +46,9 @@ import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.HomeActivityNavHost
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.common.SearchField
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
+import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.presentation.viewmodel.HomeViewModel
 import com.soroush.eskandarie.musicplayer.shared_component.media_controller.MediaControllerObserver
 import dagger.hilt.android.AndroidEntryPoint
@@ -110,9 +115,11 @@ class HomeActivity : ComponentActivity() {
                     }
                 }
             }
+            val colorTheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .background(color = colorTheme.Background)
                     .navigationBarsPadding()
             ) {
                 Column(
@@ -135,7 +142,7 @@ class HomeActivity : ComponentActivity() {
 //                    }
                     HomeActivityNavHost(
                         navController = navController,
-                        modifier = Modifier.padding(bottom = 40.dp),
+                        modifier = Modifier,
                         getState = viewmodel::viewModelGetStateActions,
                         setState = viewmodel::viewModelSetAction,
                         musicLazyPaging = viewmodel::getMusicPageList
