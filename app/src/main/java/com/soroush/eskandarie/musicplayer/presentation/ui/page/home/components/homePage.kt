@@ -142,14 +142,15 @@ fun HomePage(
                     title = Constants.HomePageValues.Favorite,
                     posterBitmap = BitmapFactory.decodeResource(LocalContext.current.resources, R.drawable.favorite_playlist),
                     posterShape = RoundedCornerShape(12.dp),
-                    onIcon1Click = { },
+                    onIcon1Click = {
+                    },
                     onIcon2Click = { },
                     dropdownList = listOf(
                         PlaylistDropdownItem(0, "Rename"){},
                         PlaylistDropdownItem(1, "Delete") {},
                         PlaylistDropdownItem(2, "Share"){},
                         PlaylistDropdownItem(3,"Add"){}
-                    )
+                    ),
                 ) {
                     navigate(NavControllerAction.NavigateToFavorite(Destination.FavoriteMusicScreen.route))
                 }
@@ -165,7 +166,9 @@ fun HomePage(
                     title = playlistList[index].name,
                     posterBitmap = MusicFile.getAlbumArtBitmap( playlistList[index].poster, LocalContext.current),
                     posterShape = RoundedCornerShape(12.dp),
-                    onIcon1Click = { },
+                    onIcon1Click = {
+                        setState(HomeViewModelSetStateAction.PutPlaylistToQueue(playlistList[index].id))
+                    },
                     onIcon2Click = { },
                     dropdownList = listOf(
                         PlaylistDropdownItem(0, "Rename"){},

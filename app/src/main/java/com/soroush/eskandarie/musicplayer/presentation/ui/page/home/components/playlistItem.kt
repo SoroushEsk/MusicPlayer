@@ -112,7 +112,10 @@ fun PlaylistItem(
         Icon(
             modifier = Modifier
                 .size(Dimens.Size.PlayListItemIconSize)
-                .padding(Dimens.Padding.PlaylistItemIcon),
+                .padding(Dimens.Padding.PlaylistItemIcon)
+                .clickable {
+                    onIcon1Click()
+                },
             painter = painterResource(id = icon1),
             contentDescription = "PlayButton",
             tint = themeColor.Icon
@@ -123,7 +126,10 @@ fun PlaylistItem(
                 .width(Dimens.Size.PlaylistSpaceBetween)
         )
         Icon(
-            modifier = Modifier.size(Dimens.Size.PlayListItemIconSize),
+            modifier = Modifier.size(Dimens.Size.PlayListItemIconSize)
+                .clickable {
+                    onIcon2Click()
+                },
             painter = painterResource(id = icon2),
             contentDescription = "ShufflePlayButton",
             tint = themeColor.Icon

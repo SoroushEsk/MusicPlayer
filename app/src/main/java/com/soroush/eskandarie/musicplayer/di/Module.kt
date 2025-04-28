@@ -67,8 +67,7 @@ object MediaModule{
     fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
         val exoPlayer = ExoPlayer.Builder(context).build()
         val mediaSession = MediaSession.Builder(context, exoPlayer)
-            .setCallback(object: MediaSession.Callback{
-
+            .setCallback(object: MediaSession.Callback  {
             })
             .build()
         return mediaSession

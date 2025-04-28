@@ -6,13 +6,17 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.session.MediaController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.soroush.eskandarie.musicplayer.R
+import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
 import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistEntity
 import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistMusicRelationEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
@@ -54,6 +58,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
@@ -163,6 +169,7 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.SetCurrentPlaylistName       -> setNewPlaylistLazyListState(action.playlistName)
                     is HomeViewModelSetStateAction.UpdateTopPlaylistState       -> setTopPlaylistState()
                     is HomeViewModelSetStateAction.SetMediaControllerObserver   -> setMediaController(action.mediaController)
+                    is HomeViewModelSetStateAction.PutPlaylistToQueue           -> putPlaylistInPlayQueue(action.playlistId)
                 }
             }
         }
@@ -179,6 +186,27 @@ class HomeViewModel @Inject constructor(
         } catch (e: Exception) {
             BitmapFactory.decodeResource(context.resources, R.drawable.empty_album)
         }
+    }
+    private fun getArtworkUri(context: Context, audioPath: String): Uri? {
+        try {
+            val bitmap = MusicFile.getAlbumArtBitmap(audioPath, context)
+            // Check if bitmap is valid
+            if (bitmap != null && !bitmap.isRecycled && bitmap.width > 0) {
+                val file = File(context.cacheDir, "cover_${audioPath.hashCode()}.jpg")
+                FileOutputStream(file).use {
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 90, it)
+                }
+                return FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
+            }
+        } catch (e: Exception) {
+            Log.e("MusicPlaybackService", "Error saving artwork: ${e.message}")
+        }
+        // Return a default artwork URI or null
+        return null
     }
     //endregion
     //region Change PlayBack Methods
@@ -210,6 +238,37 @@ class HomeViewModel @Inject constructor(
     fun getMusicPageList(): Flow<PagingData<MusicFile>> = musicList
     //endregion
     //region Set State Functions
+    private fun putPlaylistInPlayQueue(playlistId: Long){
+        viewModelScope.launch {
+            val musicList = getPlaylistWithAllMusic(playlistId).musicList
+            refreshQueueUseCase(
+                musicList.map{
+                    MusicQueueEntity(
+                        id = it.id,
+                        path = it.path,
+                        isFavorite = it.isFavorite
+                    )
+                }
+            )
+            mediaController.setMediaItems(musicList.map{
+                val mediaItem = MediaItem.Builder()
+                    .setMediaId(it.id.toString())
+                    .setUri(it.path)
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(it.title)
+                            .setDescription("${it.isFavorite}")
+                            .setArtist(it.artist)
+                            .setArtworkUri(getArtworkUri(applicationContext, it.path))
+                            .build()
+                    )
+                    .build()
+                mediaItem
+            })
+            mediaController.play()
+        }
+
+    }
     private fun setFolderMusicMap(){
         viewModelScope.launch {
             _folder_music_map.value = analyzeFoldersUseCase()
