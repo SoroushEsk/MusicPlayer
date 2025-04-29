@@ -60,12 +60,16 @@ class MusicPlaybackService : MediaSessionService() {
     companion object {
         private const val NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "MediaPlaybackChannel"
+        const val COMMAND_REPEAT = "custom_repeat"
+        const val COMMAND_SHUFFLE = "custom_shuffle"
+        const val COMMAND_LIKE = "custom_like"
     }
 
     //endregion
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
+        setMediaNotificationProvider(CustomMediaNotificationProvider())
 //        getsong()
     }
     private fun getsong(): Int {
@@ -103,23 +107,7 @@ class MusicPlaybackService : MediaSessionService() {
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {
         return mediaSession
     }
-    //endregion
-    //region Init Function
-    //endregion
-    //region Player Control
-    private fun pausePlayback() {
-        Log.e("song playback service", "pause")
-    }
-    private fun resumePlayback() {
-        Log.e("song playback service", "resume")
-    }
-    private fun playMusic(mediaItems: List<MediaItem>) {
-        val player = mediaSession.player // Get ExoPlayer from MediaSession
-        player.setMediaItems(mediaItems)
-        player.prepare()
-        player.play()
-    }
-    //endregion
+    //endregionno //
     //region Notification
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -185,5 +173,7 @@ class MusicPlaybackService : MediaSessionService() {
     }
 
     //endregion
+
 }
+
 

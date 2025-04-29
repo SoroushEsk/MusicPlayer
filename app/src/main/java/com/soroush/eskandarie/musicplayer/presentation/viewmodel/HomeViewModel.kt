@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.media3.common.Player
 import androidx.media3.session.MediaController
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -418,6 +419,11 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun setRepeatMode(repeatMode: RepeatMode){
+        mediaController.repeatMode = when(repeatMode){
+            RepeatMode.No_Repeat  -> Player.REPEAT_MODE_OFF
+            RepeatMode.Repeat_All -> Player.REPEAT_MODE_ALL
+            RepeatMode.Repeat_Once-> Player.REPEAT_MODE_ONE
+        }
         _playbackState.update {
             it.copy(
                 repeatMode = repeatMode
@@ -503,9 +509,16 @@ class HomeViewModel @Inject constructor(
     private fun setMusicDetails() {
         _playbackState.update {
             it.copy(
+                isShuffle = mediaController.shuffleModeEnabled,
                 artist = mediaController.currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown_Artist",
                 title = mediaController.currentMediaItem?.mediaMetadata?.title?.toString() ?: "Unknown_Title",
-                bitmapBitmap = uriToBitmap(applicationContext, mediaController.currentMediaItem?.mediaMetadata?.artworkUri)
+                bitmapBitmap = uriToBitmap(applicationContext, mediaController.currentMediaItem?.mediaMetadata?.artworkUri),
+                repeatMode = when(mediaController.repeatMode){
+                    Player.REPEAT_MODE_ONE -> RepeatMode.Repeat_Once
+                    Player.REPEAT_MODE_ALL -> RepeatMode.Repeat_All
+                    Player.REPEAT_MODE_OFF -> RepeatMode.No_Repeat
+                    else -> RepeatMode.No_Repeat
+                }
             )
         }
     }

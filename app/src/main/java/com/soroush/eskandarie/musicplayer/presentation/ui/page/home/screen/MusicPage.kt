@@ -1,12 +1,9 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -39,7 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
@@ -66,13 +62,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -84,12 +78,10 @@ import androidx.constraintlayout.compose.MotionLayout
 import androidx.constraintlayout.compose.MotionScene
 import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
-import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.PlaybackState
-import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
-import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
+import com.soroush.eskandarie.musicplayer.presentation.extensions.getReadableTextColor
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.ui.MusicPageScrollState
 import com.soroush.eskandarie.musicplayer.presentation.ui.animation.musicPageMotionLayoutConfig
@@ -112,7 +104,6 @@ fun MusicPage(
 ) {
     val playbackState by (getState(HomeViewModelGetStateAction.GetMusicStatus)as StateFlow<PlaybackStates>).collectAsState()
     val configuration = LocalConfiguration.current
-    val resources = LocalContext.current.resources
     var progress by rememberSaveable { mutableStateOf(1.0f) }
     var scrollStatus by remember { mutableStateOf(MusicPageScrollState.NoScroll) }
     val bitmap = playbackState.bitmapBitmap
@@ -124,16 +115,12 @@ fun MusicPage(
     var mainContainerCoordinates by remember {
         mutableStateOf(Offset(0f, 0f))
     }
-//    var songPercentState by remember { mutableStateOf(0f) }
-
-
     val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = Dimens.Alpha.DomainColor1Alpha)
     val dominantColor2 = Color(palette.getDominantColor(0)).copy(alpha = Dimens.Alpha.DomainColor2Alpha)
     val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = Dimens.Alpha.VibrantColor1Alpha)
-    val vibrantColor2 = Color(palette.getVibrantColor(0)).copy(alpha = Dimens.Alpha.VibrantColor2Alpha)
     val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = Dimens.Alpha.MutedColorAlpha)
     val listOfColors =
-        listOf(dominantColor1, dominantColor2, vibrantColor1, vibrantColor2, mutedColor)
+        listOf(dominantColor1, dominantColor2, vibrantColor1, mutedColor)
     val radialGradientBrush = Brush.radialGradient(
         colors = listOfColors,
         center = Offset(posterCoordinates.x, posterCoordinates.y - mainContainerCoordinates.y),
@@ -147,44 +134,23 @@ fun MusicPage(
             )
         ).toFloat()
     )
-    var fingerY by remember { mutableStateOf(0f) }
+    var fingerX by remember { mutableStateOf(0f) }
     var isTouching by remember { mutableStateOf(false) }
-    val maxScrollRange = configuration.screenHeightDp * LocalDensity.current.density
 
     val animatedProgress by animateFloatAsState(
         targetValue = when( scrollStatus ) {
             MusicPageScrollState.ScrollUp -> 1f
             MusicPageScrollState.ScrollDown -> 0f
             else -> progress
-//            else -> {
-//                if (isTouching) {
-//                    Math.abs(fingerY - maxScrollRange) / maxScrollRange
-//                } else {
-//                    if (progress > 0.5f) {
-//                        1f
-//                    } else 0f
-//                }
-//            }
         },
         animationSpec = tween(
-            durationMillis = if (isTouching) 0
-                            else Constants.MusicPageValues.LeaveScrollDuration
+            durationMillis =  Constants.MusicPageValues.LeaveScrollDuration
         )
     )
     progress = animatedProgress
 
     var textWidth by remember { mutableStateOf(0f) }
     val infiniteTransition = rememberInfiniteTransition()
-    val offsetX = infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -textWidth,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 8000,
-                easing = LinearEasing
-            ), repeatMode = RepeatMode.Restart
-        ), label = ""
-    )
     var musicBarPosterWidth by remember { mutableStateOf(1f) }
     var isTheSameSize by remember { mutableStateOf(false)}
     val pagePosterAlphaAnimation by animateFloatAsState(
@@ -232,8 +198,8 @@ fun MusicPage(
                     orientation = Orientation.Vertical,
                     state = rememberScrollableState { delta ->
                         offset += delta
-                        if (delta < -5) scrollStatus = MusicPageScrollState.ScrollDown
-                        else if (delta > 0) scrollStatus = MusicPageScrollState.ScrollUp
+                        if (delta > 100) scrollStatus = MusicPageScrollState.ScrollDown
+                        else if (delta < -2) scrollStatus = MusicPageScrollState.ScrollUp
                         delta
                     }
                 )
@@ -241,20 +207,20 @@ fun MusicPage(
                     mainContainerCoordinates =
                         Offset(coordinates.positionInWindow().x, coordinates.positionInWindow().y)
                 }
-                .pointerInput(Unit) {
-                    awaitPointerEventScope {
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val position = event.changes.first().position
-//                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
-//                                isTouching = event.changes.any { it.pressed }
-//                            else isTouching = false
-                            if (isTouching) {
-                                fingerY = position.y + mainContainerCoordinates.y
-                            }
-                        }
-                    }
-                }
+//                .pointerInput(Unit) {
+//                    awaitPointerEventScope {
+//                        while (true) {
+//                            val event = awaitPointerEvent()
+//                            val position = event.changes.first().position
+////                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
+////                                isTouching = event.changes.any { it.pressed }
+////                            else isTouching = false
+//                            if (isTouching) {
+//                                fingerY = position.y + mainContainerCoordinates.y
+//                            }
+//                        }
+//                    }
+//                }
             ) {}
         Column(
             modifier = Modifier
@@ -266,7 +232,7 @@ fun MusicPage(
                 text = playbackState.title,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
-                color = colorTheme.Text,
+                color = dominantColor1.getReadableTextColor(isSystemInDarkTheme()),
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 maxLines = 1,
                 onTextLayout = { textLayoutResult ->
@@ -277,7 +243,7 @@ fun MusicPage(
                 text = playbackState.artist,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
-                color = colorTheme.Text.copy(alpha = 0.70f),
+                color = dominantColor1.getReadableTextColor(isSystemInDarkTheme()).copy(alpha = 0.70f),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1
             )
@@ -288,6 +254,7 @@ fun MusicPage(
             rightIcon =  R.drawable.options_list,
             leftIcon  =  R.drawable.down_arrow,
             colorTheme = colorTheme,
+            progress = progress,
             onClickLeft = {
                 scrollStatus = MusicPageScrollState.ScrollDown
             }
@@ -335,6 +302,7 @@ fun MusicPage(
             lightTint = colorTheme.FavoriteTint,
             colorTheme = colorTheme,
             isColorTint = playbackState.isFavorite,
+            progress = progress,
             onClickRight = {
                 if(playbackState.isFavorite) setState(HomeViewModelSetStateAction.ChangeFavoriteState(false))
                 else setState(HomeViewModelSetStateAction.ChangeFavoriteState(true))
@@ -384,17 +352,14 @@ fun MusicPage(
         ){
             setState(HomeViewModelSetStateAction.ForwardPlayback)
         }
-        IconsAtEndsRow(
+        IconsAtEndsRowRepeatShuffle(
             modifier  = Modifier
                 .layoutId(Constants.MusicPageValues.ShuffleRepeatContainerId),
-            rightIcon =  R.drawable.repeat_disable,
-            leftIcon  =  R.drawable.shuffle,
             isColorTint = playbackState.isShuffle,
             colorTheme = colorTheme,
-            onClickRight = {
-                if(playbackState.isShuffle) setState(HomeViewModelSetStateAction.SetShuffleState(false))
-                else setState(HomeViewModelSetStateAction.SetShuffleState(true))
-            }
+            progress = progress,
+            setState = setState,
+            playbackState = playbackState
         )
         Icon(
             painter = painterResource(id = R.drawable.playlist),
@@ -552,6 +517,7 @@ fun IconsAtEndsRow(
     colorTheme: ColorTheme,
     rightIcon: Int,
     leftIcon: Int,
+    progress: Float,
     lightTint: Color = colorTheme.Secondary,
     isColorTint: Boolean = false,
     extraPadding: Dp = Dimens.Padding.MusicPageIconsAtEndRowDefault,
@@ -570,7 +536,7 @@ fun IconsAtEndsRow(
             },
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        if (size.width > 30 && size.height > 30) {
+        if ((size.width > 50 && size.height > 50) || progress > 0.6f){
 
             IconShadowed(
                 modifier = Modifier
@@ -586,6 +552,86 @@ fun IconsAtEndsRow(
                 tint = if(isColorTint) lightTint else colorTheme.Tint,
                 colorTheme = colorTheme,
                 onClick = onClickRight
+            )
+        }
+    }
+}@Composable
+fun IconsAtEndsRowRepeatShuffle(
+    modifier: Modifier = Modifier,
+    colorTheme: ColorTheme,
+    progress: Float,
+    lightTint: Color = colorTheme.Secondary,
+    isColorTint: Boolean = false,
+    extraPadding: Dp = Dimens.Padding.MusicPageIconsAtEndRowDefault,
+    setState: (action: HomeViewModelSetStateAction) -> Unit,
+    playbackState: PlaybackStates
+) {
+    var size by remember {
+        mutableStateOf(Size.Zero)
+    }
+    val rightIcon = R.drawable.shuffle
+    val noRepeat = R.drawable.repeat_disable
+    val repeatList = R.drawable.list_repeat
+    val repeatOnce = R.drawable.repeat_once
+
+    val repeatModeNoRepeat   = com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode.No_Repeat
+    val repeatModeRepeatAll  = com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode.Repeat_All
+    val repeatModeRepeatOnce = com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode.Repeat_Once
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(extraPadding)
+            .onGloballyPositioned { coordinates ->
+                size = coordinates.size.toSize()
+            },
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        if ((size.width > 50 && size.height > 50) || progress > 0.6f){
+
+            IconShadowed(
+                modifier = Modifier
+                    .aspectRatio(1f),
+                iconPainter = when(playbackState.repeatMode){
+                     repeatModeRepeatAll -> repeatList
+                     repeatModeRepeatOnce-> repeatOnce
+                     repeatModeNoRepeat  -> noRepeat
+                    else -> noRepeat
+                },
+                colorTheme = colorTheme,
+                onClick = {
+                    when(playbackState.repeatMode){
+                        com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode.Repeat_All -> {
+                            setState(HomeViewModelSetStateAction.SetRepeatMode(repeatModeNoRepeat))
+                        }
+                        com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode.Repeat_Once-> {
+                            setState(HomeViewModelSetStateAction.SetRepeatMode(repeatModeRepeatAll))
+                        }
+                        com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode.No_Repeat  -> {
+                            setState(HomeViewModelSetStateAction.SetRepeatMode(repeatModeRepeatOnce))
+                        }
+                    }
+                }
+            )
+            IconShadowed(
+                modifier = Modifier
+                    .aspectRatio(1f)
+                    .then(
+                        if (isColorTint) Modifier
+                            .background(
+                                brush = Brush.radialGradient(
+                                    colors = listOf(lightTint.copy(alpha = 0.2f), Color.Transparent)
+                                )
+                            )
+                        else Modifier
+                    )
+                    ,
+                iconPainter = rightIcon,
+                tint = if(isColorTint) lightTint else colorTheme.Tint,
+                colorTheme = colorTheme,
+                onClick = {
+                    if(playbackState.isShuffle) setState(HomeViewModelSetStateAction.SetShuffleState(false))
+                    else setState(HomeViewModelSetStateAction.SetShuffleState(true))
+                }
             )
         }
     }
