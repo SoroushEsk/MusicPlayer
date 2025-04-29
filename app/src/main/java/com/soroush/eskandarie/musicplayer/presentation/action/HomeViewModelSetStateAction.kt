@@ -19,7 +19,6 @@ sealed class HomeViewModelSetStateAction {
     data class SetShuffleState(val isShuffle: Boolean)          : HomeViewModelSetStateAction()
     data class SetRepeatMode(val repeatMode: RepeatMode)        : HomeViewModelSetStateAction()
     data class SetCurrentDuration(val currentDuration: Long)    : HomeViewModelSetStateAction()
-    data class OnNextMusic(val nextMusic: Long)                 : HomeViewModelSetStateAction()
     data class ChangeFavoriteState(val isFavorite: Boolean)     : HomeViewModelSetStateAction()
     data class UpdateArtist(val artist: String)                 : HomeViewModelSetStateAction()
     data class UpdateTitle(val title: String)                   : HomeViewModelSetStateAction()
@@ -27,8 +26,9 @@ sealed class HomeViewModelSetStateAction {
     data class AddMusicToPlaylist(val musicId: Long)            : HomeViewModelSetStateAction()
     data class AddANewPlaylist(val name: String)                : HomeViewModelSetStateAction()
     data class PutPlaylistToQueue(val playlistId: Long)         : HomeViewModelSetStateAction()
-
     data object UpdateTopPlaylistState                          : HomeViewModelSetStateAction()
+
+    data object OnNextMusic                                     : HomeViewModelSetStateAction()
     data object FillFolderRequirements                          : HomeViewModelSetStateAction()
     data object ResetLazyListState                              : HomeViewModelSetStateAction()
     data object UpdateMusicDetails                              : HomeViewModelSetStateAction()

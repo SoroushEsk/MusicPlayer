@@ -66,7 +66,7 @@ class MusicPlaybackService : MediaSessionService() {
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
-        getsong()
+//        getsong()
     }
     private fun getsong(): Int {
         serviceScope.launch {
@@ -78,7 +78,7 @@ class MusicPlaybackService : MediaSessionService() {
                     .setMediaMetadata(
                         MediaMetadata.Builder()
                             .setTitle(MusicFile.getMusicTitle(it.path))
-                            .setDescription("${it.isFavorite}")
+                            .setDescription("${it.id}")
                             .setArtist(MusicFile.getMusicArtist(it.path))
                             .setArtworkUri(getArtworkUri(this@MusicPlaybackService, it.path))
                             .build()

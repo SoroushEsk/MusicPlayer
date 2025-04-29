@@ -68,7 +68,9 @@ class MediaControllerObserver(
 
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                     super.onMediaItemTransition(mediaItem, reason)
-                    changeViewModelState(HomeViewModelSetStateAction.UpdateMusicDetails)
+                    if ( reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO){
+                       changeViewModelState(HomeViewModelSetStateAction.OnNextMusic)
+                    }else changeViewModelState(HomeViewModelSetStateAction.UpdateMusicDetails)
                 }
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     super.onIsPlayingChanged(isPlaying)

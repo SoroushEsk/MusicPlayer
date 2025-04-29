@@ -141,7 +141,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             setActionChannel.receiveAsFlow().collect{ action ->
                 when( action ){
-                    is HomeViewModelSetStateAction.OnNextMusic                  -> onMusicChange(action.nextMusic)
+                    is HomeViewModelSetStateAction.OnNextMusic                  -> onMusicChange()
                     is HomeViewModelSetStateAction.UpdateTitle                  -> setTitle(action.title)
                     is HomeViewModelSetStateAction.SetPlayState                 -> setPlayState(action.isMusicPlaying)
                     is HomeViewModelSetStateAction.UpdateArtist                 -> setArtist(action.artist)
@@ -159,7 +159,7 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.BackwardPlayback             -> backwardPlayback()
                     is HomeViewModelSetStateAction.GetAllMusicFiles             -> {}
                     is HomeViewModelSetStateAction.FillFolderRequirements       -> setFolderMusicMap()
-                    is HomeViewModelSetStateAction.UpdateDatePlayed             -> updateDatePlayed()
+                    is HomeViewModelSetStateAction.UpdateDatePlayed             -> {}
                     is HomeViewModelSetStateAction.AddMusicToPlaylist           -> addSongToAPlaylist(action.musicId)
                     is HomeViewModelSetStateAction.ResetLazyListState           -> resetLazyListState()
                     is HomeViewModelSetStateAction.SetStateSearchText           -> setSearchText(action.searchText)
@@ -241,6 +241,22 @@ class HomeViewModel @Inject constructor(
     private fun putPlaylistInPlayQueue(playlistId: Long){
         viewModelScope.launch {
             val musicList = getPlaylistWithAllMusic(playlistId).musicList
+            mediaController.setMediaItems(musicList.map{
+                val mediaItem = MediaItem.Builder()
+                    .setMediaId(it.id.toString())
+                    .setUri(it.path)
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(it.title)
+                            .setArtist(it.artist)
+                            .setDescription(it.id.toString())
+                            .setArtworkUri(getArtworkUri(applicationContext, it.path))
+                            .build()
+                    )
+                    .build()
+                mediaItem
+            })
+            mediaController.play()
             refreshQueueUseCase(
                 musicList.map{
                     MusicQueueEntity(
@@ -250,22 +266,6 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             )
-            mediaController.setMediaItems(musicList.map{
-                val mediaItem = MediaItem.Builder()
-                    .setMediaId(it.id.toString())
-                    .setUri(it.path)
-                    .setMediaMetadata(
-                        MediaMetadata.Builder()
-                            .setTitle(it.title)
-                            .setDescription("${it.isFavorite}")
-                            .setArtist(it.artist)
-                            .setArtworkUri(getArtworkUri(applicationContext, it.path))
-                            .build()
-                    )
-                    .build()
-                mediaItem
-            })
-            mediaController.play()
         }
 
     }
@@ -383,15 +383,7 @@ class HomeViewModel @Inject constructor(
         _lazyListState.value = LazyListState()
         _playlistName.value = playlistName
     }
-//    private fun getAllMusicFiles(){
-//        viewModelScope.launch {
-//            getAllMusicFromDatabaseUseCase()
-//                .cachedIn(viewModelScope)
-//                .collectLatest { pagingData ->
-//                    _musicList.value = pagingData
-//                }
-//        }
-//    }
+
     private fun getAllPlaylists(){
         viewModelScope.launch {
             _playlistItems.value = getAllPlaylistItemsUseCase().toMutableList()
@@ -442,38 +434,18 @@ class HomeViewModel @Inject constructor(
     private fun resetLazyListState(){
         _lazyListState.value = LazyListState()
     }
-    private fun onMusicChange(nextMusicFileId: Long){
-//        viewModelScope.launch {
-//            modifyMusicStatusUseCase(_playbackState.value.currentMusicFile)
-//        }
-//        viewModelScope.launch {
-//            val nextMusicFile = getMusicFileByIdUseCase(nextMusicFileId)
-//            if (nextMusicFile != null) {
-//                _playbackState.update {
-//                    it.copy(
-//                    )
-//                }
-//            }
-//        }
-    }
-    private fun updatePlayCount(){
-//        Todo("playCoutn")
-//        _playbackState.update {
-//            it.copy(
-//                currentMusicFile = it.currentMusicFile.copy(
-//                    playCount = it.currentMusicFile.playCount + 1
-//                )
-//            )
-//        }
-    }
-    private fun updateDatePlayed(){
-//        _playbackState.update {
-//            it.copy(
-//                currentMusicFile = it.currentMusicFile.copy(
-//                    datePlayed = System.currentTimeMillis()
-//                )
-//            )
-//        }Todo("dataplayed")
+    private fun onMusicChange(){
+        viewModelScope.launch {
+            val previousIndex = mediaController.previousMediaItemIndex
+            val id: Long = mediaController.getMediaItemAt(previousIndex).mediaMetadata.description.toString().toLong()
+            val musicFile = getMusicFileByIdUseCase(id) ?: return@launch
+            val newMusicFile = musicFile.copy(
+                playCount = musicFile.playCount + 1,
+                datePlayed = System.currentTimeMillis()
+            )
+            setMusicDetails()
+            modifyMusicStatusUseCase(newMusicFile)
+        }
     }
     private fun setFavoriteState(isFavorite: Boolean){
         _playbackState.update {
