@@ -1,6 +1,10 @@
 package com.soroush.eskandarie.musicplayer.di
 
 import android.content.Context
+import androidx.annotation.OptIn
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.room.Room
@@ -62,10 +66,16 @@ object MediaModule{
     )!!
     //endregion
     //region MediaSession
+    @OptIn(UnstableApi::class)
     @Provides
     @Singleton
     fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
         val exoPlayer = ExoPlayer.Builder(context).build()
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .build()
+        exoPlayer.setAudioAttributes(audioAttributes, true)
         val mediaSession = MediaSession.Builder(context, exoPlayer)
             .setCallback(object: MediaSession.Callback  {
             })

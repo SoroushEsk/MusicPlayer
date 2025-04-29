@@ -66,7 +66,7 @@ class MusicPlaybackService : MediaSessionService() {
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
-//        getsong()
+        getsong()
     }
     private fun getsong(): Int {
         serviceScope.launch {

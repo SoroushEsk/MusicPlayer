@@ -55,7 +55,7 @@ fun SplashScreen(){
                 modifier = Modifier
                     .fillMaxSize(Dimens.Size.SplashScreenIcon)
                     .aspectRatio(Dimens.AspectRatio.SplashIcon),
-                painter = painterResource(id = R.mipmap.ic_launcher),
+                painter = painterResource(id = R.drawable.music_player_icon),
                 contentDescription = Constants.SplashScreen.SplashScreenIconDescription
             )
         }
