@@ -104,7 +104,7 @@ fun MusicPage(
 ) {
     val playbackState by (getState(HomeViewModelGetStateAction.GetMusicStatus)as StateFlow<PlaybackStates>).collectAsState()
     val configuration = LocalConfiguration.current
-    var progress by rememberSaveable { mutableStateOf(1.0f) }
+    var progress by rememberSaveable { mutableStateOf(0.0f) }
     var scrollStatus by remember { mutableStateOf(MusicPageScrollState.NoScroll) }
     val bitmap = playbackState.bitmapBitmap
     val palette = Palette.from(bitmap).generate()

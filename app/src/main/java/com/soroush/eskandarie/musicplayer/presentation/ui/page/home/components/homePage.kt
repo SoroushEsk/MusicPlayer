@@ -177,7 +177,7 @@ fun HomePage(
                         PlaylistDropdownItem(3,"Add"){}
                     )
                 ) {
-                    navigate(NavControllerAction.NavigateToPlaylist(playlistList[index].id, Destination.PlaylistScreen.route))
+                    navigate(NavControllerAction.NavigateToPlaylist(playlistList[index].id, Destination.PlaylistScreen.route, playlistList[index].name))
                 }
                 Spacer(
                     modifier = Modifier

@@ -11,7 +11,7 @@ class GetTracksWithUsualOrderLimitedUseCase @Inject constructor(
     suspend operator fun invoke(limitAmount: Int) =
         musicRepository.getOrderedMusicList(
             SimpleSQLiteQuery(
-                "SELECT * FROM ${Constants.Database.MusicTableName} ORDER BY ${Constants.Database.MusicIdColumn} DESC LIMIT ?",
+                "SELECT * FROM ${Constants.Database.MusicTableName} ORDER BY ${Constants.Database.MusicIdColumn} ASC LIMIT ?",
                 arrayOf(limitAmount)
             )
         )

@@ -2,6 +2,7 @@ package com.soroush.eskandarie.musicplayer.presentation.action
 
 import android.graphics.Bitmap
 import androidx.media3.session.MediaController
+import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 
 sealed class HomeViewModelSetStateAction {
@@ -26,8 +27,8 @@ sealed class HomeViewModelSetStateAction {
     data class AddMusicToPlaylist(val musicId: Long)            : HomeViewModelSetStateAction()
     data class AddANewPlaylist(val name: String)                : HomeViewModelSetStateAction()
     data class PutPlaylistToQueue(val playlistId: Long)         : HomeViewModelSetStateAction()
+    data class SetCurrentPlaylist(val playlist: PlaylistType)   : HomeViewModelSetStateAction()
     data object UpdateTopPlaylistState                          : HomeViewModelSetStateAction()
-
     data object OnNextMusic                                     : HomeViewModelSetStateAction()
     data object FillFolderRequirements                          : HomeViewModelSetStateAction()
     data object ResetLazyListState                              : HomeViewModelSetStateAction()

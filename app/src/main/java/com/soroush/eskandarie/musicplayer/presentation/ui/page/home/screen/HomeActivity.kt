@@ -124,7 +124,6 @@ class HomeActivity : ComponentActivity() {
             ) {
                 Column(
                     modifier = Modifier
-                        .statusBarsPadding()
                         .nestedScroll(nestedScrollConnection)
                 ) {
 //                    Log.e("12345", "${isTopBarVisible.value} $isAtStart $isScrollingUp")

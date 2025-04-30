@@ -1,13 +1,18 @@
 package com.soroush.eskandarie.musicplayer.di
 
 import android.content.Context
+import android.os.Bundle
 import androidx.annotation.OptIn
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
 import androidx.room.Room
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 import com.soroush.eskandarie.musicplayer.data.local.MusicPlayerDatabase
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicQueueDao
@@ -46,6 +51,9 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddListO
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
+import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
+import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService.Companion
+import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService.Companion.ACTION_FAVORITES
 import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -64,25 +72,6 @@ object MediaModule{
         Constants.SharedPreference.Name,
         Context.MODE_PRIVATE
     )!!
-    //endregion
-    //region MediaSession
-    @OptIn(UnstableApi::class)
-    @Provides
-    @Singleton
-    fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
-        val exoPlayer = ExoPlayer.Builder(context).build()
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(C.USAGE_MEDIA)
-            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
-            .build()
-        exoPlayer.setAudioAttributes(audioAttributes, true)
-        val mediaSession = MediaSession.Builder(context, exoPlayer)
-            .setCallback(object: MediaSession.Callback  {
-            })
-            .build()
-        return mediaSession
-    }
-
     //endregion
     //region Database + Dao
     @Provides

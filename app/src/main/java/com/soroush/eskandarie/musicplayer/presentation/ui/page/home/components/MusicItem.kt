@@ -88,9 +88,9 @@ fun MusicItem(
         defaultAlbumArt
     )
     val palette = Palette.from(albumArtBitmap).generate()
-    val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = 0.1f)
-    val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = 0.04f)
-    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.02f)
+    val dominantColor1 = Color(palette.getDominantColor(0)).copy(alpha = 0.12f)
+    val vibrantColor1 = Color(palette.getVibrantColor(0)).copy(alpha = 0.07f)
+    val mutedColor = Color(palette.getMutedColor(0)).copy(alpha = 0.05f)
     val listOfColors =
         listOf(dominantColor1, vibrantColor1, mutedColor)
     val radialGradientBrush = Brush.horizontalGradient(

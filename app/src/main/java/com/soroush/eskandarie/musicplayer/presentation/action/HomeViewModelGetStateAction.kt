@@ -14,4 +14,5 @@ sealed class HomeViewModelGetStateAction  {
     data object GetLazyListState   : HomeViewModelGetStateAction()
     data object GetTopPlaylistState: HomeViewModelGetStateAction()
     data object GetFolderList      : HomeViewModelGetStateAction()
+    data object GetCurrentPlaylist : HomeViewModelGetStateAction()
 }

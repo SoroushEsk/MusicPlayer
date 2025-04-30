@@ -44,6 +44,7 @@ import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.state.FourTopPlaylistImageState
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
+import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import com.soroush.eskandarie.musicplayer.presentation.state.TopPlaylistState
@@ -101,6 +102,9 @@ class HomeViewModel @Inject constructor(
     private val _topPlaylistState = MutableStateFlow(FourTopPlaylistImageState())
     val topPlaylistState: StateFlow<FourTopPlaylistImageState> = _topPlaylistState.asStateFlow()
 
+    private val _currentPlaylist = MutableStateFlow<PlaylistType>(PlaylistType.TopPlaylist("", ""))
+    val currentPlaylist: StateFlow<PlaylistType> = _currentPlaylist.asStateFlow()
+
     private val _playbackState: MutableStateFlow<PlaybackStates> = MutableStateFlow(PlaybackStates(
         artist =  "Unknown_Artist",
         title = "Unknown_Title",
@@ -142,6 +146,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             setActionChannel.receiveAsFlow().collect{ action ->
                 when( action ){
+                    is HomeViewModelSetStateAction.SetCurrentPlaylist           -> setPlaylistType(action.playlist)
                     is HomeViewModelSetStateAction.OnNextMusic                  -> onMusicChange()
                     is HomeViewModelSetStateAction.UpdateTitle                  -> setTitle(action.title)
                     is HomeViewModelSetStateAction.SetPlayState                 -> setPlayState(action.isMusicPlaying)
@@ -229,16 +234,22 @@ class HomeViewModel @Inject constructor(
         return when(action){
             is HomeViewModelGetStateAction.GetPlaylists         -> playlistItems
             is HomeViewModelGetStateAction.GetMusicStatus       -> playbackState
-            is HomeViewModelGetStateAction.GetMusicFiles        -> playbackState
+            is HomeViewModelGetStateAction.GetMusicFiles        -> playbackState//
             is HomeViewModelGetStateAction.GetSearchTextState   -> homeState
             is HomeViewModelGetStateAction.GetTopPlaylistState  -> topPlaylistState
             is HomeViewModelGetStateAction.GetLazyListState     -> lazyListState
             is HomeViewModelGetStateAction.GetFolderList        -> folder_music_map
+            is HomeViewModelGetStateAction.GetCurrentPlaylist   -> currentPlaylist
         }
     }
     fun getMusicPageList(): Flow<PagingData<MusicFile>> = musicList
     //endregion
     //region Set State Functions
+    private fun setPlaylistType(playlistType: PlaylistType){
+        _currentPlaylist.update {
+            playlistType
+        }
+    }
     private fun putPlaylistInPlayQueue(playlistId: Long){
         viewModelScope.launch {
             val musicList = getPlaylistWithAllMusic(playlistId).musicList

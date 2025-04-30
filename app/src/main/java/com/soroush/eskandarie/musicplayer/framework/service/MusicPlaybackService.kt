@@ -10,20 +10,29 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.IBinder
 import androidx.media3.session.MediaSession
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaSessionService
 import androidx.media3.session.MediaStyleNotificationHelper
+import androidx.media3.session.SessionCommand
+import androidx.media3.session.SessionResult
 import androidx.media3.session.legacy.MediaMetadataCompat
 import androidx.media3.ui.PlayerNotificationManager
+import com.google.common.collect.ImmutableList
+import com.google.common.util.concurrent.Futures
+import com.google.common.util.concurrent.ListenableFuture
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
@@ -31,6 +40,7 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueue
 import com.soroush.eskandarie.musicplayer.framework.notification.MusicNotificationManager
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.lockscreen.LockScreenActivity
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -45,7 +55,6 @@ import javax.inject.Inject
 @UnstableApi
 class MusicPlaybackService : MediaSessionService() {
     //region Fields
-    @Inject
     lateinit var mediaSession: MediaSession
 
     @Inject
@@ -60,17 +69,59 @@ class MusicPlaybackService : MediaSessionService() {
     companion object {
         private const val NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "MediaPlaybackChannel"
-        const val COMMAND_REPEAT = "custom_repeat"
-        const val COMMAND_SHUFFLE = "custom_shuffle"
-        const val COMMAND_LIKE = "custom_like"
-    }
+        const val ACTION_FAVORITES = "custom_action_favorites"
 
+    }
+    private val customCommandFavorites = SessionCommand(ACTION_FAVORITES, Bundle.EMPTY)
     //endregion
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
-        setMediaNotificationProvider(CustomMediaNotificationProvider())
-//        getsong()
+        val favoriteButton =
+            CommandButton.Builder(CommandButton.ICON_HEART_UNFILLED)
+                .setDisplayName("Save to favorites")
+                .setSessionCommand(customCommandFavorites)
+                .build()
+        mediaSession = provideMediaSession(this)
+        mediaSession.setMediaButtonPreferences(ImmutableList.of(favoriteButton))
+    }
+    fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
+        val exoPlayer = ExoPlayer.Builder(context).build()
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+            .build()
+        exoPlayer.setAudioAttributes(audioAttributes, true)
+        val mediaSession = MediaSession.Builder(context, exoPlayer)
+            .setCallback(object: MediaSession.Callback  {
+                override fun onConnect(
+                    session: MediaSession,
+                    controller: MediaSession.ControllerInfo
+                ): MediaSession.ConnectionResult {
+                    return MediaSession.ConnectionResult.AcceptedResultBuilder(session)
+                        .setAvailableSessionCommands(
+                            MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
+                                .add(customCommandFavorites)
+                                .build()
+                        )
+                        .build()
+                }
+
+                override fun onCustomCommand(
+                    session: MediaSession,
+                    controller: MediaSession.ControllerInfo,
+                    customCommand: SessionCommand,
+                    args: Bundle
+                ): ListenableFuture<SessionResult> {
+                    if (customCommand.customAction == ACTION_FAVORITES) {
+//                saveToFavorites(session.player.currentMediaItem)
+                        return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                    }
+                    return super.onCustomCommand(session, controller, customCommand, args)
+                }
+            })
+            .build()
+        return mediaSession
     }
     private fun getsong(): Int {
         serviceScope.launch {
