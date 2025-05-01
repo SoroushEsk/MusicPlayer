@@ -51,6 +51,7 @@ import com.soroush.eskandarie.musicplayer.presentation.state.TopPlaylistState
 import com.soroush.eskandarie.musicplayer.shared_component.paging.ListPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -60,6 +61,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -175,7 +177,7 @@ class HomeViewModel @Inject constructor(
                     is HomeViewModelSetStateAction.SetCurrentPlaylistName       -> setNewPlaylistLazyListState(action.playlistName)
                     is HomeViewModelSetStateAction.UpdateTopPlaylistState       -> setTopPlaylistState()
                     is HomeViewModelSetStateAction.SetMediaControllerObserver   -> setMediaController(action.mediaController)
-                    is HomeViewModelSetStateAction.PutPlaylistToQueue           -> putPlaylistInPlayQueue(action.playlistId)
+                    is HomeViewModelSetStateAction.PutPlaylistToQueue           -> putPlaylistInPlayQueue(action.playlistType)
                 }
             }
         }
@@ -250,25 +252,34 @@ class HomeViewModel @Inject constructor(
             playlistType
         }
     }
-    private fun putPlaylistInPlayQueue(playlistId: Long){
-        viewModelScope.launch {
-            val musicList = getPlaylistWithAllMusic(playlistId).musicList
-            mediaController.setMediaItems(musicList.map{
-                val mediaItem = MediaItem.Builder()
-                    .setMediaId(it.id.toString())
-                    .setUri(it.path)
-                    .setMediaMetadata(
-                        MediaMetadata.Builder()
-                            .setTitle(it.title)
-                            .setArtist(it.artist)
-                            .setDescription(it.id.toString())
-                            .setArtworkUri(getArtworkUri(applicationContext, it.path))
-                            .build()
-                    )
-                    .build()
-                mediaItem
-            })
-            mediaController.play()
+    private fun putPlaylistInPlayQueue(playlistType: PlaylistType){
+        viewModelScope.launch (Dispatchers.IO){
+            val musicList = when(playlistType){
+                is PlaylistType.UserPlayList ->
+                    getPlaylistWithAllMusic(playlistType.id).musicList.map { it.toMusicFile() }
+                is PlaylistType.FolderPlaylist ->
+                    folder_music_map.value.getOrDefault(playlistType.folderName, listOf())
+                is PlaylistType.TopPlaylist ->
+                    listOf()
+            }
+            withContext(Dispatchers.Main) {
+                mediaController.setMediaItems(musicList.map{
+                    val mediaItem = MediaItem.Builder()
+                        .setMediaId(it.id.toString())
+                        .setUri(it.path)
+                        .setMediaMetadata(
+                            MediaMetadata.Builder()
+                                .setTitle(it.title)
+                                .setArtist(it.artist)
+                                .setDescription(it.id.toString())
+                                .setArtworkUri(getArtworkUri(applicationContext, it.path))
+                                .build()
+                        )
+                        .build()
+                    mediaItem
+                })
+                mediaController.play()
+            }
             refreshQueueUseCase(
                 musicList.map{
                     MusicQueueEntity(
@@ -341,7 +352,7 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun setupMusicList(id: Long, route: String, folderName: String){
-        viewModelScope.launch {
+        viewModelScope.launch (Dispatchers.IO){
             musicList = if(id == -1L){
                 when(route){
                     Destination.AllMusicScreen.route -> getAllMusicFromDatabaseUseCase()

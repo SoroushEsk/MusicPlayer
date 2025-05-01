@@ -26,7 +26,7 @@ sealed class HomeViewModelSetStateAction {
     data class UpdateArtWork(val artWork: Bitmap)               : HomeViewModelSetStateAction()
     data class AddMusicToPlaylist(val musicId: Long)            : HomeViewModelSetStateAction()
     data class AddANewPlaylist(val name: String)                : HomeViewModelSetStateAction()
-    data class PutPlaylistToQueue(val playlistId: Long)         : HomeViewModelSetStateAction()
+    data class PutPlaylistToQueue(val playlistType:PlaylistType): HomeViewModelSetStateAction()
     data class SetCurrentPlaylist(val playlist: PlaylistType)   : HomeViewModelSetStateAction()
     data object UpdateTopPlaylistState                          : HomeViewModelSetStateAction()
     data object OnNextMusic                                     : HomeViewModelSetStateAction()

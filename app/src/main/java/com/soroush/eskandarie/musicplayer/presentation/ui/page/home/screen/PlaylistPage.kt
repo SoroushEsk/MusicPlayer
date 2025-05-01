@@ -3,6 +3,7 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -43,6 +44,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +65,8 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlin.math.abs
+import kotlin.math.min
 
 @Composable
 fun PlaylistPage(
@@ -78,6 +84,9 @@ fun PlaylistPage(
     val context = LocalContext.current
     var playlistImage by remember {
         mutableStateOf(BitmapFactory.decodeResource(context.resources, R.drawable.empty_album))
+    }
+    var aspectRatio by remember {
+        mutableStateOf(1f)
     }
     LaunchedEffect(pageDataItem.itemCount) {
         if (pageDataItem.itemCount != 0) {
@@ -106,6 +115,13 @@ fun PlaylistPage(
                     modifier = Modifier
                         .fillMaxWidth()
                         .aspectRatio(1f)
+                        .onGloballyPositioned {
+                            aspectRatio = min(it.size.width / abs(
+                                it.size.height - abs(
+                                    it.positionOnScreen().y
+                                )
+                            ), 3f)
+                        }
                 )
 
             }
@@ -150,7 +166,9 @@ fun PlaylistPage(
             }
         }
         PlaylistPoster(
-            modifier = Modifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(aspectRatio),
             colorTheme = colorTheme,
             playlistType = (playlistType),
             playlistImage = playlistImage,
@@ -231,9 +249,7 @@ fun PlaylistPoster(
         is PlaylistType.UserPlayList -> playlistType.name
     }
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(1f),
+        modifier = modifier,
         contentAlignment = Alignment.BottomStart
     ) {
         Box(
@@ -242,8 +258,9 @@ fun PlaylistPoster(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 bitmap = playlistImage.asImageBitmap(),
+                contentScale = ContentScale.Crop,
                 contentDescription = "playlist_poster_image"
             )
             Box(
@@ -279,7 +296,7 @@ fun PlaylistPoster(
             )
             Icon(
                 modifier = Modifier
-                    .height(76.dp)
+                    .height(72.dp)
                     .aspectRatio(1f)
                     .offset(y = 38.dp)
                     .clip(CircleShape)
@@ -289,6 +306,23 @@ fun PlaylistPoster(
                         if (isPlaying)
                             setState(HomeViewModelSetStateAction.PausePlayback)
                         else {
+                            setState(HomeViewModelSetStateAction.PutPlaylistToQueue(
+                                when(playlistType){
+                                    is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
+                                        id = playlistType.id,
+                                        name = playlistType.name
+                                    )
+                                    is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
+                                        route = playlistType.route,
+                                        name = playlistType.name
+                                    )
+                                    is PlaylistType.FolderPlaylist-> PlaylistType.FolderPlaylist(
+                                        folderName = playlistType.folderName,
+                                        name = playlistType.name
+                                    )
+
+                                }
+                            ))
                             setState(HomeViewModelSetStateAction.ResumePlayback)
                         }
                     },
