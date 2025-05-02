@@ -1,18 +1,7 @@
 package com.soroush.eskandarie.musicplayer.di
 
 import android.content.Context
-import android.os.Bundle
-import androidx.annotation.OptIn
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
-import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.MediaSession
-import androidx.media3.session.SessionCommand
-import androidx.media3.session.SessionResult
 import androidx.room.Room
-import com.google.common.util.concurrent.Futures
-import com.google.common.util.concurrent.ListenableFuture
 import com.soroush.eskandarie.musicplayer.data.local.MusicPlayerDatabase
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicDao
 import com.soroush.eskandarie.musicplayer.data.local.dao.MusicQueueDao
@@ -31,12 +20,12 @@ import com.soroush.eskandarie.musicplayer.domain.repository.MusicQueueRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.MusicRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistRepository
 import com.soroush.eskandarie.musicplayer.domain.repository.PlaylistWithMusicRepository
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabasePagerUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDeviceUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.AnalyzeFoldersUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
-import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesPagerUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
@@ -51,9 +40,6 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.AddListO
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCase
-import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService
-import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService.Companion
-import com.soroush.eskandarie.musicplayer.framework.service.MusicPlaybackService.Companion.ACTION_FAVORITES
 import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.Module
 import dagger.Provides
@@ -180,8 +166,8 @@ object MediaModule{
         ModifyMusicStatusUseCase(musicRepository)
     @Provides
     @Singleton
-    fun provideGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabaseUseCase{
-        return GetAllMusicFromDatabaseUseCase(musicRepository)
+    fun provideGetAllMusicFilesFromDatabase(musicRepository: MusicRepository): GetAllMusicFromDatabasePagerUseCase{
+        return GetAllMusicFromDatabasePagerUseCase(musicRepository)
     }
     @Provides
     @Singleton
@@ -202,8 +188,8 @@ object MediaModule{
         GetTracksWithUsualOrderLimitedUseCase(musicRepository)
     @Provides
     @Singleton
-    fun provideGetFavoriteMusicFilesUseCase(musicRepository: MusicRepository): GetFavoriteMusicFilesUseCase =
-        GetFavoriteMusicFilesUseCase(musicRepository)
+    fun provideGetFavoriteMusicFilesUseCase(musicRepository: MusicRepository): GetFavoriteMusicFilesPagerUseCase =
+        GetFavoriteMusicFilesPagerUseCase(musicRepository)
     @Provides
     @Singleton
     fun provideAnalyzeFoldersUseCase(musicRepository: MusicRepository): AnalyzeFoldersUseCase =

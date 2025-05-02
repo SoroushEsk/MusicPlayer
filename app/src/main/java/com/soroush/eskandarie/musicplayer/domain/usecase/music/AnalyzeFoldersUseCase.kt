@@ -7,7 +7,7 @@ class AnalyzeFoldersUseCase @Inject constructor(
     private val musicRepository: MusicRepository
 ) {
     suspend operator fun invoke()
-        = musicRepository.getAllMusic()
+        = musicRepository.getAllMusicFolder()
 
 
 }

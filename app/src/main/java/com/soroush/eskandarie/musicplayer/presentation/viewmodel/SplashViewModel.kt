@@ -3,8 +3,7 @@ package com.soroush.eskandarie.musicplayer.presentation.viewmodel
 import android.content.SharedPreferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.soroush.eskandarie.musicplayer.domain.model.Playlist
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabasePagerUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.SavingDeviceMusicToLocalDBUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.util.Constants
@@ -17,7 +16,7 @@ class SplashViewModel @Inject constructor(
     private val sharedPreferences: SharedPreferences,
     private val saveDeviceMusicToLocalDB : SavingDeviceMusicToLocalDBUseCase,
     private val createANewPlaylistUseCase: CreateANewPlaylistUseCase,
-    private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase
+    private val getAllMusicFromDatabasePagerUseCase: GetAllMusicFromDatabasePagerUseCase
 ): ViewModel() {
     fun firstTimeLaunchActions(){
 

@@ -18,16 +18,15 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.data.local.entitie.MusicQueueEntity
-import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistEntity
 import com.soroush.eskandarie.musicplayer.data.local.entitie.PlaylistMusicRelationEntity
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
-import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabaseUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.GetAllMusicFromDatabasePagerUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.AnalyzeFoldersUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
-import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesPagerUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
@@ -47,7 +46,6 @@ import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
-import com.soroush.eskandarie.musicplayer.presentation.state.TopPlaylistState
 import com.soroush.eskandarie.musicplayer.shared_component.paging.ListPagingSource
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -69,12 +67,12 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
-    private val getAllMusicFromDatabaseUseCase: GetAllMusicFromDatabaseUseCase,
+    private val getAllMusicFromDatabasePagerUseCase: GetAllMusicFromDatabasePagerUseCase,
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
     private val getPlaylistWithAllMusic: GetPlaylistWithAllMusicFileByIdUseCase,
     private val numberrOfPlaylists: GetNumberOfPlaylistsUseCase,
     private val createANewPlaylist: CreateANewPlaylistUseCase,
-    private val getFavoriteMusicFiles: GetFavoriteMusicFilesUseCase,
+    private val getFavoriteMusicFiles: GetFavoriteMusicFilesPagerUseCase,
     private val analyzeFoldersUseCase: AnalyzeFoldersUseCase,
     private val addMusicListToPlaylist: AddListOfMusicToAPlaylistUseCase,
     private val get100MostPlayed: Get100MostPlayedMusicsUseCase,
@@ -357,7 +355,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch (Dispatchers.IO){
             musicList = if(id == -1L){
                 when(route){
-                    Destination.AllMusicScreen.route -> getAllMusicFromDatabaseUseCase()
+                    Destination.AllMusicScreen.route -> getAllMusicFromDatabasePagerUseCase()
                     Destination.MostPlayedScreen.route -> {
                         val mostPlayedMusics = get100MostPlayed()
 //                        modifyMusicStatusUseCase(mostPlayedMusics.get(6).copy(isFavorite = true))
@@ -385,7 +383,7 @@ class HomeViewModel @Inject constructor(
                         pager.flow
                     }
                     Destination.FavoriteMusicScreen.route -> getFavoriteMusicFiles()
-                    else -> getAllMusicFromDatabaseUseCase()
+                    else -> getAllMusicFromDatabasePagerUseCase()
                 }
             } else {
                 val playlistWithMusic = getPlaylistWithAllMusic(id)

@@ -1,9 +1,6 @@
 package com.soroush.eskandarie.musicplayer.data.repository
 
 
-import android.content.Context
-import android.net.Uri
-import android.provider.MediaStore
 import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -46,7 +43,7 @@ class MusicRepositoryImp @Inject constructor(
             }
         }
     }
-    override suspend fun getAllMusicFiles(): Flow<PagingData<MusicFile>> = Pager(
+    override suspend fun getAllMusicFilesPager(): Flow<PagingData<MusicFile>> = Pager(
         config = PagingConfig(
             pageSize = 50,
             enablePlaceholders = false
@@ -73,14 +70,14 @@ class MusicRepositoryImp @Inject constructor(
             it.toMusicFile()
         }
     }
-    override suspend fun getFavoriteMusicFiles(): Flow<PagingData<MusicFile>> {
+    override suspend fun getFavoriteMusicFilesPager(): Flow<PagingData<MusicFile>> {
         return Pager(
             config = PagingConfig(
                 pageSize = 50,
                 enablePlaceholders = false
             ),
             pagingSourceFactory = {
-                musicTableDao.getFavoriteMusic()
+                musicTableDao.getFavoriteMusicPaging()
             }
         ).flow.map {
             it.map { entity ->
@@ -88,7 +85,7 @@ class MusicRepositoryImp @Inject constructor(
             }
         }
     }
-    override suspend fun getAllMusic(): Map<String, List<MusicFile>> {
+    override suspend fun getAllMusicFolder(): Map<String, List<MusicFile>> {
         return withContext(Dispatchers.IO){
             val map = mutableMapOf<String, List<MusicFile>>()
             musicTableDao.getAllMusic().forEach{musicEntity ->
@@ -98,6 +95,24 @@ class MusicRepositoryImp @Inject constructor(
             map
         }
     }
+
+    override suspend fun getAllMusic(): List<MusicFile> =
+        withContext(Dispatchers.IO){
+            musicTableDao.getAllMusic().map{
+                it.toMusicFile()
+            }
+        }
+
+    override suspend fun getAllFavorite(): List<MusicFile> =
+        withContext(Dispatchers.IO){
+            musicTableDao.getFavoriteMusic().map { it.toMusicFile() }
+        }
+
+    override suspend fun updateFavoriteById(isFavorite: Boolean, musicId: Long) =
+        withContext(Dispatchers.IO){
+            musicTableDao.updtateFavorite(isFavorite, musicId)
+        }
+
     private fun getMediaParentFolder(path: String): String {
         val file = java.io.File(path)
         return file.parentFile?.name ?: "Unidentified"

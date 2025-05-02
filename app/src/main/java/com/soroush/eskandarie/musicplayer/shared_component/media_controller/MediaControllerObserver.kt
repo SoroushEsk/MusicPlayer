@@ -76,6 +76,11 @@ class MediaControllerObserver(
                     super.onIsPlayingChanged(isPlaying)
                     changeViewModelState(HomeViewModelSetStateAction.SetPlayState(isPlaying))
                 }
+
+                override fun onShuffleModeEnabledChanged(shuffleModeEnabled: Boolean) {
+                    super.onShuffleModeEnabledChanged(shuffleModeEnabled)
+                    changeViewModelState(HomeViewModelSetStateAction.SetShuffleState(shuffleModeEnabled))
+                }
             }
         )
 
