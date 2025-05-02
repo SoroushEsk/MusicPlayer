@@ -259,8 +259,11 @@ class HomeViewModel @Inject constructor(
                     getPlaylistWithAllMusic(playlistType.id).musicList.map { it.toMusicFile() }
                 is PlaylistType.FolderPlaylist ->
                     folder_music_map.value.getOrDefault(playlistType.folderName, listOf())
-                is PlaylistType.TopPlaylist ->
-                    listOf()
+                is PlaylistType.TopPlaylist -> when(playlistType.route){
+                        Destination.MostPlayedScreen.route ->  get100MostPlayed()
+                        Destination.RecentlyPlayedScreen.route -> get100RecentlyPlayed()
+                        else -> emptyList()
+                    }
             }
             withContext(Dispatchers.Main) {
                 mediaController.setMediaItems(musicList.map{
@@ -278,7 +281,6 @@ class HomeViewModel @Inject constructor(
                         .build()
                     mediaItem
                 })
-                mediaController.play()
             }
             refreshQueueUseCase(
                 musicList.map{

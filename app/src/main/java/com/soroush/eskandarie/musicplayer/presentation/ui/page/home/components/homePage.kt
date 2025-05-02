@@ -174,14 +174,6 @@ fun HomePage(
                     ),
                     posterShape = RoundedCornerShape(12.dp),
                     onIcon1Click = {
-                        setState(
-                            HomeViewModelSetStateAction.PutPlaylistToQueue(
-                                PlaylistType.UserPlayList(
-                                    id = playlistList[index].id,
-                                    name = playlistList[index].name
-                                )
-                            )
-                        )
                     },
                     onIcon2Click = { },
                     dropdownList = listOf(

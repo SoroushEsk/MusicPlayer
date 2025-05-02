@@ -63,6 +63,8 @@ class MusicPlaybackService : MediaSessionService() {
     @Inject
     lateinit var getAllMusicOfQueueUseCase: GetAllMusicOfQueueUseCase
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+    private var isFavorite = false
+    private var isShuffle  = false
 
     private lateinit var notificationManager: PlayerNotificationManager
     private lateinit var musicNotificationManager: MusicNotificationManager
@@ -70,23 +72,21 @@ class MusicPlaybackService : MediaSessionService() {
         private const val NOTIFICATION_ID = 2
         private const val CHANNEL_ID = "MediaPlaybackChannel"
         const val ACTION_FAVORITES = "custom_action_favorites"
-
+        const val ACTION_SHUFFLE   = "custom_action_shuffle"
     }
     private val customCommandFavorites = SessionCommand(ACTION_FAVORITES, Bundle.EMPTY)
+    private val customCommandShuffle   = SessionCommand(ACTION_SHUFFLE  , Bundle.EMPTY)
     //endregion
     //region Lifecycle Methods
     override fun onCreate() {
         super.onCreate()
-        val favoriteButton =
-            CommandButton.Builder(CommandButton.ICON_HEART_UNFILLED)
-                .setDisplayName("Save to favorites")
-                .setSessionCommand(customCommandFavorites)
-                .build()
         mediaSession = provideMediaSession(this)
-        mediaSession.setMediaButtonPreferences(ImmutableList.of(favoriteButton))
+        updateCustomLayout()
+        getsong()
     }
     fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
         val exoPlayer = ExoPlayer.Builder(context).build()
+        isShuffle = exoPlayer.shuffleModeEnabled
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
@@ -102,11 +102,11 @@ class MusicPlaybackService : MediaSessionService() {
                         .setAvailableSessionCommands(
                             MediaSession.ConnectionResult.DEFAULT_SESSION_COMMANDS.buildUpon()
                                 .add(customCommandFavorites)
+                                .add(customCommandShuffle)
                                 .build()
                         )
                         .build()
                 }
-
                 override fun onCustomCommand(
                     session: MediaSession,
                     controller: MediaSession.ControllerInfo,
@@ -115,6 +115,14 @@ class MusicPlaybackService : MediaSessionService() {
                 ): ListenableFuture<SessionResult> {
                     if (customCommand.customAction == ACTION_FAVORITES) {
 //                saveToFavorites(session.player.currentMediaItem)
+                        isFavorite =!isFavorite
+                        updateCustomLayout()
+                        return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
+                    }
+                    if (customCommand.customAction == ACTION_SHUFFLE) {
+                        isShuffle = !isShuffle
+                        exoPlayer.shuffleModeEnabled = isShuffle
+                        updateCustomLayout()
                         return Futures.immediateFuture(SessionResult(SessionResult.RESULT_SUCCESS))
                     }
                     return super.onCustomCommand(session, controller, customCommand, args)
@@ -123,8 +131,26 @@ class MusicPlaybackService : MediaSessionService() {
             .build()
         return mediaSession
     }
-    private fun getsong(): Int {
-        serviceScope.launch {
+    private fun updateCustomLayout() {
+        val favoriteButton =
+            CommandButton.Builder(if(isFavorite) CommandButton.ICON_HEART_FILLED else CommandButton.ICON_HEART_UNFILLED)
+                .setDisplayName("Save to favorites")
+                .setSessionCommand(customCommandFavorites)
+                .build()
+
+        val shuffleButton =
+            CommandButton.Builder(if(isShuffle)CommandButton.ICON_SHUFFLE_ON else CommandButton.ICON_SHUFFLE_OFF)
+                .setDisplayName("Shuffle")
+                .setSessionCommand(customCommandShuffle)
+                .build()
+
+        mediaSession.setCustomLayout(ImmutableList.of(favoriteButton, shuffleButton))
+
+        mediaSession.setMediaButtonPreferences(ImmutableList.of(favoriteButton, shuffleButton))
+    }
+
+    private fun getsong() {
+        serviceScope.launch(Dispatchers.IO) {
             val mutableList = mutableListOf<MediaItem>()
             val music = getAllMusicOfQueueUseCase().forEach {
                 val mediaItem = MediaItem.Builder()
@@ -133,7 +159,6 @@ class MusicPlaybackService : MediaSessionService() {
                     .setMediaMetadata(
                         MediaMetadata.Builder()
                             .setTitle(MusicFile.getMusicTitle(it.path))
-                            .setDescription("${it.id}")
                             .setArtist(MusicFile.getMusicArtist(it.path))
                             .setArtworkUri(getArtworkUri(this@MusicPlaybackService, it.path))
                             .build()
@@ -146,7 +171,6 @@ class MusicPlaybackService : MediaSessionService() {
                 mediaSession.player.prepare()
             }
         }
-        return START_STICKY
     }
     override fun onDestroy() {
         mediaSession.run {
