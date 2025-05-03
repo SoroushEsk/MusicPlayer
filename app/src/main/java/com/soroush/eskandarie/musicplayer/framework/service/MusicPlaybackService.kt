@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
@@ -39,6 +40,7 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetAllMusicOfQueu
 import com.soroush.eskandarie.musicplayer.domain.usecase.queue.GetMusicFromQueueUseCase
 import com.soroush.eskandarie.musicplayer.framework.notification.MusicNotificationManager
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.lockscreen.LockScreenActivity
+import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -59,7 +61,8 @@ class MusicPlaybackService : MediaSessionService() {
 
     @Inject
     lateinit var getMusicByIdUseCase: GetMusicFromQueueUseCase
-
+    @Inject
+    lateinit var sharedPreferences: SharedPreferences
     @Inject
     lateinit var getAllMusicOfQueueUseCase: GetAllMusicOfQueueUseCase
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -86,6 +89,25 @@ class MusicPlaybackService : MediaSessionService() {
     }
     fun provideMediaSession(@ApplicationContext context: Context): MediaSession {
         val exoPlayer = ExoPlayer.Builder(context).build()
+        exoPlayer.addListener(
+            object : Player.Listener{
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    super.onMediaItemTransition(mediaItem, reason)
+                    sharedPreferences.edit().putString(
+                        Constants.SharedPreference.CurrentSongId,
+                        mediaItem?.mediaId.toString()
+                    ).apply()
+                }
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
+                    super.onIsPlayingChanged(isPlaying)
+                    sharedPreferences.edit().putLong(
+                        Constants.SharedPreference.PlaylingSongDuration,
+                        exoPlayer.currentPosition
+                    ).apply()
+                }
+            }
+        )
         isShuffle = exoPlayer.shuffleModeEnabled
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
@@ -168,16 +190,31 @@ class MusicPlaybackService : MediaSessionService() {
                 mutableList.add(mediaItem)
             }
             withContext(Dispatchers.Main) {
+                val id: String =
+                    sharedPreferences.getString(Constants.SharedPreference.CurrentSongId, "").toString()
+                val duration: Long = sharedPreferences.getLong(Constants.SharedPreference.PlaylingSongDuration, 0)
                 mediaSession.player.addMediaItems(mutableList)
+                val mediaItemIndex = mutableList.indexOfFirst {
+                    it.mediaId == id
+                }
+                if(mediaItemIndex != -1){
+                    mediaSession.player.seekTo(mediaItemIndex, duration)
+                }
                 mediaSession.player.prepare()
             }
         }
     }
     override fun onDestroy() {
+        with(sharedPreferences.edit()){
+            putLong(Constants.SharedPreference.PlaylingSongDuration, mediaSession.player.currentPosition)
+            putString(Constants.SharedPreference.CurrentSongId, mediaSession.player.currentMediaItem?.mediaId.toString())
+            apply()
+        }
         mediaSession.run {
             player.release()
             release()
         }
+
         super.onDestroy()
     }
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? {

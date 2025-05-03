@@ -12,7 +12,9 @@ object Constants {
     object SharedPreference{
         const val Name                          : String = "music_player_shared_preference"
         const val IntroductionToken             : String = "introduction_token"
-        const val PlaylingSongDuration          : String = "p"
+        const val CurrentSongId                 : String = "current_song_id"
+        const val CurrentPlaylistPath           : String = "current_playlist_path"
+        const val PlaylingSongDuration          : String = "current_song_duration"
     }
     object Database{
         const val MusicPlayerDatabaseName       : String = "music_player_database"
