@@ -27,10 +27,13 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.music.AnalyzeFoldersUse
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesPagerUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetListOfAllMusicUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetListOfFavoriteMusicUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.UpdateFavoriteMusicByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetNumberOfPlaylistsUseCase
@@ -63,6 +66,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
+import kotlin.reflect.KClass
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -81,9 +85,42 @@ class HomeViewModel @Inject constructor(
     private val addAMusicToPlaylist: AddAMusicToPlaylistUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
     private val modifyMusicStatusUseCase: ModifyMusicStatusUseCase,
-    private val getMusicFileByIdUseCase: GetMusicFileByIdFromDatabaseUseCase
+    private val getMusicFileByIdUseCase: GetMusicFileByIdFromDatabaseUseCase,
+    private val updateMusicFavoriteState: UpdateFavoriteMusicByIdUseCase,
+    private val getListOfFavoriteMusic: GetListOfFavoriteMusicUseCase,
+    private val getListAllMusic: GetListOfAllMusicUseCase
 ): ViewModel() {
     //region Viewmodel States
+
+
+    private val actionHandlers: Map<KClass<out HomeViewModelSetStateAction>, (HomeViewModelSetStateAction) -> Unit> = mapOf(
+        HomeViewModelSetStateAction.SetCurrentPlaylist::class      to { action -> setPlaylistType((action as HomeViewModelSetStateAction.SetCurrentPlaylist).playlist) },
+        HomeViewModelSetStateAction.OnNextMusic::class             to { _ -> onMusicChange() },
+        HomeViewModelSetStateAction.UpdateTitle::class             to { action -> setTitle((action as HomeViewModelSetStateAction.UpdateTitle).title) },
+        HomeViewModelSetStateAction.SetPlayState::class            to { action -> setPlayState((action as HomeViewModelSetStateAction.SetPlayState).isMusicPlaying) },
+        HomeViewModelSetStateAction.UpdateArtist::class            to { action -> setArtist((action as HomeViewModelSetStateAction.UpdateArtist).artist) },
+        HomeViewModelSetStateAction.PausePlayback::class           to { _ -> pausePlayback() },
+        HomeViewModelSetStateAction.SetRepeatMode::class           to { action -> setRepeatMode((action as HomeViewModelSetStateAction.SetRepeatMode).repeatMode) },
+        HomeViewModelSetStateAction.UpdateArtWork::class           to { action -> setArtWork((action as HomeViewModelSetStateAction.UpdateArtWork).artWork) },
+        HomeViewModelSetStateAction.SetUpMusicList::class          to { action -> setupMusicList((action as HomeViewModelSetStateAction.SetUpMusicList).id, action.route, action.folderName) },
+        HomeViewModelSetStateAction.ResumePlayback::class          to { _ -> resumePlayback() },
+        HomeViewModelSetStateAction.SetShuffleState::class         to { action -> setShuffleStatus((action as HomeViewModelSetStateAction.SetShuffleState).isShuffle) },
+        HomeViewModelSetStateAction.ForwardPlayback::class         to { _ -> forwardPlayback() },
+        HomeViewModelSetStateAction.SetMusicPercent::class         to { _ -> setSongPercent() },
+        HomeViewModelSetStateAction.GetAllPlaylists::class         to { _ -> getAllPlaylists() },
+        HomeViewModelSetStateAction.AddANewPlaylist::class         to { action -> addNewPlaylist((action as HomeViewModelSetStateAction.AddANewPlaylist).name) },
+        HomeViewModelSetStateAction.BackwardPlayback::class        to { _ -> backwardPlayback() },
+        HomeViewModelSetStateAction.FillFolderRequirements::class  to { _ -> setFolderMusicMap() },
+        HomeViewModelSetStateAction.AddMusicToPlaylist::class      to { action -> addSongToAPlaylist((action as HomeViewModelSetStateAction.AddMusicToPlaylist).musicId) },
+        HomeViewModelSetStateAction.ResetLazyListState::class      to { _ -> resetLazyListState() },
+        HomeViewModelSetStateAction.SetStateSearchText::class      to { action -> setSearchText((action as HomeViewModelSetStateAction.SetStateSearchText).searchText) },
+        HomeViewModelSetStateAction.SetCurrentDuration::class      to { action -> setCurrentDuration((action as HomeViewModelSetStateAction.SetCurrentDuration).currentDuration) },
+        HomeViewModelSetStateAction.UpdateMusicDetails::class      to { _ -> setMusicDetails() },
+        HomeViewModelSetStateAction.ChangeFavoriteState::class     to { action -> setFavoriteState((action as HomeViewModelSetStateAction.ChangeFavoriteState).isFavorite) },
+        HomeViewModelSetStateAction.UpdateTopPlaylistState::class  to { _ -> setTopPlaylistState() },
+        HomeViewModelSetStateAction.SetMediaControllerObserver::class to { action -> setMediaController((action as HomeViewModelSetStateAction.SetMediaControllerObserver).mediaController) },
+        HomeViewModelSetStateAction.PutPlaylistToQueue::class      to { action -> putPlaylistInPlayQueue((action as HomeViewModelSetStateAction.PutPlaylistToQueue).playlistType) }
+    )
 
     private lateinit var mediaController: MediaController
     private var isMediaControllerInitialized: Boolean = false
@@ -126,9 +163,6 @@ class HomeViewModel @Inject constructor(
     private val _lazyListState = MutableStateFlow(LazyListState())
     val lazyListState: StateFlow<LazyListState> = _lazyListState.asStateFlow()
 
-    private val _playlistName = MutableStateFlow("")
-    val playlistName: StateFlow<String> = _playlistName.asStateFlow()
-
     //endregion
     //region Viewmodel Action Channels
     private val setActionChannel = Channel<HomeViewModelSetStateAction> ( Channel.UNLIMITED )
@@ -142,43 +176,15 @@ class HomeViewModel @Inject constructor(
             setActionChannel.send(action)
         }
     }
-    private fun handleSetActions(){
+    private fun handleSetActions() {
         viewModelScope.launch {
-            setActionChannel.receiveAsFlow().collect{ action ->
-                when( action ){
-                    is HomeViewModelSetStateAction.SetCurrentPlaylist           -> setPlaylistType(action.playlist)
-                    is HomeViewModelSetStateAction.OnNextMusic                  -> onMusicChange()
-                    is HomeViewModelSetStateAction.UpdateTitle                  -> setTitle(action.title)
-                    is HomeViewModelSetStateAction.SetPlayState                 -> setPlayState(action.isMusicPlaying)
-                    is HomeViewModelSetStateAction.UpdateArtist                 -> setArtist(action.artist)
-                    is HomeViewModelSetStateAction.PausePlayback                -> pausePlayback()
-                    is HomeViewModelSetStateAction.SetRepeatMode                -> setRepeatMode(action.repeatMode)
-                    is HomeViewModelSetStateAction.UpdateArtWork                -> setArtWork(action.artWork)
-                    is HomeViewModelSetStateAction.SetUpMusicList               -> setupMusicList(action.id, action.route, action.folderName)
-                    is HomeViewModelSetStateAction.ResumePlayback               -> resumePlayback()
-                    is HomeViewModelSetStateAction.UpdatePlayCount              -> {}
-                    is HomeViewModelSetStateAction.SetShuffleState              -> setShuffleStatus(action.isShuffle)
-                    is HomeViewModelSetStateAction.ForwardPlayback              -> forwardPlayback()
-                    is HomeViewModelSetStateAction.SetMusicPercent              -> setSongPercent()
-                    is HomeViewModelSetStateAction.GetAllPlaylists              -> getAllPlaylists()
-                    is HomeViewModelSetStateAction.AddANewPlaylist              -> addNewPlaylist(action.name)
-                    is HomeViewModelSetStateAction.BackwardPlayback             -> backwardPlayback()
-                    is HomeViewModelSetStateAction.GetAllMusicFiles             -> {}
-                    is HomeViewModelSetStateAction.FillFolderRequirements       -> setFolderMusicMap()
-                    is HomeViewModelSetStateAction.UpdateDatePlayed             -> {}
-                    is HomeViewModelSetStateAction.AddMusicToPlaylist           -> addSongToAPlaylist(action.musicId)
-                    is HomeViewModelSetStateAction.ResetLazyListState           -> resetLazyListState()
-                    is HomeViewModelSetStateAction.SetStateSearchText           -> setSearchText(action.searchText)
-                    is HomeViewModelSetStateAction.SetCurrentDuration           -> setCurrentDuration(action.currentDuration)
-                    is HomeViewModelSetStateAction.UpdateMusicDetails           -> setMusicDetails()
-                    is HomeViewModelSetStateAction.ChangeFavoriteState          -> setFavoriteState(action.isFavorite)
-                    is HomeViewModelSetStateAction.SetCurrentPlaylistName       -> setNewPlaylistLazyListState(action.playlistName)
-                    is HomeViewModelSetStateAction.UpdateTopPlaylistState       -> setTopPlaylistState()
-                    is HomeViewModelSetStateAction.SetMediaControllerObserver   -> setMediaController(action.mediaController)
-                    is HomeViewModelSetStateAction.PutPlaylistToQueue           -> putPlaylistInPlayQueue(action.playlistType)
-                }
+            setActionChannel.receiveAsFlow().collect { action ->
+                actionHandlers[action::class]?.invoke(action) ?: handleUnknownAction(action)
             }
         }
+    }
+    private fun handleUnknownAction(action: HomeViewModelSetStateAction) {
+        println("Unhandled action: $action")
     }
     private fun uriToBitmap(context: Context, uri: Uri?): Bitmap {
         return try {
@@ -251,35 +257,37 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun putPlaylistInPlayQueue(playlistType: PlaylistType){
-        viewModelScope.launch (Dispatchers.IO){
+        viewModelScope.launch {
             val musicList = when(playlistType){
                 is PlaylistType.UserPlayList ->
                     getPlaylistWithAllMusic(playlistType.id).musicList.map { it.toMusicFile() }
                 is PlaylistType.FolderPlaylist ->
                     folder_music_map.value.getOrDefault(playlistType.folderName, listOf())
                 is PlaylistType.TopPlaylist -> when(playlistType.route){
+                        Destination.FavoriteMusicScreen.route -> getListOfFavoriteMusic()
+                        Destination.AllMusicScreen.route -> getListAllMusic()
                         Destination.MostPlayedScreen.route ->  get100MostPlayed()
                         Destination.RecentlyPlayedScreen.route -> get100RecentlyPlayed()
                         else -> emptyList()
                     }
             }
-            withContext(Dispatchers.Main) {
-                mediaController.setMediaItems(musicList.map{
-                    val mediaItem = MediaItem.Builder()
-                        .setMediaId(it.id.toString())
-                        .setUri(it.path)
-                        .setMediaMetadata(
-                            MediaMetadata.Builder()
-                                .setTitle(it.title)
-                                .setArtist(it.artist)
-                                .setDescription(it.id.toString())
-                                .setArtworkUri(getArtworkUri(applicationContext, it.path))
-                                .build()
-                        )
-                        .build()
-                    mediaItem
-                })
+            mediaController.setMediaItems(musicList.map {
+                val mediaItem = MediaItem.Builder()
+                    .setMediaId(it.id.toString())
+                    .setUri(it.path)
+                    .setMediaMetadata(
+                        MediaMetadata.Builder()
+                            .setTitle(it.title)
+                            .setArtist(it.artist)
+                            .setDescription(it.id.toString())
+                            .setArtworkUri(getArtworkUri(applicationContext, it.path))
+                            .build()
+                    )
+                    .build()
+                mediaItem
             }
+            )
+
             refreshQueueUseCase(
                 musicList.map{
                     MusicQueueEntity(
@@ -297,9 +305,7 @@ class HomeViewModel @Inject constructor(
             _folder_music_map.value = analyzeFoldersUseCase()
         }
     }
-    private fun addNewPlaylist(
-        playlistName: String
-    ){
+    private fun addNewPlaylist(playlistName: String){
         viewModelScope.launch {
             val playlist =
                 Playlist(
@@ -348,7 +354,6 @@ class HomeViewModel @Inject constructor(
             } catch (e : Exception){
                 e.printStackTrace()
             }
-
         }
     }
     private fun setupMusicList(id: Long, route: String, folderName: String){
@@ -358,11 +363,6 @@ class HomeViewModel @Inject constructor(
                     Destination.AllMusicScreen.route -> getAllMusicFromDatabasePagerUseCase()
                     Destination.MostPlayedScreen.route -> {
                         val mostPlayedMusics = get100MostPlayed()
-//                        modifyMusicStatusUseCase(mostPlayedMusics.get(6).copy(isFavorite = true))
-//                        modifyMusicStatusUseCase(mostPlayedMusics.get(8).copy(isFavorite = true))
-//
-//                        modifyMusicStatusUseCase(mostPlayedMusics.get(2).copy(isFavorite = true))
-//                        modifyMusicStatusUseCase(mostPlayedMusics.get(3).copy(isFavorite = true))
                         val pager = Pager(PagingConfig(pageSize = 100)){
                             ListPagingSource<MusicFile>(mostPlayedMusics)
                         }
@@ -399,14 +399,9 @@ class HomeViewModel @Inject constructor(
         isMediaControllerInitialized = true
         setMusicDetails()
     }
-    private fun backToHomeScreen(){
-        _playlistName.value = ""
-    }
-    private fun setNewPlaylistLazyListState(playlistName: String) {
+    private fun setNewPlaylistLazyListState() {
         _lazyListState.value = LazyListState()
-        _playlistName.value = playlistName
     }
-
     private fun getAllPlaylists(){
         viewModelScope.launch {
             _playlistItems.value = getAllPlaylistItemsUseCase().toMutableList()
@@ -476,6 +471,13 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun setFavoriteState(isFavorite: Boolean){
+        var id : Long = -1
+        mediaController.currentMediaItem?.mediaId?.let {
+            id = it.toLong()
+        }
+        viewModelScope.launch(Dispatchers.IO){
+            updateMusicFavoriteState(id, isFavorite)
+        }
         _playbackState.update {
             it.copy(
                 isFavorite = isFavorite
@@ -529,22 +531,33 @@ class HomeViewModel @Inject constructor(
         }
     }
     private fun setMusicDetails() {
-        _playbackState.update {
-            it.copy(
-                isShuffle = mediaController.shuffleModeEnabled,
-                artist = mediaController.currentMediaItem?.mediaMetadata?.artist?.toString() ?: "Unknown_Artist",
-                title = mediaController.currentMediaItem?.mediaMetadata?.title?.toString() ?: "Unknown_Title",
-                bitmapBitmap = uriToBitmap(applicationContext, mediaController.currentMediaItem?.mediaMetadata?.artworkUri),
-                repeatMode = when(mediaController.repeatMode){
-                    Player.REPEAT_MODE_ONE -> RepeatMode.Repeat_Once
-                    Player.REPEAT_MODE_ALL -> RepeatMode.Repeat_All
-                    Player.REPEAT_MODE_OFF -> RepeatMode.No_Repeat
-                    else -> RepeatMode.No_Repeat
-                }
-            )
-        }
-    }
+        viewModelScope.launch{
+            val id: Long = mediaController.currentMediaItem?.mediaId?.toLong() ?: -1
+            val isFavorite = getMusicFileByIdUseCase(id)?.isFavorite ?: false
+            _playbackState.update {
+                it.copy(
+                    isFavorite = isFavorite,
+                    isShuffle = mediaController.shuffleModeEnabled,
+                    artist = (mediaController.currentMediaItem?.mediaMetadata?.artist
+                        ?: "Unknown_Artist").toString(),
+                    title = (mediaController.currentMediaItem?.mediaMetadata?.title
+                        ?: "Unknown_Title").toString(),
+                    bitmapBitmap = uriToBitmap(
+                        applicationContext,
+                        mediaController.currentMediaItem?.mediaMetadata?.artworkUri
+                    ),
+                    repeatMode = when (mediaController.repeatMode) {
+                        Player.REPEAT_MODE_ONE -> RepeatMode.Repeat_Once
+                        Player.REPEAT_MODE_ALL -> RepeatMode.Repeat_All
+                        Player.REPEAT_MODE_OFF -> RepeatMode.No_Repeat
+                        else -> RepeatMode.No_Repeat
+                    }
+                )
+            }
 
+        }
+
+    }
     //endregion
     //region Override Methods
     override fun onCleared() {

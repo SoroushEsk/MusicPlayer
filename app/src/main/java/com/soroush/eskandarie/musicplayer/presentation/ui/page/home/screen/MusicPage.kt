@@ -232,7 +232,7 @@ fun MusicPage(
                 text = playbackState.title,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutTitleId),
-                color = dominantColor1.getReadableTextColor(isSystemInDarkTheme()),
+                color = colorTheme.Text.copy(alpha = 0.65f),
                 style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
                 maxLines = 1,
                 onTextLayout = { textLayoutResult ->
@@ -243,7 +243,7 @@ fun MusicPage(
                 text = playbackState.artist,
                 modifier = modifier
                     .layoutId(Constants.MusicBarValues.MotionLayoutArtistId),
-                color = dominantColor1.getReadableTextColor(isSystemInDarkTheme()).copy(alpha = 0.70f),
+                color = colorTheme.Text.copy(alpha = 0.4f),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1
             )

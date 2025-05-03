@@ -26,10 +26,13 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.music.AnalyzeFoldersUse
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100MostPlayedMusicsUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.Get100RecentlyPlayedMusicListUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetFavoriteMusicFilesPagerUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetListOfAllMusicUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetListOfFavoriteMusicUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist_music.GetPlaylistWithAllMusicFileByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetMusicFileByIdFromDatabaseUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.GetTracksWithUsualOrderLimitedUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.music.ModifyMusicStatusUseCase
+import com.soroush.eskandarie.musicplayer.domain.usecase.music.UpdateFavoriteMusicByIdUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.CreateANewPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.DeleteAPlaylistUseCase
 import com.soroush.eskandarie.musicplayer.domain.usecase.playlist.GetAllPlaylistItemsUseCase
@@ -194,6 +197,18 @@ object MediaModule{
     @Singleton
     fun provideAnalyzeFoldersUseCase(musicRepository: MusicRepository): AnalyzeFoldersUseCase =
         AnalyzeFoldersUseCase(musicRepository)
+    @Provides
+    @Singleton
+    fun provideUpdateFavoriteMusicByIdUseCase(musicRepository: MusicRepository): UpdateFavoriteMusicByIdUseCase =
+        UpdateFavoriteMusicByIdUseCase(musicRepository)
+    @Provides
+    @Singleton
+    fun provideGetListOfFavoriteMusicUseCase(musicRepository: MusicRepository): GetListOfFavoriteMusicUseCase =
+        GetListOfFavoriteMusicUseCase(musicRepository)
+    @Provides
+    @Singleton
+    fun provideGetListOfAllMusicUseCase(musicRepository: MusicRepository): GetListOfAllMusicUseCase =
+        GetListOfAllMusicUseCase(musicRepository)
     //endregion
     //region PlayList-Music UseCase
     @Provides

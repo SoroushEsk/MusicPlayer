@@ -15,7 +15,6 @@ sealed class HomeViewModelSetStateAction {
         val mediaController : MediaController
     )                                                           : HomeViewModelSetStateAction()
     data class SetStateSearchText(val searchText: String)       : HomeViewModelSetStateAction()
-    data class SetCurrentPlaylistName(val playlistName: String) : HomeViewModelSetStateAction()
     data class SetPlayState(val isMusicPlaying: Boolean)        : HomeViewModelSetStateAction()
     data class SetShuffleState(val isShuffle: Boolean)          : HomeViewModelSetStateAction()
     data class SetRepeatMode(val repeatMode: RepeatMode)        : HomeViewModelSetStateAction()

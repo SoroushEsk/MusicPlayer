@@ -22,6 +22,7 @@ class MusicRepositoryImp @Inject constructor(
     private val getAllMusicFromDeviceUseCase: GetAllMusicFromDeviceUseCase,
     private val musicTableDao: MusicDao
 ) : MusicRepository {
+    //region Overrides Methods
     override suspend fun saveDeviceMusicFile() {
         withContext(Dispatchers.IO) {
             getAllMusicFromDeviceUseCase().collect { musicList ->
@@ -112,11 +113,11 @@ class MusicRepositoryImp @Inject constructor(
         withContext(Dispatchers.IO){
             musicTableDao.updtateFavorite(isFavorite, musicId)
         }
-
+    //endregion
+    //region class functions
     private fun getMediaParentFolder(path: String): String {
         val file = java.io.File(path)
         return file.parentFile?.name ?: "Unidentified"
     }
-
-
+    //endregion
 }
