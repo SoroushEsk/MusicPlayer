@@ -1,6 +1,7 @@
 package com.soroush.eskandarie.musicplayer.presentation.viewmodel
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -43,6 +44,7 @@ import com.soroush.eskandarie.musicplayer.domain.usecase.queue.RefreshQueueUseCa
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
+import com.soroush.eskandarie.musicplayer.presentation.state.CurrentPlaylist
 import com.soroush.eskandarie.musicplayer.presentation.state.FourTopPlaylistImageState
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
@@ -50,6 +52,7 @@ import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 import com.soroush.eskandarie.musicplayer.presentation.state.SearchFieldState
 import com.soroush.eskandarie.musicplayer.shared_component.paging.ListPagingSource
+import com.soroush.eskandarie.musicplayer.util.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -62,7 +65,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
@@ -71,6 +73,7 @@ import kotlin.reflect.KClass
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val applicationContext: Context,
+    private val sharedPreferences: SharedPreferences,
     private val getAllMusicFromDatabasePagerUseCase: GetAllMusicFromDatabasePagerUseCase,
     private val getAllPlaylistItemsUseCase: GetAllPlaylistItemsUseCase,
     private val getPlaylistWithAllMusic: GetPlaylistWithAllMusicFileByIdUseCase,
@@ -162,8 +165,8 @@ class HomeViewModel @Inject constructor(
     private val _topPlaylistState = MutableStateFlow(FourTopPlaylistImageState())
     val topPlaylistState: StateFlow<FourTopPlaylistImageState> = _topPlaylistState.asStateFlow()
 
-    private val _currentPlaylist = MutableStateFlow<PlaylistType>(PlaylistType.TopPlaylist("", ""))
-    val currentPlaylist: StateFlow<PlaylistType> = _currentPlaylist.asStateFlow()
+    private val _currentPlaylistUI = MutableStateFlow<PlaylistType>(PlaylistType.TopPlaylist("", ""))
+    val currentPlaylistUI: StateFlow<PlaylistType> = _currentPlaylistUI.asStateFlow()
 
     private val _playbackState: MutableStateFlow<PlaybackStates> = MutableStateFlow(
         PlaybackStates(
@@ -188,6 +191,9 @@ class HomeViewModel @Inject constructor(
 
     private val _lazyListState = MutableStateFlow(LazyListState())
     val lazyListState: StateFlow<LazyListState> = _lazyListState.asStateFlow()
+
+    private val _currentPlaylistOnQueue = MutableStateFlow(setUpLastPlayedPlaylist())
+    val currentPlaylistOnQueue: StateFlow<CurrentPlaylist> = _currentPlaylistOnQueue.asStateFlow()
 
     //endregion
     //region Viewmodel Action Channels
@@ -253,6 +259,78 @@ class HomeViewModel @Inject constructor(
         return null
     }
 
+    private fun setUpLastPlayedPlaylist(): CurrentPlaylist{
+        val lastPlaylist = sharedPreferences.getString(
+            Constants.SharedPreference.CurrentPlaylistPath,
+            "default"
+        )
+        val seprated = parseRouteAndId(lastPlaylist.toString())
+        return CurrentPlaylist(
+            route = seprated.first,
+            parameter = seprated.second
+        )
+
+    }
+
+    private fun buildRouteWithOptionalId(route: String, id: String? = null): String {
+        return if (!id.isNullOrBlank()) "$route/$id" else route
+    }
+
+    private fun parseRouteAndId(input: String): Pair<String, String?> {
+        val regex = Regex("""^([^/]+)(?:/([^/]+))?$""")
+        val match = regex.matchEntire(input)
+
+        return if (match != null) {
+            val route = match.groupValues[1]
+            val id = match.groupValues.getOrNull(2)
+            route to id
+        } else {
+            input to null
+        }
+    }
+
+    private fun saveCurrentPlaylistToSharedPref(route: String, paramter: String? = null){
+        with(sharedPreferences.edit()){
+            putString(
+                Constants.SharedPreference.CurrentPlaylistPath,
+                buildRouteWithOptionalId(route, paramter)
+            )
+            apply()
+        }
+    }
+
+    private suspend fun provideMusicListForPlaylist(playlistType: PlaylistType): List<MusicFile> = when (playlistType) {
+        is PlaylistType.UserPlayList -> {
+            saveCurrentPlaylistToSharedPref(Destination.PlaylistScreen.route, playlistType.id.toString())
+            getPlaylistWithAllMusic(playlistType.id).musicList.map { it.toMusicFile() }
+        }
+        is PlaylistType.FolderPlaylist -> {
+            saveCurrentPlaylistToSharedPref(Destination.FolderMusicScreen.route, playlistType.folderName)
+            folder_music_map.value.getOrDefault(playlistType.folderName, listOf())
+        }
+        is PlaylistType.TopPlaylist -> {
+            when (playlistType.route) {
+                Destination.FavoriteMusicScreen.route -> {
+                    saveCurrentPlaylistToSharedPref(Destination.FavoriteMusicScreen.route)
+                    getListOfFavoriteMusic()
+                }
+                Destination.AllMusicScreen.route -> {
+                    saveCurrentPlaylistToSharedPref(Destination.AllMusicScreen.route)
+                    getListAllMusic()
+                }
+                Destination.MostPlayedScreen.route -> {
+                    saveCurrentPlaylistToSharedPref(Destination.MostPlayedScreen.route)
+                    get100MostPlayed()
+                }
+                Destination.RecentlyPlayedScreen.route -> {
+                    saveCurrentPlaylistToSharedPref(Destination.RecentlyPlayedScreen.route)
+                    get100RecentlyPlayed()
+                }
+                else -> emptyList()
+            }
+        }
+    }
+
     //endregion
     //region Change PlayBack Methods
     private fun pausePlayback() {
@@ -277,12 +355,12 @@ class HomeViewModel @Inject constructor(
         return when (action) {
             is HomeViewModelGetStateAction.GetPlaylists -> playlistItems
             is HomeViewModelGetStateAction.GetMusicStatus -> playbackState
-            is HomeViewModelGetStateAction.GetMusicFiles -> playbackState//
+            is HomeViewModelGetStateAction.GetOnQueuePlaylist -> currentPlaylistOnQueue
             is HomeViewModelGetStateAction.GetSearchTextState -> homeState
             is HomeViewModelGetStateAction.GetTopPlaylistState -> topPlaylistState
             is HomeViewModelGetStateAction.GetLazyListState -> lazyListState
             is HomeViewModelGetStateAction.GetFolderList -> folder_music_map
-            is HomeViewModelGetStateAction.GetCurrentPlaylist -> currentPlaylist
+            is HomeViewModelGetStateAction.GetCurrentPlaylist -> currentPlaylistUI
         }
     }
 
@@ -291,28 +369,15 @@ class HomeViewModel @Inject constructor(
     //endregion
     //region Set State Functions
     private fun setPlaylistType(playlistType: PlaylistType) {
-        _currentPlaylist.update {
+        _currentPlaylistUI.update {
             playlistType
         }
     }
 
     private fun putPlaylistInPlayQueue(playlistType: PlaylistType) {
         viewModelScope.launch {
-            val musicList = when (playlistType) {
-                is PlaylistType.UserPlayList ->
-                    getPlaylistWithAllMusic(playlistType.id).musicList.map { it.toMusicFile() }
-
-                is PlaylistType.FolderPlaylist ->
-                    folder_music_map.value.getOrDefault(playlistType.folderName, listOf())
-
-                is PlaylistType.TopPlaylist -> when (playlistType.route) {
-                    Destination.FavoriteMusicScreen.route -> getListOfFavoriteMusic()
-                    Destination.AllMusicScreen.route -> getListAllMusic()
-                    Destination.MostPlayedScreen.route -> get100MostPlayed()
-                    Destination.RecentlyPlayedScreen.route -> get100RecentlyPlayed()
-                    else -> emptyList()
-                }
-            }
+            val musicList = provideMusicListForPlaylist(playlistType)
+            _currentPlaylistOnQueue.value = setUpLastPlayedPlaylist()
             mediaController.setMediaItems(musicList.map {
                 val mediaItem = MediaItem.Builder()
                     .setMediaId(it.id.toString())

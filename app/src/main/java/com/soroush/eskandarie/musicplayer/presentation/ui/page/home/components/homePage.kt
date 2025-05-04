@@ -75,6 +75,20 @@ fun HomePage(
     val lazyListState = rememberLazyListState()
     var textEditInput by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
+    val playingPreSetUP: (id:Long, name: String) -> Unit = { id, name ->
+        setState(HomeViewModelSetStateAction.PutPlaylistToQueue(
+            PlaylistType.UserPlayList(
+                id = id,
+                name = name
+            )
+        ))
+        setState(HomeViewModelSetStateAction.SetCurrentPlaylist(
+            PlaylistType.UserPlayList(
+                id = id,
+                name = name
+            )
+        ))
+    }
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -147,8 +161,36 @@ fun HomePage(
                     ),
                     posterShape = RoundedCornerShape(12.dp),
                     onIcon1Click = {
+                        setState(HomeViewModelSetStateAction.PutPlaylistToQueue(
+                            PlaylistType.TopPlaylist(
+                                route = Destination.FavoriteMusicScreen.route,
+                                name = Constants.HomePageValues.Favorite
+                            )
+                        ))
+                        setState(HomeViewModelSetStateAction.SetCurrentPlaylist(
+                            PlaylistType.TopPlaylist(
+                                route = Destination.FavoriteMusicScreen.route,
+                                name = Constants.HomePageValues.Favorite
+                            )
+                        ))
+                        setState(HomeViewModelSetStateAction.ResumePlayback)
                     },
-                    onIcon2Click = { },
+                    onIcon2Click = {
+                        setState(HomeViewModelSetStateAction.PutPlaylistToQueue(
+                            PlaylistType.TopPlaylist(
+                                route = Destination.FavoriteMusicScreen.route,
+                                name = Constants.HomePageValues.Favorite
+                            )
+                        ))
+                        setState(HomeViewModelSetStateAction.SetCurrentPlaylist(
+                            PlaylistType.TopPlaylist(
+                                route = Destination.FavoriteMusicScreen.route,
+                                name = Constants.HomePageValues.Favorite
+                            )
+                        ))
+                        setState(HomeViewModelSetStateAction.SetShuffleState(true))
+                        setState(HomeViewModelSetStateAction.ResumePlayback)
+                    },
                     dropdownList = listOf(
                         PlaylistDropdownItem(0, "Rename") {},
                         PlaylistDropdownItem(1, "Delete") {},
@@ -174,8 +216,14 @@ fun HomePage(
                     ),
                     posterShape = RoundedCornerShape(12.dp),
                     onIcon1Click = {
+                        playingPreSetUP(playlistList[index].id, playlistList[index].name)
+                        setState(HomeViewModelSetStateAction.ResumePlayback)
                     },
-                    onIcon2Click = { },
+                    onIcon2Click = {
+                        playingPreSetUP(playlistList[index].id, playlistList[index].name)
+                        setState(HomeViewModelSetStateAction.SetShuffleState(true))
+                        setState(HomeViewModelSetStateAction.ResumePlayback)
+                    },
                     dropdownList = listOf(
                         PlaylistDropdownItem(0, "Rename") {},
                         PlaylistDropdownItem(1, "Delete") {},

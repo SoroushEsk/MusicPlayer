@@ -24,6 +24,7 @@ import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelGetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
+import com.soroush.eskandarie.musicplayer.presentation.state.CurrentPlaylist
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.HomePage
@@ -77,12 +78,14 @@ fun HomeActivityNavHost(
                 val lazyListState by getState(HomeViewModelGetStateAction.GetLazyListState).collectAsState()
                 val playbackStates by (getState(HomeViewModelGetStateAction.GetMusicStatus) as StateFlow<PlaybackStates>).collectAsState()
                 val playlistType by (getState(HomeViewModelGetStateAction.GetCurrentPlaylist) as StateFlow<PlaylistType>).collectAsState()
+                val playlistQueue by (getState(HomeViewModelGetStateAction.GetOnQueuePlaylist) as StateFlow<CurrentPlaylist>).collectAsState()
                 PlaylistPage(
                     lazyListState = lazyListState as LazyListState,
                     pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
                     setState = setState,
                     isPlaying = playbackStates.isPlaying,
-                    playlistType = playlistType
+                    playlistType = playlistType,
+                    playlistOnQueue = playlistQueue
                 )
             }
         }

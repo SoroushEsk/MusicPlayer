@@ -52,26 +52,6 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.util.Constants
 
-//@Preview(showBackground = true)
-//@Composable
-//fun PlaylistPage() {
-//    MusicItem(
-//        Modifier,
-//        MusicFile(
-//            id = 12,
-//            title = "Z - The warning",
-//            artist = "The warning",
-//            album = "",
-//            duration = 213443,
-//            recordingDate = null,
-//            genre = null,
-//            size = 234,
-//            path = "/storage/emulated/0/Download/NeginKt - Paiz   Saraabe Toe.mp3"
-//        ),
-//        isPlaying = false
-//    )
-//}
-
 @Composable
 fun MusicItem(
     modifier: Modifier = Modifier,

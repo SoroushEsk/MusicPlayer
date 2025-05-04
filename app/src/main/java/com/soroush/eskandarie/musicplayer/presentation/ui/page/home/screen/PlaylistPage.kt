@@ -57,6 +57,8 @@ import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
+import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
+import com.soroush.eskandarie.musicplayer.presentation.state.CurrentPlaylist
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.MusicItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
@@ -76,7 +78,8 @@ fun PlaylistPage(
     pageDataItem: LazyPagingItems<MusicFile>,
     setState: (action: HomeViewModelSetStateAction) -> Unit,
     isPlaying: Boolean,
-    playlistType: PlaylistType
+    playlistType: PlaylistType,
+    playlistOnQueue: CurrentPlaylist
 ) {
     val lazyState = remember {
         lazyListState
@@ -116,11 +119,13 @@ fun PlaylistPage(
                         .fillMaxWidth()
                         .aspectRatio(1f)
                         .onGloballyPositioned {
-                            aspectRatio = min(it.size.width / abs(
-                                it.size.height - abs(
-                                    it.positionOnScreen().y
-                                )
-                            ), 3f)
+                            aspectRatio = min(
+                                it.size.width / abs(
+                                    it.size.height - abs(
+                                        it.positionOnScreen().y
+                                    )
+                                ), 3f
+                            )
                         }
                 )
 
@@ -174,6 +179,7 @@ fun PlaylistPage(
             playlistImage = playlistImage,
             setState = setState,
             isPlaying = isPlaying,
+            playlistOnQueue = playlistOnQueue
         )
     }
 }
@@ -240,10 +246,11 @@ fun PlaylistPoster(
     playlistType: PlaylistType,
     playlistImage: Bitmap,
     setState: (action: HomeViewModelSetStateAction) -> Unit,
-    isPlaying: Boolean
+    isPlaying: Boolean,
+    playlistOnQueue: CurrentPlaylist
 ) {
-    val colortheme = if(isSystemInDarkTheme()) DarkTheme else LightTheme
-    val playlistName = when(playlistType){
+    val colortheme = if (isSystemInDarkTheme()) DarkTheme else LightTheme
+    val playlistName = when (playlistType) {
         is PlaylistType.TopPlaylist -> playlistType.name
         is PlaylistType.FolderPlaylist -> playlistType.name
         is PlaylistType.UserPlayList -> playlistType.name
@@ -276,13 +283,13 @@ fun PlaylistPoster(
                     )
             )
         }
-        Row (
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(start = 10.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
-        ){
+        ) {
             Text(
                 modifier = Modifier
                     .padding(start = 10.dp, bottom = 10.dp, end = 10.dp),
@@ -303,33 +310,71 @@ fun PlaylistPoster(
                     .background(colorTheme.Secondary)
                     .padding(20.dp)
                     .clickable {
-                        if (isPlaying)
-                            setState(HomeViewModelSetStateAction.PausePlayback)
-                        else {
-                            setState(HomeViewModelSetStateAction.PutPlaylistToQueue(
-                                when(playlistType){
-                                    is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
-                                        id = playlistType.id,
-                                        name = playlistType.name
-                                    )
-                                    is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
-                                        route = playlistType.route,
-                                        name = playlistType.name
-                                    )
-                                    is PlaylistType.FolderPlaylist-> PlaylistType.FolderPlaylist(
-                                        folderName = playlistType.folderName,
-                                        name = playlistType.name
-                                    )
+                        if(isThisPlaylistOnQueue(playlistOnQueue, playlistType)){
+                            if (isPlaying)
+                                setState(HomeViewModelSetStateAction.PausePlayback)
+                            else {
+                                setState(HomeViewModelSetStateAction.ResumePlayback)
+                            }
+                        }else{
+                            setState(
+                                HomeViewModelSetStateAction.PutPlaylistToQueue(
+                                    when (playlistType) {
+                                        is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
+                                            id = playlistType.id,
+                                            name = playlistType.name
+                                        )
 
-                                }
-                            ))
-                            setState(HomeViewModelSetStateAction.ResumePlayback)
+                                        is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
+                                            route = playlistType.route,
+                                            name = playlistType.name
+                                        )
+
+                                        is PlaylistType.FolderPlaylist -> PlaylistType.FolderPlaylist(
+                                            folderName = playlistType.folderName,
+                                            name = playlistType.name
+                                        )
+                                    }
+                                )
+                            )
                         }
                     },
                 tint = Color.White,
-                painter = painterResource(id = if(isPlaying) R.drawable.pause else R.drawable.play_button),
-                contentDescription = "Playlist_page_Play_button"
-            )
+                painter = painterResource(
+                    id = if (isThisPlaylistOnQueue(
+                            playlistOnQueue,
+                            playlistType
+                        ) )playIcon(isPlaying) else R.drawable.play_button
+                    ),
+                    contentDescription = "Playlist_page_Play_button"
+                )
+        }
+    }
+}
+
+private fun playIcon(isPlaying: Boolean) =
+    if (isPlaying) R.drawable.pause else R.drawable.play_button
+
+private fun isThisPlaylistOnQueue(
+    playlistOnQueue: CurrentPlaylist,
+    playlistType: PlaylistType
+): Boolean {
+    return when (playlistType) {
+        is PlaylistType.TopPlaylist -> {
+            if (playlistOnQueue.route == playlistType.route) true
+            else false
+        }
+
+        is PlaylistType.FolderPlaylist -> {
+            if (playlistOnQueue.route == Destination.FolderMusicScreen.route) {
+                if (playlistOnQueue.parameter == playlistType.folderName) true else false
+            } else false
+        }
+
+        is PlaylistType.UserPlayList -> {
+            if (playlistOnQueue.route == Destination.PlaylistScreen.route) {
+                if (playlistOnQueue.parameter == playlistType.id.toString()) true else false
+            } else false
         }
     }
 }
