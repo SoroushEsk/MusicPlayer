@@ -14,6 +14,10 @@ sealed class HomeViewModelSetStateAction {
     data class SetMediaControllerObserver(
         val mediaController : MediaController
     )                                                           : HomeViewModelSetStateAction()
+    data class SetSongToPlay(
+        val playlistType: PlaylistType,
+        val id: Long
+    )                                                           : HomeViewModelSetStateAction()
     data class SetStateSearchText(val searchText: String)       : HomeViewModelSetStateAction()
     data class SetPlayState(val isMusicPlaying: Boolean)        : HomeViewModelSetStateAction()
     data class SetShuffleState(val isShuffle: Boolean)          : HomeViewModelSetStateAction()

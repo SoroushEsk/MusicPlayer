@@ -145,6 +145,12 @@ class HomeViewModel @Inject constructor(
                 putPlaylistInPlayQueue(
                     (action as HomeViewModelSetStateAction.PutPlaylistToQueue).playlistType
                 )
+            },
+            HomeViewModelSetStateAction.SetSongToPlay::class to {action->
+                putPlaylistInPlayQueue(
+                    (action as HomeViewModelSetStateAction.SetSongToPlay).playlistType,
+                    (action).id
+                )
             }
         )
 
@@ -298,7 +304,29 @@ class HomeViewModel @Inject constructor(
             apply()
         }
     }
+    private fun isThisPlaylistOnQueue(
+        playlistOnQueue: CurrentPlaylist,
+        playlistType: PlaylistType
+    ): Boolean {
+        return when (playlistType) {
+            is PlaylistType.TopPlaylist -> {
+                if (playlistOnQueue.route == playlistType.route) true
+                else false
+            }
 
+            is PlaylistType.FolderPlaylist -> {
+                if (playlistOnQueue.route == Destination.FolderMusicScreen.route) {
+                    if (playlistOnQueue.parameter == playlistType.folderName) true else false
+                } else false
+            }
+
+            is PlaylistType.UserPlayList -> {
+                if (playlistOnQueue.route == Destination.PlaylistScreen.route) {
+                    if (playlistOnQueue.parameter == playlistType.id.toString()) true else false
+                } else false
+            }
+        }
+    }
     private suspend fun provideMusicListForPlaylist(playlistType: PlaylistType): List<MusicFile> = when (playlistType) {
         is PlaylistType.UserPlayList -> {
             saveCurrentPlaylistToSharedPref(Destination.PlaylistScreen.route, playlistType.id.toString())
@@ -373,27 +401,54 @@ class HomeViewModel @Inject constructor(
             playlistType
         }
     }
-
-    private fun putPlaylistInPlayQueue(playlistType: PlaylistType) {
+    private fun putPlaylistInPlayQueue(playlistType: PlaylistType, id: Long? = null) {
+        if(isThisPlaylistOnQueue(currentPlaylistOnQueue.value, playlistType)) {
+            var index = 0
+            id ?: return
+            try{
+                while(true){
+                    val c_id = mediaController.getMediaItemAt(index).mediaId.toLong()
+                    if(c_id == id) {
+                        mediaController.seekTo(index, 0)
+                        break
+                    }
+                    index++
+                }
+            }catch (_: IndexOutOfBoundsException){
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
+            return
+        }
         viewModelScope.launch {
             val musicList = provideMusicListForPlaylist(playlistType)
             _currentPlaylistOnQueue.value = setUpLastPlayedPlaylist()
-            mediaController.setMediaItems(musicList.map {
+            var mediaItemIndex: Int = -1
+            mediaController.setMediaItems(musicList.mapIndexed() {index, musicFile->
+                id?.let{ id->
+                    if(musicFile.id == id){
+                        mediaItemIndex = index
+                    }
+                }
                 val mediaItem = MediaItem.Builder()
-                    .setMediaId(it.id.toString())
-                    .setUri(it.path)
+                    .setMediaId(musicFile.id.toString())
+                    .setUri(musicFile.path)
                     .setMediaMetadata(
                         MediaMetadata.Builder()
-                            .setTitle(it.title)
-                            .setArtist(it.artist)
-                            .setDescription(it.id.toString())
-                            .setArtworkUri(getArtworkUri(applicationContext, it.path))
+                            .setTitle(musicFile.title)
+                            .setArtist(musicFile.artist)
+                            .setDescription(musicFile.id.toString())
+                            .setArtworkUri(getArtworkUri(applicationContext, musicFile.path))
                             .build()
                     )
                     .build()
                 mediaItem
-            }
+                }
             )
+            id?.let{
+                if(mediaItemIndex != -1)
+                    mediaController.seekTo(mediaItemIndex, 0)
+            }
             refreshQueueUseCase(
                 musicList.map {
                     MusicQueueEntity(

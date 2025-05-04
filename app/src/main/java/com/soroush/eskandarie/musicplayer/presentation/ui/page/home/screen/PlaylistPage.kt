@@ -157,6 +157,30 @@ fun PlaylistPage(
                             .animateItem(
                                 placementSpec = tween(1200)
                             )
+                            .clickable {
+                                setState(
+                                    HomeViewModelSetStateAction.SetSongToPlay(
+                                        when (playlistType) {
+                                            is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
+                                                id = playlistType.id,
+                                                name = playlistType.name
+                                            )
+
+                                            is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
+                                                route = playlistType.route,
+                                                name = playlistType.name
+                                            )
+
+                                            is PlaylistType.FolderPlaylist -> PlaylistType.FolderPlaylist(
+                                                folderName = playlistType.folderName,
+                                                name = playlistType.name
+                                            )
+                                        },
+                                        it.id
+                                    )
+                                )
+                                setState(HomeViewModelSetStateAction.ResumePlayback)
+                            }
                     )
                 }
 
