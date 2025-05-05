@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -66,6 +67,7 @@ fun HomeActivityNavHost(
             HomePage(
                 modifier = Modifier
                     .statusBarsPadding()
+                    .padding(top = 8.dp)
                     .padding(horizontal = (Dimens.Padding.HomeActivity)),
                 loadPlaylist = (getState(HomeViewModelGetStateAction.GetPlaylists) as StateFlow<List<Playlist>>).collectAsState(),
                 navigate = navigate,

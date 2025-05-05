@@ -16,27 +16,32 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,15 +67,12 @@ import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.state.CurrentPlaylist
-import com.soroush.eskandarie.musicplayer.presentation.state.MusicSelectState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.MusicItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
 import kotlin.math.abs
 import kotlin.math.min
 
@@ -109,9 +111,9 @@ fun PlaylistPage(
         targetValue = if(isSelectedModeEnabled) -offsetY else 0f,
         animationSpec = tween(2000)
     )
-    val aspecRatioAnimation by animateFloatAsState(
+    val aspectRatioAnimation by animateFloatAsState(
         targetValue = if(isSelectedModeEnabled){
-            3.5f
+            4f
         }else{
             if (playlistType is PlaylistType.UserPlayList) 1f else 3f
         },
@@ -152,7 +154,7 @@ fun PlaylistPage(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(aspecRatioAnimation)
+                        .aspectRatio(aspectRatioAnimation)
                         .onGloballyPositioned {
                             offsetY = it.size.width.toFloat()
                             aspectRatio = min(
@@ -160,11 +162,10 @@ fun PlaylistPage(
                                     it.size.height - abs(
                                         it.positionOnScreen().y
                                     )
-                                ), 3f
+                                ), if(isSelectedModeEnabled) Float.MAX_VALUE else 3f
                             )
                         }
                 )
-
             }
             items(pageDataItem.itemCount, key = { index: Int ->
                 pageDataItem[index].hashCode()
@@ -225,36 +226,6 @@ fun PlaylistPage(
                                     }
                                 )
                             },
-//                            .clickable {
-//
-//                                if(selectState.isSelectMode){
-//                                    Log.e("12345", "onTap")
-//                                    setState(HomeViewModelSetStateAction.MusicSelectedState(musicFile.id))
-//                                } else {
-//                                    setState(
-//                                        HomeViewModelSetStateAction.SetSongToPlay(
-//                                            when (playlistType) {
-//                                                is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
-//                                                    id = playlistType.id,
-//                                                    name = playlistType.name
-//                                                )
-//
-//                                                is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
-//                                                    route = playlistType.route,
-//                                                    name = playlistType.name
-//                                                )
-//
-//                                                is PlaylistType.FolderPlaylist -> PlaylistType.FolderPlaylist(
-//                                                    folderName = playlistType.folderName,
-//                                                    name = playlistType.name
-//                                                )
-//                                            },
-//                                            musicFile.id
-//                                        )
-//                                    )
-//                                    setState(HomeViewModelSetStateAction.ResumePlayback)
-//                                }
-//                            },
                         colorTheme = colorTheme
                     )
                 }
@@ -269,6 +240,13 @@ fun PlaylistPage(
                 )
             }
         }
+        selectDetails(
+            modifier = Modifier
+                .aspectRatio(aspectRatio),
+            colorTheme = colorTheme,
+            numberSelected = selectedMusic.size,
+            isVisible = if(aspectRatioAnimation > 3.4f) true else false
+        )
         PlaylistPoster(
             modifier = Modifier
                 .fillMaxWidth()
@@ -283,7 +261,51 @@ fun PlaylistPage(
         )
     }
 }
-
+@Composable
+fun selectDetails(
+    modifier: Modifier = Modifier,
+    colorTheme: ColorTheme,
+    numberSelected: Int,
+    isVisible: Boolean,
+    leftIcon: ()->Unit = {},
+    rightIcon: ()->Unit ={}
+){
+    if(isVisible) {
+        Row(
+            modifier = modifier
+                .fillMaxSize()
+                .background(colorTheme.Background)
+                .statusBarsPadding()
+                .padding(top = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(1f)
+                    .padding(20.dp),
+                imageVector = Icons.Rounded.FavoriteBorder,
+                tint = colorTheme.Primary,
+                contentDescription = "select all"
+            )
+            Text(
+                text = "$numberSelected",
+                color = colorTheme.Primary,
+                style = MaterialTheme.typography.titleLarge
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .aspectRatio(1f)
+                    .padding(20.dp),
+                imageVector = Icons.Default.AddCircle,
+                tint = colorTheme.Primary,
+                contentDescription = "add to playlistIcon"
+            )
+        }
+    }
+}
 @Composable
 fun AnimatedMusicItem(
     music: MusicFile,
@@ -315,31 +337,6 @@ fun AnimatedMusicItem(
             }
     )
 }
-
-@Composable
-fun InfiniteListHandler(
-    listState: LazyListState,
-    buffer: Int = 5,
-    onLoadMore: () -> Unit
-) {
-    val shouldLoadMore = remember {
-        derivedStateOf {
-            val totalItemsCount = listState.layoutInfo.totalItemsCount
-            val lastVisibleItemIndex =
-                listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItemIndex >= (totalItemsCount - buffer)
-        }
-    }
-    LaunchedEffect(shouldLoadMore) {
-        snapshotFlow { shouldLoadMore.value }
-            .distinctUntilChanged()
-            .filter { it }
-            .collect {
-                onLoadMore()
-            }
-    }
-}
-
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun PlaylistPoster(
