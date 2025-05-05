@@ -11,12 +11,12 @@ sealed class HomeViewModelSetStateAction {
         val id: Long = -1,
         val route: String
     )                                                           : HomeViewModelSetStateAction()
-    data class SetMediaControllerObserver(
-        val mediaController : MediaController
-    )                                                           : HomeViewModelSetStateAction()
     data class SetSongToPlay(
         val playlistType: PlaylistType,
         val id: Long
+    )                                                           : HomeViewModelSetStateAction()
+    data class SetMediaControllerObserver(
+        val mediaController : MediaController
     )                                                           : HomeViewModelSetStateAction()
     data class SetStateSearchText(val searchText: String)       : HomeViewModelSetStateAction()
     data class SetPlayState(val isMusicPlaying: Boolean)        : HomeViewModelSetStateAction()
@@ -36,8 +36,6 @@ sealed class HomeViewModelSetStateAction {
     data object FillFolderRequirements                          : HomeViewModelSetStateAction()
     data object ResetLazyListState                              : HomeViewModelSetStateAction()
     data object UpdateMusicDetails                              : HomeViewModelSetStateAction()
-    data object UpdatePlayCount                                 : HomeViewModelSetStateAction()
-    data object UpdateDatePlayed                                : HomeViewModelSetStateAction()
     data object SetMusicPercent                                 : HomeViewModelSetStateAction()
     data object GetAllMusicFiles                                : HomeViewModelSetStateAction()
     data object GetAllPlaylists                                 : HomeViewModelSetStateAction()

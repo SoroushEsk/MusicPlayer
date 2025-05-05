@@ -46,6 +46,7 @@ import androidx.palette.graphics.Palette
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
+import com.soroush.eskandarie.musicplayer.presentation.state.MusicSelectState
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
@@ -61,6 +62,7 @@ fun MusicItem(
     resumeIconId: Int = R.drawable.play_button,
     defaultAlbumArt: Int = R.drawable.empty_album,
     isPlaying: Boolean,
+    isSelected: Boolean,
     shape: Shape = RoundedCornerShape(Dimens.CornerRadius.MusicItemDefault)
 ) {
     val albumArtBitmap = music.getAlbumArtBitmap() ?: BitmapFactory.decodeResource(
@@ -104,7 +106,10 @@ fun MusicItem(
                 shape = shape
             )
             .background(colorTheme.Surface)
-            .background(radialGradientBrush)
+            .then(
+                if(isSelected) Modifier.background(colorTheme.Primary.copy(alpha = 0.7f))
+                else Modifier.background(radialGradientBrush)
+            )
     ) {
         SongAlbumArt(
             songAlbumArt = albumArtBitmap,

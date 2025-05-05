@@ -9,6 +9,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +46,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionOnScreen
@@ -59,6 +62,7 @@ import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.state.CurrentPlaylist
+import com.soroush.eskandarie.musicplayer.presentation.state.MusicSelectState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.MusicItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
@@ -91,7 +95,38 @@ fun PlaylistPage(
     var aspectRatio by remember {
         mutableStateOf(1f)
     }
+    var isSelectedModeEnabled by remember {
+        mutableStateOf(false)
+    }
+    val selectedMusic = remember { mutableStateMapOf<String, Boolean>() }
+    LaunchedEffect(selectedMusic.size) {
+        isSelectedModeEnabled = selectedMusic.isNotEmpty()
+    }
+    var offsetY by remember{
+        mutableStateOf(0f)
+    }
+    val offsetAnimation by animateFloatAsState(
+        targetValue = if(isSelectedModeEnabled) -offsetY else 0f,
+        animationSpec = tween(2000)
+    )
+    val aspecRatioAnimation by animateFloatAsState(
+        targetValue = if(isSelectedModeEnabled){
+            3.5f
+        }else{
+            if (playlistType is PlaylistType.UserPlayList) 1f else 3f
+        },
+        animationSpec = tween(2000)
+    )
     LaunchedEffect(pageDataItem.itemCount) {
+        if (playlistType is PlaylistType.TopPlaylist) {
+            if (playlistType.route == Destination.FavoriteMusicScreen.route) {
+                playlistImage = BitmapFactory.decodeResource(
+                    context.resources,
+                    R.drawable.favorite_poster
+                )
+                return@LaunchedEffect
+            }
+        }
         if (pageDataItem.itemCount != 0) {
             playlistImage = pageDataItem[0]?.getAlbumArtBitmap() ?: BitmapFactory.decodeResource(
                 context.resources,
@@ -117,8 +152,9 @@ fun PlaylistPage(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .aspectRatio(1f)
+                        .aspectRatio(aspecRatioAnimation)
                         .onGloballyPositioned {
+                            offsetY = it.size.width.toFloat()
                             aspectRatio = min(
                                 it.size.width / abs(
                                     it.size.height - abs(
@@ -133,54 +169,93 @@ fun PlaylistPage(
             items(pageDataItem.itemCount, key = { index: Int ->
                 pageDataItem[index].hashCode()
             }) { index ->
-//            MusicItem(
-//                modifier = Modifier
-//                    .padding(horizontal = 10.dp)
-//                    .animateItem(
-//                        fadeInSpec = tween(900),
-//                        fadeOutSpec = null,
-//                        placementSpec = tween(
-//                            durationMillis = 900
-//                        )
-//                    )
-//                ,
-//                music = musicList[index],
-//                isPlaying = false
-//            )
-
-                pageDataItem[index]?.let {
+                pageDataItem[index]?.let { musicFile ->
                     AnimatedMusicItem(
-                        music = it,
+                        music = musicFile,
                         isPlaying = false,
+                        isSelected = selectedMusic.getOrDefault(musicFile.id.toString(), false),
                         modifier = Modifier
                             .padding(horizontal = 10.dp)
                             .animateItem(
                                 placementSpec = tween(1200)
                             )
-                            .clickable {
-                                setState(
-                                    HomeViewModelSetStateAction.SetSongToPlay(
-                                        when (playlistType) {
-                                            is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
-                                                id = playlistType.id,
-                                                name = playlistType.name
-                                            )
+                            .pointerInput(Unit) {
 
-                                            is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
-                                                route = playlistType.route,
-                                                name = playlistType.name
+                                detectTapGestures(
+                                    onLongPress = {
+                                        if (selectedMusic.containsKey(musicFile.id.toString())) selectedMusic.remove(
+                                            musicFile.id.toString()
+                                        )
+                                        else selectedMusic.put(musicFile.id.toString(), true)
+                                        setState(
+                                            HomeViewModelSetStateAction.PausePlayback
+                                        )
+                                    },
+                                    onPress = {
+                                        if (isSelectedModeEnabled) {
+                                            Log.e("12345", "${selectedMusic}")
+                                            if (selectedMusic.containsKey(musicFile.id.toString())) selectedMusic.remove(
+                                                musicFile.id.toString()
                                             )
+                                            else selectedMusic.put(musicFile.id.toString(), true)
+                                        } else {
+                                            setState(
+                                                HomeViewModelSetStateAction.SetSongToPlay(
+                                                    when (playlistType) {
+                                                        is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
+                                                            id = playlistType.id,
+                                                            name = playlistType.name
+                                                        )
 
-                                            is PlaylistType.FolderPlaylist -> PlaylistType.FolderPlaylist(
-                                                folderName = playlistType.folderName,
-                                                name = playlistType.name
+                                                        is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
+                                                            route = playlistType.route,
+                                                            name = playlistType.name
+                                                        )
+
+                                                        is PlaylistType.FolderPlaylist -> PlaylistType.FolderPlaylist(
+                                                            folderName = playlistType.folderName,
+                                                            name = playlistType.name
+                                                        )
+                                                    },
+                                                    musicFile.id
+                                                )
                                             )
-                                        },
-                                        it.id
-                                    )
+                                            setState(HomeViewModelSetStateAction.ResumePlayback)
+                                        }
+                                    }
                                 )
-                                setState(HomeViewModelSetStateAction.ResumePlayback)
-                            }
+                            },
+//                            .clickable {
+//
+//                                if(selectState.isSelectMode){
+//                                    Log.e("12345", "onTap")
+//                                    setState(HomeViewModelSetStateAction.MusicSelectedState(musicFile.id))
+//                                } else {
+//                                    setState(
+//                                        HomeViewModelSetStateAction.SetSongToPlay(
+//                                            when (playlistType) {
+//                                                is PlaylistType.UserPlayList -> PlaylistType.UserPlayList(
+//                                                    id = playlistType.id,
+//                                                    name = playlistType.name
+//                                                )
+//
+//                                                is PlaylistType.TopPlaylist -> PlaylistType.TopPlaylist(
+//                                                    route = playlistType.route,
+//                                                    name = playlistType.name
+//                                                )
+//
+//                                                is PlaylistType.FolderPlaylist -> PlaylistType.FolderPlaylist(
+//                                                    folderName = playlistType.folderName,
+//                                                    name = playlistType.name
+//                                                )
+//                                            },
+//                                            musicFile.id
+//                                        )
+//                                    )
+//                                    setState(HomeViewModelSetStateAction.ResumePlayback)
+//                                }
+//                            },
+                        colorTheme = colorTheme
                     )
                 }
 
@@ -197,6 +272,7 @@ fun PlaylistPage(
         PlaylistPoster(
             modifier = Modifier
                 .fillMaxWidth()
+                .offset(y = offsetAnimation.dp)
                 .aspectRatio(aspectRatio),
             colorTheme = colorTheme,
             playlistType = (playlistType),
@@ -212,7 +288,9 @@ fun PlaylistPage(
 fun AnimatedMusicItem(
     music: MusicFile,
     isPlaying: Boolean,
+    isSelected: Boolean,
     modifier: Modifier = Modifier,
+    colorTheme: ColorTheme,
     shpae: Shape = RoundedCornerShape(Dimens.CornerRadius.FolderItem)
 ) {
     var startAnimation by remember { mutableStateOf(false) }
@@ -226,10 +304,10 @@ fun AnimatedMusicItem(
     LaunchedEffect(Unit) {
         startAnimation = true
     }
-
     MusicItem(
         music = music,
         isPlaying = isPlaying,
+        isSelected = isSelected,
         modifier = modifier
             .graphicsLayer {
                 rotationX = rotation
@@ -334,13 +412,13 @@ fun PlaylistPoster(
                     .background(colorTheme.Secondary)
                     .padding(20.dp)
                     .clickable {
-                        if(isThisPlaylistOnQueue(playlistOnQueue, playlistType)){
+                        if (isThisPlaylistOnQueue(playlistOnQueue, playlistType)) {
                             if (isPlaying)
                                 setState(HomeViewModelSetStateAction.PausePlayback)
                             else {
                                 setState(HomeViewModelSetStateAction.ResumePlayback)
                             }
-                        }else{
+                        } else {
                             setState(
                                 HomeViewModelSetStateAction.PutPlaylistToQueue(
                                     when (playlistType) {
@@ -368,10 +446,11 @@ fun PlaylistPoster(
                     id = if (isThisPlaylistOnQueue(
                             playlistOnQueue,
                             playlistType
-                        ) )playIcon(isPlaying) else R.drawable.play_button
-                    ),
-                    contentDescription = "Playlist_page_Play_button"
-                )
+                        )
+                    ) playIcon(isPlaying) else R.drawable.play_button
+                ),
+                contentDescription = "Playlist_page_Play_button"
+            )
         }
     }
 }
