@@ -41,6 +41,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -119,6 +120,10 @@ fun PlaylistPage(
         },
         animationSpec = tween(2000)
     )
+    var isLongPress by remember{
+        mutableStateOf(false)
+    }
+    val playlistScope = rememberCoroutineScope()
     LaunchedEffect(pageDataItem.itemCount) {
         if (playlistType is PlaylistType.TopPlaylist) {
             if (playlistType.route == Destination.FavoriteMusicScreen.route) {
@@ -162,7 +167,7 @@ fun PlaylistPage(
                                     it.size.height - abs(
                                         it.positionOnScreen().y
                                     )
-                                ), if(isSelectedModeEnabled) Float.MAX_VALUE else 3f
+                                ), if (isSelectedModeEnabled) 4f else 3f
                             )
                         }
                 )
@@ -184,17 +189,20 @@ fun PlaylistPage(
 
                                 detectTapGestures(
                                     onLongPress = {
+                                        isLongPress = true
                                         if (selectedMusic.containsKey(musicFile.id.toString())) selectedMusic.remove(
                                             musicFile.id.toString()
                                         )
                                         else selectedMusic.put(musicFile.id.toString(), true)
-                                        setState(
-                                            HomeViewModelSetStateAction.PausePlayback
-                                        )
+//                                        setState(
+//                                            HomeViewModelSetStateAction.PausePlayback
+//                                        )
                                     },
                                     onPress = {
+                                        isLongPress = false
+                                        awaitRelease()
+                                        if (isLongPress) return@detectTapGestures
                                         if (isSelectedModeEnabled) {
-                                            Log.e("12345", "${selectedMusic}")
                                             if (selectedMusic.containsKey(musicFile.id.toString())) selectedMusic.remove(
                                                 musicFile.id.toString()
                                             )
@@ -223,6 +231,7 @@ fun PlaylistPage(
                                             )
                                             setState(HomeViewModelSetStateAction.ResumePlayback)
                                         }
+
                                     }
                                 )
                             },
