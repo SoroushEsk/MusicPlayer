@@ -2,6 +2,7 @@ package com.soroush.eskandarie.musicplayer.presentation.action
 
 import android.graphics.Bitmap
 import androidx.media3.session.MediaController
+import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 
@@ -14,6 +15,10 @@ sealed class HomeViewModelSetStateAction {
     data class SetSongToPlay(
         val playlistType: PlaylistType,
         val id: Long
+    )                                                           : HomeViewModelSetStateAction()
+    data class AddMusicListToPlaylist(
+        val playlistId: Long,
+        val musicList: List<MusicFile>
     )                                                           : HomeViewModelSetStateAction()
     data class SetMediaControllerObserver(
         val mediaController : MediaController

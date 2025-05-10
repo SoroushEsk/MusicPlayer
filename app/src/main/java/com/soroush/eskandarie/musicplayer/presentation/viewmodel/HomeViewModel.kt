@@ -152,6 +152,12 @@ class HomeViewModel @Inject constructor(
                     (action as HomeViewModelSetStateAction.SetSongToPlay).playlistType,
                     (action).id
                 )
+            },
+            HomeViewModelSetStateAction.AddMusicListToPlaylist::class to { action ->
+                putAListOfMusicInPlaylist(
+                    (action as HomeViewModelSetStateAction.AddMusicListToPlaylist).playlistId,
+                    (action).musicList
+                )
             }
         )
 
@@ -414,6 +420,16 @@ class HomeViewModel @Inject constructor(
 
     //endregion
     //region Set State Functions
+    private fun putAListOfMusicInPlaylist(playlistId: Long, musicList: List<MusicFile>) {
+        viewModelScope.launch {
+            addMusicListToPlaylist(musicList.map{
+                PlaylistMusicRelationEntity(
+                    playlistId = playlistId,
+                    musicId = it.id
+                )
+            })
+        }
+    }
 
     private fun setPlaylistType(playlistType: PlaylistType) {
         _currentPlaylistUI.update {

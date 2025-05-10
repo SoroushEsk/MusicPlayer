@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -76,6 +77,7 @@ import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.state.CurrentPlaylist
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.MusicItem
+import com.soroush.eskandarie.musicplayer.presentation.ui.page.home.components.PlaylistDialogItem
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.ColorTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
@@ -93,7 +95,7 @@ fun PlaylistPage(
     isPlaying: Boolean,
     playlistType: PlaylistType,
     playlistOnQueue: CurrentPlaylist,
-    playlists: State<List<Playlist>>,
+    playlists: List<Playlist>,
 ) {
     val lazyState = remember {
         lazyListState
@@ -108,26 +110,26 @@ fun PlaylistPage(
     var isSelectedModeEnabled by remember {
         mutableStateOf(false)
     }
-    val selectedMusic = remember { mutableStateMapOf<String, Boolean>() }
+    val selectedMusic = remember { mutableStateMapOf<MusicFile, Boolean>() }
     LaunchedEffect(selectedMusic.size) {
         isSelectedModeEnabled = selectedMusic.isNotEmpty()
     }
-    var offsetY by remember{
+    var offsetY by remember {
         mutableStateOf(0f)
     }
     val offsetAnimation by animateFloatAsState(
-        targetValue = if(isSelectedModeEnabled) -offsetY else 0f,
+        targetValue = if (isSelectedModeEnabled) -offsetY else 0f,
         animationSpec = tween(2000)
     )
     val aspectRatioAnimation by animateFloatAsState(
-        targetValue = if(isSelectedModeEnabled){
+        targetValue = if (isSelectedModeEnabled) {
             4f
-        }else{
+        } else {
             if (playlistType is PlaylistType.UserPlayList) 1f else 3f
         },
         animationSpec = tween(2000)
     )
-    var isLongPress by remember{
+    var isLongPress by remember {
         mutableStateOf(false)
     }
     var showDialog by remember { mutableStateOf(false) }
@@ -187,7 +189,7 @@ fun PlaylistPage(
                     AnimatedMusicItem(
                         music = musicFile,
                         isPlaying = false,
-                        isSelected = selectedMusic.getOrDefault(musicFile.id.toString(), false),
+                        isSelected = selectedMusic.getOrDefault(musicFile, false),
                         modifier = Modifier
                             .padding(horizontal = 10.dp)
                             .animateItem(
@@ -198,10 +200,10 @@ fun PlaylistPage(
                                 detectTapGestures(
                                     onLongPress = {
                                         isLongPress = true
-                                        if (selectedMusic.containsKey(musicFile.id.toString())) selectedMusic.remove(
-                                            musicFile.id.toString()
+                                        if (selectedMusic.containsKey(musicFile)) selectedMusic.remove(
+                                            musicFile
                                         )
-                                        else selectedMusic.put(musicFile.id.toString(), true)
+                                        else selectedMusic.put(musicFile, true)
 //                                        setState(
 //                                            HomeViewModelSetStateAction.PausePlayback
 //                                        )
@@ -211,10 +213,10 @@ fun PlaylistPage(
                                         awaitRelease()
                                         if (isLongPress) return@detectTapGestures
                                         if (isSelectedModeEnabled) {
-                                            if (selectedMusic.containsKey(musicFile.id.toString())) selectedMusic.remove(
-                                                musicFile.id.toString()
+                                            if (selectedMusic.containsKey(musicFile)) selectedMusic.remove(
+                                                musicFile
                                             )
-                                            else selectedMusic.put(musicFile.id.toString(), true)
+                                            else selectedMusic.put(musicFile, true)
                                         } else {
                                             setState(
                                                 HomeViewModelSetStateAction.SetSongToPlay(
@@ -262,9 +264,10 @@ fun PlaylistPage(
                 .aspectRatio(aspectRatio),
             colorTheme = colorTheme,
             numberSelected = selectedMusic.size,
-            isVisible = if(aspectRatioAnimation > 3.4f) true else false,
+            isVisible = if (aspectRatioAnimation > 3.4f) true else false,
             rightIcon = {
                 showDialog = showDialog.not()
+                if (playlists.isEmpty()) setState(HomeViewModelSetStateAction.GetAllPlaylists)
             }
         )
         PlaylistPoster(
@@ -283,13 +286,27 @@ fun PlaylistPage(
             AlertDialog(
                 onDismissRequest = { showDialog = false },
                 title = {
-                    Text(text = "Playlist's name")
+                    Text(text = "Choose playlist...")
                 },
                 text = {
-                    LazyColumn(){
-                        items(30){
-                            Text(text = it.toString())
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        items(playlists.size) { index ->
+                            PlaylistDialogItem(
+                                playlist = playlists[index],
+                                onClick = {
+                                    setState(
+                                        HomeViewModelSetStateAction.AddMusicListToPlaylist(
+                                            playlistId = playlists[index].id,
+                                            musicList = selectedMusic.keys.toList()
+                                        )
+                                    )
+                                },
+                                colorTheme = colorTheme
+                            )
                         }
+
                     }
                 },
                 confirmButton = {},
@@ -301,16 +318,17 @@ fun PlaylistPage(
         }
     }
 }
+
 @Composable
 fun selectDetails(
     modifier: Modifier = Modifier,
     colorTheme: ColorTheme,
     numberSelected: Int,
     isVisible: Boolean,
-    leftIcon: ()->Unit = {},
-    rightIcon: ()->Unit ={}
-){
-    if(isVisible) {
+    leftIcon: () -> Unit = {},
+    rightIcon: () -> Unit = {}
+) {
+    if (isVisible) {
         Row(
             modifier = modifier
                 .fillMaxSize()
@@ -328,7 +346,7 @@ fun selectDetails(
                     .clickable {
                         leftIcon()
                     },
-                imageVector = Icons.Rounded.FavoriteBorder,
+                imageVector = Icons.Rounded.CheckCircle,
                 tint = colorTheme.Primary,
                 contentDescription = "select all"
             )
@@ -343,7 +361,7 @@ fun selectDetails(
                     .fillMaxHeight()
                     .aspectRatio(1f)
                     .padding(10.dp)
-                    .clickable{
+                    .clickable {
                         rightIcon()
                     },
                 imageVector = Icons.Default.AddCircle,
@@ -353,6 +371,7 @@ fun selectDetails(
         }
     }
 }
+
 @Composable
 fun AnimatedMusicItem(
     music: MusicFile,
@@ -384,6 +403,7 @@ fun AnimatedMusicItem(
             }
     )
 }
+
 @SuppressLint("UseOfNonLambdaOffsetOverload")
 @Composable
 fun PlaylistPoster(

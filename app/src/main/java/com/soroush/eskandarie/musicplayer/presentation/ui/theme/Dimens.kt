@@ -11,6 +11,7 @@ object Dimens {
         val HomePagePlaylistTitleContainerHeight            : Dp        =  40.dp
         val MusicItemShadowBorder                           : Dp        =   2.dp
         val MusicItemHeight                                 : Dp        =  80.dp
+        val PlaylistDialogItemHeight                        : Dp        =  72.dp
         val MusicItemPlayStatusIcon                         : Float     =  0.5f
         val SplashScreenIcon                                : Float     =  0.45f
         val TopPlaylistItemTextWeight                       : Float     =  0.15f
