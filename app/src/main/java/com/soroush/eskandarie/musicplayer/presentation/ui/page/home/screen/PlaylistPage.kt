@@ -31,12 +31,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +69,7 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.compose.LazyPagingItems
 import com.soroush.eskandarie.musicplayer.R
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
+import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.domain.model.getAlbumArtBitmap
 import com.soroush.eskandarie.musicplayer.presentation.action.HomeViewModelSetStateAction
 import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
@@ -86,7 +92,8 @@ fun PlaylistPage(
     setState: (action: HomeViewModelSetStateAction) -> Unit,
     isPlaying: Boolean,
     playlistType: PlaylistType,
-    playlistOnQueue: CurrentPlaylist
+    playlistOnQueue: CurrentPlaylist,
+    playlists: State<List<Playlist>>,
 ) {
     val lazyState = remember {
         lazyListState
@@ -123,6 +130,7 @@ fun PlaylistPage(
     var isLongPress by remember{
         mutableStateOf(false)
     }
+    var showDialog by remember { mutableStateOf(false) }
     val playlistScope = rememberCoroutineScope()
     LaunchedEffect(pageDataItem.itemCount) {
         if (playlistType is PlaylistType.TopPlaylist) {
@@ -254,7 +262,10 @@ fun PlaylistPage(
                 .aspectRatio(aspectRatio),
             colorTheme = colorTheme,
             numberSelected = selectedMusic.size,
-            isVisible = if(aspectRatioAnimation > 3.4f) true else false
+            isVisible = if(aspectRatioAnimation > 3.4f) true else false,
+            rightIcon = {
+                showDialog = showDialog.not()
+            }
         )
         PlaylistPoster(
             modifier = Modifier
@@ -268,6 +279,26 @@ fun PlaylistPage(
             isPlaying = isPlaying,
             playlistOnQueue = playlistOnQueue
         )
+        if (showDialog) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = {
+                    Text(text = "Playlist's name")
+                },
+                text = {
+                    LazyColumn(){
+                        items(30){
+                            Text(text = it.toString())
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {},
+                containerColor = colorTheme.Surface,
+                textContentColor = colorTheme.Background,
+                titleContentColor = colorTheme.Text
+            )
+        }
     }
 }
 @Composable
@@ -285,14 +316,18 @@ fun selectDetails(
                 .fillMaxSize()
                 .background(colorTheme.Background)
                 .statusBarsPadding()
-                .padding(top = 10.dp),
+                .padding(top = 10.dp)
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 modifier = Modifier
                     .fillMaxHeight()
                     .aspectRatio(1f)
-                    .padding(20.dp),
+                    .padding(10.dp)
+                    .clickable {
+                        leftIcon()
+                    },
                 imageVector = Icons.Rounded.FavoriteBorder,
                 tint = colorTheme.Primary,
                 contentDescription = "select all"
@@ -307,7 +342,10 @@ fun selectDetails(
                 modifier = Modifier
                     .fillMaxHeight()
                     .aspectRatio(1f)
-                    .padding(20.dp),
+                    .padding(10.dp)
+                    .clickable{
+                        rightIcon()
+                    },
                 imageVector = Icons.Default.AddCircle,
                 tint = colorTheme.Primary,
                 contentDescription = "add to playlistIcon"

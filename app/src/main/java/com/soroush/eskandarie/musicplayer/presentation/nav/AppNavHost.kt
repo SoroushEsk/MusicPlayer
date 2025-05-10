@@ -82,13 +82,15 @@ fun HomeActivityNavHost(
                 val playbackStates by (getState(HomeViewModelGetStateAction.GetMusicStatus) as StateFlow<PlaybackStates>).collectAsState()
                 val playlistType by (getState(HomeViewModelGetStateAction.GetCurrentPlaylist) as StateFlow<PlaylistType>).collectAsState()
                 val playlistQueue by (getState(HomeViewModelGetStateAction.GetOnQueuePlaylist) as StateFlow<CurrentPlaylist>).collectAsState()
+                val userPlaylists by (getState(HomeViewModelGetStateAction.GetPlaylists) as StateFlow<List<Playlist>>).collectAsState()
                 PlaylistPage(
                     lazyListState = lazyListState as LazyListState,
                     pageDataItem = musicLazyPaging().collectAsLazyPagingItems(),
                     setState = setState,
                     isPlaying = playbackStates.isPlaying,
                     playlistType = playlistType,
-                    playlistOnQueue = playlistQueue
+                    playlistOnQueue = playlistQueue,
+                    playlists = userPlaylists
                 )
             }
         }
