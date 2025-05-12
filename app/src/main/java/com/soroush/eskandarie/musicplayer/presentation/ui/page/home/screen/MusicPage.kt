@@ -1,6 +1,7 @@
 package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -14,6 +15,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -62,6 +64,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -172,6 +175,9 @@ fun MusicPage(
         }
     }
 
+    var horizontalScrollPrevId by remember{
+        mutableStateOf(-1L)
+    }
     MotionLayout(
         motionScene = MotionScene(content = musicPageMotionLayoutConfig),
         progress = animatedProgress,
@@ -203,25 +209,21 @@ fun MusicPage(
                         delta
                     }
                 )
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { change, dragAmount ->
+                        if(change.id.value == horizontalScrollPrevId) return@detectHorizontalDragGestures
+                        horizontalScrollPrevId = change.id.value
+                        if(dragAmount<-10) setState(HomeViewModelSetStateAction.ForwardPlayback)
+                        else if(dragAmount > 90) setState(HomeViewModelSetStateAction.BackwardPlayback)
+                    }
+                }
                 .onGloballyPositioned { coordinates ->
                     mainContainerCoordinates =
                         Offset(coordinates.positionInWindow().x, coordinates.positionInWindow().y)
                 }
-//                .pointerInput(Unit) {
-//                    awaitPointerEventScope {
-//                        while (true) {
-//                            val event = awaitPointerEvent()
-//                            val position = event.changes.first().position
-////                            if ( progress < 1f && scrollStatus == MusicPageScrollState.NoScroll)
-////                                isTouching = event.changes.any { it.pressed }
-////                            else isTouching = false
-//                            if (isTouching) {
-//                                fingerY = position.y + mainContainerCoordinates.y
-//                            }
-//                        }
-//                    }
-//                }
-            ) {}
+            ) {
+
+        }
         Column(
             modifier = Modifier
                 .layoutId(Constants.MusicBarValues.MotionLayoutTextContainer),
