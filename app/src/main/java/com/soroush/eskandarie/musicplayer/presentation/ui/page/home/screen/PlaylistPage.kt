@@ -196,7 +196,6 @@ fun PlaylistPage(
                                 placementSpec = tween(1200)
                             )
                             .pointerInput(Unit) {
-
                                 detectTapGestures(
                                     onLongPress = {
                                         isLongPress = true
@@ -204,9 +203,6 @@ fun PlaylistPage(
                                             musicFile
                                         )
                                         else selectedMusic.put(musicFile, true)
-//                                        setState(
-//                                            HomeViewModelSetStateAction.PausePlayback
-//                                        )
                                     },
                                     onPress = {
                                         isLongPress = false
@@ -284,7 +280,9 @@ fun PlaylistPage(
         )
         if (showDialog) {
             AlertDialog(
-                onDismissRequest = { showDialog = false },
+                onDismissRequest = {
+                    showDialog = false
+                },
                 title = {
                     Text(text = "Choose playlist...")
                 },

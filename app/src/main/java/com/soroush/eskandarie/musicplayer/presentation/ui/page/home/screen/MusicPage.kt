@@ -3,6 +3,7 @@ package com.soroush.eskandarie.musicplayer.presentation.ui.page.home.screen
 import android.graphics.Bitmap
 import android.util.Log
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloatAsState
@@ -15,7 +16,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.drag
+import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -93,7 +100,9 @@ import com.soroush.eskandarie.musicplayer.presentation.ui.theme.DarkTheme
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.Dimens
 import com.soroush.eskandarie.musicplayer.presentation.ui.theme.LightTheme
 import com.soroush.eskandarie.musicplayer.util.Constants
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.StateFlow
+import kotlin.math.floor
 
 @OptIn(ExperimentalMotionApi::class)
 @Composable
@@ -211,10 +220,10 @@ fun MusicPage(
                 )
                 .pointerInput(Unit) {
                     detectHorizontalDragGestures { change, dragAmount ->
-                        if(change.id.value == horizontalScrollPrevId) return@detectHorizontalDragGestures
+                        if (change.id.value == horizontalScrollPrevId) return@detectHorizontalDragGestures
                         horizontalScrollPrevId = change.id.value
-                        if(dragAmount<-10) setState(HomeViewModelSetStateAction.ForwardPlayback)
-                        else if(dragAmount > 90) setState(HomeViewModelSetStateAction.BackwardPlayback)
+                        if (dragAmount < -10) setState(HomeViewModelSetStateAction.ForwardPlayback)
+                        else if (dragAmount > 90) setState(HomeViewModelSetStateAction.BackwardPlayback)
                     }
                 }
                 .onGloballyPositioned { coordinates ->
@@ -294,7 +303,8 @@ fun MusicPage(
             needleImage = if(isSystemInDarkTheme()) R.drawable.needle else R.drawable.needle_light ,
             isAnimation = progress == 1f,
             resetRotation = progress == 0f,
-            colorTheme = colorTheme
+            colorTheme = colorTheme,
+            rotationPercent = (playbackState.currentDuration).toFloat()/60000
         )
         IconsAtEndsRow(
             modifier = Modifier
@@ -318,7 +328,10 @@ fun MusicPage(
             colorTheme = colorTheme,
             currentPosition = playbackState.currentDuration,
             totalDuration = playbackState.totalDuration,
-            songPercent = playbackState.musicPercent
+            songPercent = playbackState.musicPercent,
+            onProgressChange = {newProgress ->
+                setState(HomeViewModelSetStateAction.ChangeMusicPositionTo(newProgress))
+            }
         )
         PLayControlShadow(
             modifier = modifier.rotate(90f),
@@ -433,7 +446,8 @@ fun ProgressBar(
     padding: PaddingValues = PaddingValues(
         horizontal = Dimens.Padding.MusicPageProgressBarDefaultHorizontal,
         vertical = Dimens.Padding.MusicPageProgressBarDefaultVertical
-    )
+    ),
+    onProgressChange: (newPercent: Float)->Unit
 ) {
     val currentPositionMin = (currentPosition/1000)/60
     val currentPositionSecond = (currentPosition/1000)%60
@@ -461,6 +475,8 @@ fun ProgressBar(
             "$totalDurationSecond"
         }
 
+    var barWidth by remember { mutableStateOf(1f) }
+    var newProgress by remember { mutableStateOf(1f) }
     Row(
         modifier = modifier
             .padding(padding),
@@ -476,6 +492,23 @@ fun ProgressBar(
                 .weight(1f)
                 .fillMaxHeight()
                 .padding(horizontal = Dimens.Padding.MusicPageProgressBarCanvasHorizontal)
+                .onGloballyPositioned {
+                    barWidth = it.size.width.toFloat()
+                }
+                .pointerInput(Unit) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown()
+                        val barWidthPx = barWidth
+                        newProgress = (down.position.x / barWidthPx).coerceIn(0f, 1f)
+                        onProgressChange(newProgress)
+                        drag(down.id) { change ->
+                            change.consume()
+                            newProgress = (change.position.x / barWidthPx).coerceIn(0f, 1f)
+                            onProgressChange(newProgress)
+                        }
+                    }
+                }
+
         ) {
             if (size.width > 0 && size.height > 0) {
                 drawLine(
@@ -647,48 +680,34 @@ fun SongPoster(
     isAnimation: Boolean,
     resetRotation: Boolean,
     colorTheme: ColorTheme,
+    rotationPercent: Float,
     rotationLength: Int = Constants.MusicPageValues.DiskRotationDuration
 ) {
-    var currentRotation by remember { mutableStateOf(0f) }
-    val rotation = remember { Animatable(currentRotation) }
-
+    var preRotatePercent by remember{
+        mutableStateOf(0f)
+    }
+    var onMusicChange by remember{
+        mutableStateOf(false)
+    }
+    val animatedRotation by animateFloatAsState(
+        targetValue = (if(preRotatePercent>rotationPercent) floor(preRotatePercent.toDouble()).toFloat() else rotationPercent)*360f,
+        animationSpec = tween(durationMillis = 1150, easing = LinearEasing),
+        label = "RotationAnimation"
+    )
+    LaunchedEffect(key1 = rotationPercent) {
+        onMusicChange = if(preRotatePercent>rotationPercent) true
+        else false
+        preRotatePercent = rotationPercent
+    }
     val needleRotation = animateFloatAsState(
         targetValue = if (isAnimation)
             Dimens.Rotation.MusicPageNeedleFinal
         else Dimens.Rotation.MusicPageNeedleInitial,
         animationSpec = tween(Constants.MusicPageValues.NeedleRotationDuration)
     )
-    // Actions when the it's full screen and compact
-    LaunchedEffect(key1 = resetRotation) {
-        if ( resetRotation ){
-            rotation.snapTo(0f)
-        }
-    }
-    LaunchedEffect(key1 = isAnimation) {
-        if (isAnimation) {
-            rotation.animateTo(
-                targetValue = currentRotation + 360f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(rotationLength, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
-                )
-            ) {
-                currentRotation = this.value
-            }
-        } else {
-            rotation.stop()
-            currentRotation = rotation.value
-        }
-    }
-
-
     var posterGradianSize by remember { mutableStateOf(Size.Zero) }
     var needleConnecterSize by remember { mutableStateOf(Size.Zero) }
     var mainContainerSize by remember {mutableStateOf(Size.Zero)}
-//    LaunchedEffect(key1 = rotation.value) {
-//        Log.e("Rotation", "${rotation.value} ${isAnimation} ${resetRotation} \n ${currentRotation}")
-//    }
-
     Box(
         modifier = modifier
             .layoutId(Constants.MusicPageValues.MusicRotateDiskId)
@@ -704,7 +723,7 @@ fun SongPoster(
                 modifier = Modifier
                     .fillMaxSize(Dimens.Size.MusicPageDiskSizeRatio)
                     .graphicsLayer {
-                        rotationZ = rotation.value
+                        rotationZ = if (onMusicChange) rotationPercent * 360f else animatedRotation
                     },
                 contentAlignment = Alignment.Center
             ) {

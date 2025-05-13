@@ -46,13 +46,6 @@ class SplashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         checkPermissions()
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_OFF)
-            addAction(Intent.ACTION_SCREEN_ON)
-        addAction(Intent.ACTION_USER_PRESENT)
-        }
-        val receiver = LockScreenReceiver()
-        registerReceiver(receiver, filter)
         if (PERMISSIONS.any { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }) {
             viewModel.firstTimeLaunchActions()
         }
