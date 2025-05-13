@@ -3,6 +3,7 @@ package com.soroush.eskandarie.musicplayer.presentation.action
 import android.graphics.Bitmap
 import androidx.media3.session.MediaController
 import com.soroush.eskandarie.musicplayer.domain.model.MusicFile
+import com.soroush.eskandarie.musicplayer.domain.model.Playlist
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
 
@@ -24,7 +25,7 @@ sealed class HomeViewModelSetStateAction {
         val mediaController : MediaController
     )                                                           : HomeViewModelSetStateAction()
     data class ChangeMusicPositionTo(val newPercent: Float)     : HomeViewModelSetStateAction()
-    data class RenamePlaylist(val playlistName: String)         : HomeViewModelSetStateAction()
+    data class ModifyPlaylist(val playlist: Playlist)           : HomeViewModelSetStateAction()
     data class SetStateSearchText(val searchText: String)       : HomeViewModelSetStateAction()
     data class SetPlayState(val isMusicPlaying: Boolean)        : HomeViewModelSetStateAction()
     data class SetShuffleState(val isShuffle: Boolean)          : HomeViewModelSetStateAction()

@@ -149,6 +149,16 @@ fun PlaylistPage(
                 context.resources,
                 R.drawable.empty_album
             )
+            pageDataItem[0]?.let {
+                if(playlistType is PlaylistType.UserPlayList){
+                    setState(HomeViewModelSetStateAction.ModifyPlaylist(Playlist(
+                        id = playlistType.id,
+                        name = playlistType.name,
+                        poster = it.path
+                    )
+                    ))
+                }
+            }
         }
     }
     Box(

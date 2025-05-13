@@ -93,7 +93,7 @@ class HomeViewModel @Inject constructor(
     private val analyzeFoldersUseCase: AnalyzeFoldersUseCase,
     private val getListAllMusic: GetListOfAllMusicUseCase,
     private val refreshQueueUseCase: RefreshQueueUseCase,
-    private val modifyPlaylist: ModifyAPlaylistUseCase
+    private val modifyPlaylistUseCase: ModifyAPlaylistUseCase
 ) : ViewModel() {
     //region Viewmodel States
 
@@ -146,7 +146,7 @@ class HomeViewModel @Inject constructor(
             HomeViewModelSetStateAction.PausePlayback::class to { _ -> pausePlayback() },
             HomeViewModelSetStateAction.SetRepeatMode::class to { action -> setRepeatMode((action as HomeViewModelSetStateAction.SetRepeatMode).repeatMode) },
             HomeViewModelSetStateAction.UpdateArtWork::class to { action -> setArtWork((action as HomeViewModelSetStateAction.UpdateArtWork).artWork) },
-            HomeViewModelSetStateAction.RenamePlaylist::class to {action -> modifyPlaylist((action as HomeViewModelSetStateAction.RenamePlaylist).playlistName)},
+            HomeViewModelSetStateAction.ModifyPlaylist::class to { action -> modifyPlaylist((action as HomeViewModelSetStateAction.ModifyPlaylist).playlist)},
             HomeViewModelSetStateAction.ResumePlayback::class to { _ -> resumePlayback() },
             HomeViewModelSetStateAction.SetShuffleState::class to { action -> setShuffleStatus((action as HomeViewModelSetStateAction.SetShuffleState).isShuffle) },
             HomeViewModelSetStateAction.ForwardPlayback::class to { _ -> forwardPlayback() },
@@ -436,7 +436,18 @@ class HomeViewModel @Inject constructor(
         mediaController.seekTo(newPosition)
     }
     private fun modifyPlaylist(playlist: Playlist){
-        
+        viewModelScope.launch {
+            modifyPlaylistUseCase(playlist)
+            _playlistItems.update {
+                it.map {
+                    if(it.id == playlist.id){
+                        playlist
+                    }else{
+                        it
+                    }
+                }
+            }
+        }
     }
     private fun putAListOfMusicInPlaylist(playlistId: Long, musicList: List<MusicFile>) {
         viewModelScope.launch {
