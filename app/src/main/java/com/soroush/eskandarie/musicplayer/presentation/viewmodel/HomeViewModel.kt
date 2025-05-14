@@ -48,6 +48,7 @@ import com.soroush.eskandarie.musicplayer.presentation.nav.Destination
 import com.soroush.eskandarie.musicplayer.presentation.state.CurrentPlaylist
 import com.soroush.eskandarie.musicplayer.presentation.state.FourTopPlaylistImageState
 import com.soroush.eskandarie.musicplayer.presentation.state.HomeViewModelState
+import com.soroush.eskandarie.musicplayer.presentation.state.MusicSelectState
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaybackStates
 import com.soroush.eskandarie.musicplayer.presentation.state.PlaylistType
 import com.soroush.eskandarie.musicplayer.presentation.state.RepeatMode
@@ -178,6 +179,10 @@ class HomeViewModel @Inject constructor(
     val homeState: StateFlow<HomeViewModelState>
         get() = _homeState
 
+
+    private val _selectedModeState = MutableStateFlow(MusicSelectState(false, emptyMap()))
+    val selectState: StateFlow<MusicSelectState> = _selectedModeState.asStateFlow()
+    
     private val _isTopPlaylistState = MutableStateFlow(false)
     private val _topPlaylistState = MutableStateFlow(FourTopPlaylistImageState())
     val topPlaylistState: StateFlow<FourTopPlaylistImageState> = _topPlaylistState.asStateFlow()
