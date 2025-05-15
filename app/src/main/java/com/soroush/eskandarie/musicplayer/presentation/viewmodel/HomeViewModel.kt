@@ -182,7 +182,7 @@ class HomeViewModel @Inject constructor(
 
     private val _selectedModeState = MutableStateFlow(MusicSelectState(false, emptyMap()))
     val selectState: StateFlow<MusicSelectState> = _selectedModeState.asStateFlow()
-    
+
     private val _isTopPlaylistState = MutableStateFlow(false)
     private val _topPlaylistState = MutableStateFlow(FourTopPlaylistImageState())
     val topPlaylistState: StateFlow<FourTopPlaylistImageState> = _topPlaylistState.asStateFlow()
